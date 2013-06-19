@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!--
+	Copyright 2013 Alex Lin.
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+	
+	     http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  	<modelVersion>4.0.0</modelVersion>
+  	<groupId>org.opoo.press</groupId>
+	<artifactId>opoopress-parent</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>OpooPress Blogging Framework: Parent</name>
+	<description>OpooPress Blogging Framework is a Java basesd blog aware static site generator.</description>
+	<url>http://press.opoo.org/</url>
+	<inceptionYear>2013</inceptionYear>
+	
+	<organization>
+  		<name>Opoo.org</name>
+  		<url>http://opoo.org/</url>
+ 	</organization>
+
+	<developers>
+		<developer>
+			<name>Alex Lin</name>
+			<email>alex at opoo.org</email>
+			<url>http://opoo.org</url>
+	            <timezone>+8</timezone>
+		</developer>
+	</developers>
+
+   <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    
+  	<distributionManagement>	
+        <repository>
+            <id>local-file</id>
+            <name>Local File System Repository</name>
+            <url>file:///${user.home}/maven.local/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>local-file</id>
+            <name>Local File System Repository</name>
+            <url>file:///${user.home}/maven.local/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
+ 	<scm>
+	    <connection>scm:git:git@github.com/opoo/opoopress.git</connection>
+	    <developerConnection>scm:git:ssh://git@github.com/opoo/opoopress.git</developerConnection>
+		<!-- <url>git@github.com/opoo/opoopress.git</url> -->
+		<url>https://github.com/opoo/opoopress</url>
+	</scm>
+	  
+	<!--
+	<scm>
+		<connection>scm:git:git://github.com/opoo/opoopress</connection>
+		<developerConnection>scm:git:git://github.com/opoo/opoopress</developerConnection>
+		<url>https://github.com/opoo/opoopress</url>
+	</scm>
+	-->
+
+	 <modules>
+        <module>core</module>
+        <!-- <module>exec</module>
+		<module>maven-plugins</module> -->
+    </modules>
+
+  	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+	        	<groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-eclipse-plugin</artifactId>
+		        <version>2.5.1</version>
+		        <configuration>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
+                    <wtpversion>2.0</wtpversion>
+                </configuration>
+	      	</plugin>
+		</plugins>
+	</build>
+
+  	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.test.skip>true</maven.test.skip>
+	</properties>
+	
+</project>
