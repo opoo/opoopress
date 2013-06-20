@@ -1,0 +1,177 @@
+# ----------------------- #
+#   目录结构配置                             #
+# ----------------------- #
+# 默认（推荐）的目录结构如下
+#(.)
+# |
+# +- site
+# |   |
+# |   +- config.yml (The site configuration file)
+# |   |
+# |   +- source (All YAML front-matter header files and some static files)
+# |   |
+# |   +- templates (FreeMarker template ONLY)
+# |   |
+# |   +- assets (All static files ONLY)
+# |  
+# +- (site2) another site
+# |
+# +- public
+#     |
+#     +- site the output directory for site
+#     |
+#     +- (site2) the output directory for site2
+#
+
+
+# 指定站点目录。对于站点中的子目录，有以下要求（或规则）
+#   source：   必须存在
+#   templates：如果该目录不存在，则取目录 source/_templates。二者之一必须存在。
+#   assets:    如果该目录不存在，则表示所有的静态资源都在 source目录中，并没有单独
+#                分出来。分了站点生成效率，建议将静态资源分离出来放置在改目录中。
+# 进行版本管理（备份）时，管理 site 这一个目录即可。
+site: site
+
+# 站点生成的目标目录。如果在本机分布，可以是 "/var/www/html"。
+# 如果不指定，默认在 site 父级目录中创建 public/site 作为该属性的值。
+# destination: public/site
+
+# 工作目录。用于生成站点时的中间过程和模板缓存等。
+# 如果不指定，默认在 java 临时文件夹中创建 opoopresscache 用于工作目录。
+# 参考 java 属性 java.io.tmpdir
+# working_dir: target/working_dir
+
+
+# ----------------------- #
+#      主要配置                              #
+# ----------------------- #
+
+locale: zh_CN
+url: http://yoursite.com
+title: 我的 OpooPress 博客
+subtitle: 又一个 OpooPres.com 站点
+author: 您的姓名
+simple_search: http://google.com/search
+description: OpooPress 博客系统是一个基于 Java 的静态博客（网站）生成器。
+
+# 默认的日期格式是 "ordinal"(相当于 java 日期格式的 "MMM d yyyy"，输出 "四月 15 2013")
+# 可以直接指定一个 java 日期格式字符串，例如 "yyyy年MM月dd日"
+date_format: "ordinal"
+
+# RSS 订阅使用的 URL
+subscribe_rss: /atom.xml
+subscribe_email:
+# RSS feeds can list your email address if you like
+email:
+
+# 如果发布到子目录如 http://site.com/project 则设置 'root: /project'
+root: /
+
+# 暂不支持，根据 post 源文件的位置决定了固定链接的格式
+# permalink:
+# permalink_label: "&infin;"
+# permalink_label_feed: "&#9875; 固定链接"
+
+# 分类所在的目录
+category_dir: /categories
+
+# 分类目录名称与标题对照关系。通常名称用于组成 URL，小写切不含空格，标题则用于显示。
+# 未在此处指定的分类 OpooPress 会自行处理。
+category_names: {"opoopress": "OpooPress", "blog": "博客"}
+
+# 首页每页显示的文章数
+paginate: 10          		
+
+# 要显示的最新文章数
+recent_posts: 5
+
+# 相关文章的最大数量
+related_posts: 5   	
+
+# 在显示摘要的文章中'继续阅读'的按钮文字
+excerpt_link: "继续阅读"  
+
+# 文章或者页面的标题是否使用 titlecase
+titlecase: true
+
+# 侧边栏默认包含的模板数组。
+# 被设置的模板片段应该位于  [模板路径]/asides 目录，例如 site/templates/asides 或者 site/source/_templates/asides.
+default_asides: [recent_posts.ftl, github.ftl, delicious.ftl, pinboard.ftl, googleplus.ftl]
+
+# 首页侧边栏包含的模板，未设置使用 default_asides
+# blog_index_asides:
+# 文章页面侧边栏包含的模板，未设置使用 default_asides
+# post_asides:
+# 普通页面侧边栏包含的模板，未设置使用 default_asides
+# page_asides:
+
+# ----------------------- #
+#   3rd Party Settings    #
+# ----------------------- #
+
+# Github repositories
+github_user: 
+github_repo_count: 0
+github_show_profile_link: false
+github_skip_forks: true
+
+# Twitter
+twitter_user:
+twitter_tweet_button: false
+
+# Google +1
+google_plus_one: false
+google_plus_one_size: medium
+
+# Google Plus Profile
+# Hidden: No visible button, just add author information to search results
+googleplus_user: 
+googleplus_hidden: false
+
+# Pinboard
+pinboard_user: 
+pinboard_count: 3
+
+# Delicious
+delicious_user: 
+delicious_count: 3
+
+# Disqus Comments
+disqus_short_name:
+disqus_show_comment_count: false
+
+# Google Analytics
+google_analytics_tracking_id:
+
+# Facebook Like
+facebook_like: false
+
+
+# ----------------------- #
+#   PlugIns Settings      #
+# ----------------------- #
+# plugins: 
+#  - org.opoo.press.plugin.SamplePlugin
+
+
+# ------------------------ #
+# Default PlugIn Settings  #
+# ------------------------ #
+converters:
+  - org.opoo.press.converter.TxtmarkMarkdownConverter
+
+generators:
+  - org.opoo.press.generator.PaginationGenerator
+  - org.opoo.press.generator.CategoryGenerator
+
+# siteFilters:
+#  - org.opoo.press.filter.SampleSiteFilter
+
+
+# ----------------------- #
+#   Code Block Settings   #
+# ----------------------- #
+
+# Default use 'SyntaxHighlighter' as the highlighter code block processor
+# http://alexgorbatchev.com/SyntaxHighlighter/
+highlighter: "org.opoo.press.converter.SyntaxHighlighter"
