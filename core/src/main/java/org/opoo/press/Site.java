@@ -18,6 +18,7 @@ package org.opoo.press;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.opoo.press.source.Source;
@@ -62,4 +63,6 @@ public interface Site extends SiteBuilder{
 	
 	Renderer getRenderer();
 	Converter getConverter(Source source);
+	
+	Locale getLocale();
 }

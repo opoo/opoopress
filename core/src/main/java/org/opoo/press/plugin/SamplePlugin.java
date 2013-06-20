@@ -14,8 +14,9 @@ import org.opoo.press.filter.SiteFilterAdapter;
  */
 public class SamplePlugin implements Plugin {
 	@Override
-	public void init(Registry registry) {
-		System.out.println("Initialize plugin 'SamplePlugin' for " + registry.getSite());
+	public void initialize(Registry registry) {
+		System.out.println("=========Initialize plugin 'SamplePlugin' for " 
+				+ registry.getSite() + "===========");
 		registry.registerSiteFilter(new SampleSiteFilter());
 	}
 

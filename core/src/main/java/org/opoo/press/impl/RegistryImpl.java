@@ -12,11 +12,7 @@ import org.opoo.press.Ordered;
 import org.opoo.press.Registry;
 import org.opoo.press.Site;
 import org.opoo.press.SiteFilter;
-import org.opoo.press.converter.IdentityConverter;
-import org.opoo.press.converter.TxtmarkMarkdownConverter;
 import org.opoo.press.filter.MultiSiteFilter;
-import org.opoo.press.generator.CategoryGenerator;
-import org.opoo.press.generator.PaginationGenerator;
 import org.opoo.press.source.Source;
 
 import freemarker.cache.TemplateLoader;
@@ -40,10 +36,10 @@ public class RegistryImpl implements Registry {
 		this.siteImpl = site;
 	
 		//defaults
-		registerConverter(new TxtmarkMarkdownConverter(site));
-		registerConverter(new IdentityConverter());
-		registerGenerator(new PaginationGenerator());
-		registerGenerator(new CategoryGenerator());
+//		registerConverter(new TxtmarkMarkdownConverter(site));
+//		registerConverter(new IdentityConverter());
+//		registerGenerator(new PaginationGenerator());
+//		registerGenerator(new CategoryGenerator());
 	}
 	
 	@Override

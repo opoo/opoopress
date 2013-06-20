@@ -19,11 +19,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Converter;
+import org.opoo.press.Initializable;
 import org.opoo.press.Site;
 import org.opoo.press.source.Source;
 import org.opoo.press.util.MapUtils;
+import org.opoo.press.util.Utils;
 
 import com.github.rjeschke.txtmark.BlockEmitter;
 import com.github.rjeschke.txtmark.Configuration;
@@ -34,18 +37,30 @@ import com.github.rjeschke.txtmark.Processor;
  * @author Alex Lin
  *
  */
-public class TxtmarkMarkdownConverter implements Converter {
+public class TxtmarkMarkdownConverter implements Converter, Initializable, HighlighterSupportConverter {
+	private static final Log log = LogFactory.getLog(TxtmarkMarkdownConverter.class);
 	private Configuration config;
+	private Highlighter highlighter;
 
-	public TxtmarkMarkdownConverter(Site site) {
+	public TxtmarkMarkdownConverter() {
 		super();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Initializable#initialize(org.opoo.press.Site)
+	 */
+	@Override
+	public void initialize(Site site) {
 		Map<String, Object> map = site.getConfig();
-		boolean useSyntaxHighlighterCompress = MapUtils.get(map, "syntax_highlighter_compress", true);
-		if(useSyntaxHighlighterCompress){
+		String highlighterClassName = MapUtils.get(map, "highlighter");
+		if(highlighterClassName == null){
+			log.warn("This converter might be need a Highlighter.");
+		}else{
+			highlighter = (Highlighter) Utils.newInstance(highlighterClassName, site);
 			config = Configuration.builder()
-				.setCodeBlockEmitter(new BlockEmitterImpl())
-				.forceExtentedProfile()
-				.build();
+					.setCodeBlockEmitter(new BlockEmitterImpl(highlighter))
+					.forceExtentedProfile()
+					.build();
 		}
 	}
 
@@ -85,42 +100,30 @@ public class TxtmarkMarkdownConverter implements Converter {
 	public String getOutputFileExtension(Source src) {
 		return ".html";
 	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.converter.HighlighterSupportConverter#getHighlighter()
+	 */
+	@Override
+	public Highlighter getHighlighter() {
+		return highlighter;
+	}
 	
+	/**
+	 * A BlockEmitter to process highlight code block. 
+	 */
 	private static class BlockEmitterImpl implements BlockEmitter{
+		private Highlighter highlighter;
+		public BlockEmitterImpl(Highlighter highlighter) {
+			this.highlighter = highlighter;
+		}
+
 		/* (non-Javadoc)
 		 * @see com.github.rjeschke.txtmark.BlockEmitter#emitBlock(java.lang.StringBuilder, java.util.List, java.lang.String)
 		 */
 		@Override
 		public void emitBlock(StringBuilder out, List<String> lines, String meta) {
-			out.append("<pre");
-			if(StringUtils.isNotBlank(meta)){
-				out.append(" class='brush:" + meta + "'");
-			}
-			out.append(">");
-			for(String line: lines)
-            {
-                for(int i = 0; i < line.length(); i++)
-                {
-                    final char c;
-                    switch(c = line.charAt(i))
-                    {
-                    case '&':
-                        out.append("&amp;");
-                        break;
-                    case '<':
-                        out.append("&lt;");
-                        break;
-                    case '>':
-                        out.append("&gt;");
-                        break;
-                    default:
-                        out.append(c);
-                        break;
-                    }
-                }
-                out.append('\n');
-            }
-			out.append("</pre>");
+			highlighter.highlight(out, lines, meta);
 		}
 	}
 }

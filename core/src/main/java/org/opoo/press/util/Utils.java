@@ -15,14 +15,8 @@
  */
 package org.opoo.press.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opoo.press.Plugin;
+import org.opoo.press.Initializable;
 import org.opoo.press.Site;
 
 /**
@@ -30,39 +24,46 @@ import org.opoo.press.Site;
  *
  */
 public abstract class Utils {
-	private static final Log log = LogFactory.getLog(Utils.class);
+	//private static final Log log = LogFactory.getLog(Utils.class);
 	
-	public static List<Plugin> instancePlugins(List<String> classNames){
-		List<Plugin> list = new ArrayList<Plugin>();
-		for(String className: classNames){
-			Plugin plugin = instancePlugin(className);
-			if(plugin != null){
-				list.add(plugin);
-			}
+	/**
+	 * Create a new instance for the specified class name and call 
+	 * {@link Initializable#initialize(Site)} if required.
+	 * @param className class name
+	 * @param site site object
+	 * @return new instance
+	 */
+	public static Object newInstance(String className, Site site){
+		Object instance = newInstance(className);
+		if(instance instanceof Initializable){
+			((Initializable) instance).initialize(site);
 		}
-		return list;
+		return instance;
 	}
-
-	private static Plugin instancePlugin(String className) {
+	
+	/**
+	 * Create a new instance for the specified class name.
+	 * @param className class name
+	 * @return new instance
+	 */
+	public static Object newInstance(String className){
 		try {
-			@SuppressWarnings("unchecked")
-			Class<Plugin> clazz = ClassUtils.getClass(className);
-			return (Plugin) clazz.newInstance();
+			Class<?> class1 = Class.forName(className);
+			return class1.newInstance();
 		} catch (ClassNotFoundException e) {
-			log.error("Instance plugin error", e);
+			throw new RuntimeException("Create instance failed: " + className, e);
 		} catch (InstantiationException e) {
-			log.error("Instance plugin error", e);
+			throw new RuntimeException("Create instance failed: " + className, e);
 		} catch (IllegalAccessException e) {
-			log.error("Instance plugin error", e);
+			throw new RuntimeException("Create instance failed: " + className, e);
 		}
-		return null;
 	}
 
 	public static String buildCanonical(Site site, String url){
 		String canonical = "" + site.getConfig().get("url");
-		String permalink = "" + site.getConfig().get("permalink");
+		String permalink = (String) site.getConfig().get("permalink");
 		String pageUrl = url;
-		if(permalink.endsWith(".html")){
+		if(permalink != null && permalink.endsWith(".html")){
 			canonical += pageUrl;
 		}else{
 			canonical += StringUtils.removeEnd(pageUrl, "index.html");
@@ -74,10 +75,5 @@ public abstract class Utils {
 		//String rootUrl = (String) site.getConfig().get("root");
 		String categoryDir = (String) site.getConfig().get("category_dir");
 		return /*rootUrl + */ categoryDir + "/" + categoryName + "/";
-	}
-	
-	public static boolean containsHighlighterCodeBlock(String content){
-		return StringUtils.contains(content, "<pre class='brush:")
-				|| StringUtils.contains(content, "<pre class=\"brush:");
 	}
 }

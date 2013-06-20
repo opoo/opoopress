@@ -22,9 +22,9 @@ import org.opoo.press.Page;
 import org.opoo.press.Pager;
 import org.opoo.press.Post;
 import org.opoo.press.Site;
+import org.opoo.press.converter.Highlighter;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
-import org.opoo.press.util.Utils;
 
 /**
  * @author Alex Lin
@@ -110,9 +110,9 @@ public class PageImpl extends AbstractBase implements Page{
 	}
 	
 	@Override
-	protected boolean containsHighlighterCodeBlock(){
-		boolean used = super.containsHighlighterCodeBlock();
-		if(used){
+	protected boolean containsHighlightCodeBlock(Highlighter highlighter) {
+		boolean contains = super.containsHighlightCodeBlock(highlighter);
+		if(contains){
 			return true;
 		}
 		
@@ -120,13 +120,12 @@ public class PageImpl extends AbstractBase implements Page{
 		if(pager != null && pager.getPosts() != null){
 			for(Post post: pager.getPosts()){
 				String excerpt = post.getExcerpt();
-				if(Utils.containsHighlighterCodeBlock(excerpt)){
-					log.debug("Found syntax highlighter code block in post excerpt: " + post.getTitle());
+				if(highlighter.containsHighlightCodeBlock(excerpt)){
+					log.debug("Found highlighter code block in post excerpt: " + post.getTitle());
 					return true;
 				}
 			}
 		}
-		
 		return false;
 	}
 

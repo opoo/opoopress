@@ -23,9 +23,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +41,8 @@ import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.SiteBuilder;
 import org.opoo.press.StaticFile;
+import org.opoo.press.converter.IdentityConverter;
+import org.opoo.press.plugin.DefaultPlugin;
 import org.opoo.press.source.NoFrontMatterException;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
@@ -87,6 +91,7 @@ public class SiteImpl implements Site, SiteBuilder{
 //	private List<String> includes;
 //	private List<String> excludes;
 	private RegistryImpl registry;
+	private Locale locale;
 	
 	/**
 	 * @param config
@@ -133,7 +138,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 		
 		source = new File(site, "source");
-		if(!source.exists() || !source.isDirectory()){
+		if(!source.exists() || !source.isDirectory() || !source.canRead()){
 			throw new IllegalArgumentException("Source directory not exists or not a directory.");
 		}
 		
@@ -150,43 +155,33 @@ public class SiteImpl implements Site, SiteBuilder{
 			assets = null;
 		}
 		
+		//target directories
 		String destDir = (String) config.get("destination");
-		boolean needCanonical = false;
 		if(destDir != null){
 			this.dest = new File(destDir);
 		}else{
-			this.dest = new File(site, "../public/" + site.getName());
-			needCanonical = true;
-		}
-		if(!dest.exists()){
-			dest.mkdirs();
-		}
-		if(needCanonical){
 			try {
+				this.dest = new File(site, "../public/" + site.getName());
 				dest = dest.getCanonicalFile();
 			} catch (IOException e) {
 				throw new IllegalArgumentException("Prepare destination directory error", e);
 			}
 		}
-		
+//		if(!dest.exists()){
+//			dest.mkdirs();
+//		}
+
 		String workingDir = (String) config.get("working_dir");
-		needCanonical = false;
 		if(workingDir != null){
 			this.working = new File(workingDir);
 		}else{
-			this.working = new File(site, "../work/" + site.getName());
-			needCanonical = true;
+			String tmpdir = System.getProperty("java.io.tmpdir");
+			System.out.println(tmpdir);
+			working = new File(tmpdir, "opoopresscache/" + site.getName());
 		}
-		if(!working.exists()){
-			working.mkdirs();
-		}
-		if(needCanonical){
-			try {
-				this.working = working.getCanonicalFile();
-			} catch (IOException e) {
-				throw new IllegalArgumentException("Prepare working directory error", e);
-			}
-		}
+//		if(!working.exists()){
+//			working.mkdirs();
+//		}
 		
 		if(dest.equals(source) || source.getAbsolutePath().startsWith(dest.getAbsolutePath())){
 			throw new IllegalArgumentException("Destination directory cannot be or contain the Source directory.");
@@ -238,19 +233,32 @@ public class SiteImpl implements Site, SiteBuilder{
 	void setup(){
 		setupDirs();
 		
-		this.registry = new RegistryImpl(this);
-		//plugin
-		@SuppressWarnings("unchecked")
-		List<String> pluginClassNames = (List<String>) config.get("plugins");
-		List<Plugin> plugins = Utils.instancePlugins(pluginClassNames);
-		for(Plugin p: plugins){
-			p.init(registry);
+		String localeString = (String) config.get("locale");
+		if(localeString != null){
+			locale = LocaleUtils.toLocale(localeString);
+			log.debug("Set locale: " + locale);
 		}
 		
+		this.registry = new RegistryImpl(this);
+		//register default converter
+		this.registry.registerConverter(new IdentityConverter());
+		
+		//plugins
+		new DefaultPlugin().initialize(registry);
+		
+		@SuppressWarnings("unchecked")
+		List<String> pluginClassNames = (List<String>) config.get("plugins");
+		if(pluginClassNames != null && !pluginClassNames.isEmpty()){
+			for(String className: pluginClassNames){
+				Plugin p = (Plugin) Utils.newInstance(className);
+				p.initialize(registry);
+			}
+		}
+		
+		//Construct RendererImpl after initializing all plugins
 		this.renderer = new RendererImpl(this, registry.getTemplateLoaders());
 	}
-	
-	
+
 
 	void read(){
 		SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
@@ -526,6 +534,9 @@ public class SiteImpl implements Site, SiteBuilder{
 
 
 	void write(){
+		if(!dest.exists()){
+			dest.mkdirs();
+		}
 		for(Post post: posts){
 			post.write(dest);
 		}
@@ -678,5 +689,13 @@ public class SiteImpl implements Site, SiteBuilder{
 	@Override
 	public String getRoot() {
 		return root;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Site#getLocale()
+	 */
+	@Override
+	public Locale getLocale() {
+		return locale;
 	}
 }

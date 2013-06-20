@@ -252,5 +252,13 @@ public class CategoryGenerator implements Generator {
 		public boolean isFooter(){
 			return false;
 		}
+		
+		public boolean isSidebar(){
+			return true;
+		}
+		
+		public Object get(String string){
+			return null;
+		}
 	}
 }

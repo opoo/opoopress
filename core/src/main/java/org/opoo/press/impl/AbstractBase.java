@@ -29,6 +29,8 @@ import org.opoo.press.Base;
 import org.opoo.press.Converter;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
+import org.opoo.press.converter.Highlighter;
+import org.opoo.press.converter.HighlighterSupportConverter;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
 import org.opoo.press.util.MapUtils;
@@ -206,19 +208,22 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	 * @param rootMap
 	 */
 	private void mergeHighlighterParam(Map<String, Object> rootMap) {
-		boolean useSyntaxHighlighterCompress = MapUtils.get(site.getConfig(), "syntax_highlighter_compress", true);
-		if(useSyntaxHighlighterCompress){
-			if(containsHighlighterCodeBlock()){
-				log.debug("Set containsHighlighterCodeBlock = true");
-				rootMap.put("containsHighlighterCodeBlock", true);
+		if(converter instanceof HighlighterSupportConverter){
+			Highlighter highlighter = ((HighlighterSupportConverter) converter).getHighlighter();
+			if(highlighter != null && containsHighlightCodeBlock(highlighter)){
+				log.debug("The content contains highlight code block.");
+				rootMap.put("highlighter", highlighter.getHighlighterName());
 			}
 		}
 	}
 	
-	protected boolean containsHighlighterCodeBlock(){
-		return Utils.containsHighlighterCodeBlock(getContent());
+	/**
+	 * @param highlighter
+	 */
+	protected boolean containsHighlightCodeBlock(Highlighter highlighter) {
+		return highlighter.containsHighlightCodeBlock(getContent());
 	}
-	
+
 	public String getUrl() {
 		return url;
 	}

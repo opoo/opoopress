@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -77,6 +78,11 @@ public class RendererImpl implements Renderer {
 		configuration = new Configuration();
 		configuration.setObjectWrapper(new DefaultObjectWrapper());
 		configuration.setTemplateLoader(buildTemplateLoader(templateLoaders));
+		
+		Locale locale = site.getLocale();
+		if(locale != null){
+			configuration.setLocale(site.getLocale());
+		}
 	}
 	
 	private TemplateLoader buildTemplateLoader(List<TemplateLoader> loaders){
@@ -178,7 +184,8 @@ public class RendererImpl implements Renderer {
 	
 	private String buildTemplateName(String layout, SourceEntry entry){
 		String name = entry.getPath() + "/" + entry.getName() + "." + layout + ".ftl";
-		return StringUtils.replace(name, "/", "__");
+//		return StringUtils.replace(name, "/", "__");
+		return name;
 	}
 
 	private StringBuffer buildTemplateContent(String layout, boolean isValidLayout, 
@@ -187,7 +194,7 @@ public class RendererImpl implements Renderer {
 		//appendPluginMarcos(template);
 		
 		if(isValidLayout){
-			template.append("<#include \"_" + layout + ".ftl\">");
+			template.append("<#include \"/_" + layout + ".ftl\">");
 			template.append("<@" + layout + "Layout>");
 		}
 		

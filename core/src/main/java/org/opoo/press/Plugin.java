@@ -5,11 +5,11 @@ package org.opoo.press;
  * 
  * @author Alex Lin
  */
-public interface Plugin {
+public interface Plugin/* extends Ordered*/{
 	
 	/**
 	 * 
 	 * @param registry
 	 */
-	void init(Registry registry);
+	void initialize(Registry registry);
 }
