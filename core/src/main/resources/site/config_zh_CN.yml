@@ -49,7 +49,7 @@ site: site
 locale: zh_CN
 url: http://yoursite.com
 title: 我的 OpooPress 博客
-subtitle: 又一个 OpooPres.com 站点
+subtitle: 又一个 OpooPress.com 站点
 author: 您的姓名
 simple_search: http://google.com/search
 description: OpooPress 博客系统是一个基于 Java 的静态博客（网站）生成器。
@@ -73,11 +73,17 @@ root: /
 # permalink_label_feed: "&#9875; 固定链接"
 
 # 分类所在的目录
-category_dir: /categories
+category_dir: /category
 
 # 分类目录名称与标题对照关系。通常名称用于组成 URL，小写切不含空格，标题则用于显示。
 # 未在此处指定的分类 OpooPress 会自行处理。
-category_names: {"opoopress": "OpooPress", "blog": "博客"}
+# category_names: {"opoopress": "OpooPress", "blog": "博客"}
+
+# 标签所在的目录
+tag_dir: /tag
+
+# 标签名称与标题对照关系。通常名称用于组成 URL，小写切不含空格，标题则用于显示。
+tag_names: {"opensource":"开源项目"}
 
 # 首页每页显示的文章数
 paginate: 10          		
@@ -89,7 +95,10 @@ recent_posts: 5
 related_posts: 5   	
 
 # 在显示摘要的文章中'继续阅读'的按钮文字
-excerpt_link: "继续阅读"  
+excerpt_link: "继续阅读"
+
+# 摘要在文章中的分隔标识
+excerpt_separator: "<!--more-->"
 
 # 文章或者页面的标题是否使用 titlecase
 titlecase: true
@@ -163,7 +172,8 @@ converters:
 generators:
   - org.opoo.press.generator.PaginationGenerator
   - org.opoo.press.generator.CategoryGenerator
-
+  - org.opoo.press.generator.TagGenerator
+  
 # siteFilters:
 #  - org.opoo.press.filter.SampleSiteFilter
 
@@ -174,4 +184,12 @@ generators:
 
 # Default use 'SyntaxHighlighter' as the highlighter code block processor
 # http://alexgorbatchev.com/SyntaxHighlighter/
-highlighter: "org.opoo.press.converter.SyntaxHighlighter"
+highlighter: "org.opoo.press.highlighter.SyntaxHighlighter"
+
+
+# ----------------------- #
+#   FreeMarker config     #
+# ----------------------- #
+
+# auto_import_templates:{"ns" : "template_name.ftl", "ns2" : "template2_name.ftl"}
+# auto_include_templates: ["global_template1.ftl", "global_template2.ftl"]

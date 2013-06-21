@@ -45,7 +45,7 @@ site: site
 # ----------------------- #
 
 # Default value is java.util.Locale.getDefault()
-locale: en_US
+# locale: en_US
 
 url: http://yourwebsite.com
 title: My OpooPress Blog
@@ -73,11 +73,17 @@ root: /
 # permalink_label_feed: "&#9875; Permalink"
 
 # category folder
-category_dir: /categories
+category_dir: /category
 
 # Define the mapping of category name (using in url) and display name.
 # The categories not defined here will be appropriate process.
 category_names: {"opoopress": "OpooPress", "blog": "Blog"}
+
+# 标签所在的目录
+tag_dir: /tag
+
+# 标签名称与标题对照关系。通常名称用于组成 URL，小写切不含空格，标题则用于显示。
+# tag_names: {}
 
 # Posts per page on the blog index
 paginate: 10          		
@@ -90,6 +96,9 @@ related_posts: 5
 
 # "Continue reading" link text at the bottom of excerpted articles
 excerpt_link: "Read on &rarr;"  
+
+# excerpt separator
+excerpt_separator: "<!--more-->"
 
 # Converts page and post titles to titlecase
 titlecase: true
@@ -163,6 +172,7 @@ converters:
 generators:
   - org.opoo.press.generator.PaginationGenerator
   - org.opoo.press.generator.CategoryGenerator
+  - org.opoo.press.generator.TagGenerator
 
 # siteFilters:
 #  - org.opoo.press.filter.SampleSiteFilter
@@ -174,4 +184,12 @@ generators:
 
 # Default use 'SyntaxHighlighter' as the highlighter code block processor
 # http://alexgorbatchev.com/SyntaxHighlighter/
-highlighter: "org.opoo.press.converter.SyntaxHighlighter"
+highlighter: "org.opoo.press.highlighter.SyntaxHighlighter"
+
+
+# ----------------------- #
+#   FreeMarker config     #
+# ----------------------- #
+
+# auto_import_templates:{"ns" : "template_name.ftl", "ns2" : "template2_name.ftl"}
+# auto_include_templates: ["global_template1.ftl", "global_template2.ftl"]
