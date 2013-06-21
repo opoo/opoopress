@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.converter;
+package org.opoo.press.highlighter;
 
 import java.util.List;
 
