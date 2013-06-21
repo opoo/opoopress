@@ -61,6 +61,7 @@ public class RendererImpl implements Renderer {
 	 * @param templateDir
 	 * @throws IOException 
 	 */
+	@SuppressWarnings("unchecked")
 	public RendererImpl(Site site, List<TemplateLoader> templateLoaders) {
 		super();
 		this.site = site;
@@ -82,6 +83,26 @@ public class RendererImpl implements Renderer {
 		Locale locale = site.getLocale();
 		if(locale != null){
 			configuration.setLocale(site.getLocale());
+		}
+		
+		//Add import i18n messages template.
+		configuration.addAutoImport("i18n", "i18n/messages.ftl");
+		
+		Map<String, Object> config = site.getConfig();
+		List<String> autoIncludeTemplates = (List<String>) config.get("auto_include_templates");
+		if(autoIncludeTemplates != null && !autoIncludeTemplates.isEmpty()){
+			for(String template: autoIncludeTemplates){
+				configuration.addAutoInclude(template);
+				log.info("Add auto include: " + template);
+			}
+		}
+		
+		Map<String,String> autoImportTemplates = (Map<String, String>) config.get("auto_import_templates");
+		if(autoImportTemplates != null && !autoImportTemplates.isEmpty()){
+			for(Map.Entry<String, String> en: autoImportTemplates.entrySet()){
+				configuration.addAutoImport(en.getKey(), en.getValue());
+				log.info("Add auto import: " + en.getKey() + " -> " + en.getValue());
+			}
 		}
 	}
 	
@@ -111,7 +132,6 @@ public class RendererImpl implements Renderer {
 	public Site getSite() {
 		return site;
 	}
-
 
 //	private String buildTemplate(String layout, String content){
 //		return buildTemplateContent(layout, content, false).toString();

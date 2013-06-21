@@ -53,7 +53,7 @@ public class CategoryLinksModel implements TemplateMethodModelEx{
 				sb.append(", ");
 			}
 
-			String lo = cat.toLowerCase();
+			String lo = Utils.toSlug(cat);
 			String capCat = site.getCategoryNames().get(lo);
 			String rootUrl = (String) site.getConfig().get("root");
 			sb.append("<a class=\"category\" href=\"").append(rootUrl)

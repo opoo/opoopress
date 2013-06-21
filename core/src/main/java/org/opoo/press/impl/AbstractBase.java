@@ -29,8 +29,7 @@ import org.opoo.press.Base;
 import org.opoo.press.Converter;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
-import org.opoo.press.converter.Highlighter;
-import org.opoo.press.converter.HighlighterSupportConverter;
+import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
 import org.opoo.press.util.MapUtils;
@@ -130,7 +129,11 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	
 	private String formatDate(Date date, String style){
 		if(date != null){
-			return new SimpleDateFormat(style).format(date);
+			if(site.getLocale() != null){
+				return new SimpleDateFormat(style, site.getLocale()).format(date);
+			}else{
+				return new SimpleDateFormat(style).format(date);
+			}
 		}
 		return null;
 	}
@@ -208,12 +211,11 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	 * @param rootMap
 	 */
 	private void mergeHighlighterParam(Map<String, Object> rootMap) {
-		if(converter instanceof HighlighterSupportConverter){
-			Highlighter highlighter = ((HighlighterSupportConverter) converter).getHighlighter();
-			if(highlighter != null && containsHighlightCodeBlock(highlighter)){
-				log.debug("The content contains highlight code block.");
-				rootMap.put("highlighter", highlighter.getHighlighterName());
-			}
+		Highlighter highlighter = site.getHighlighter();
+		if(highlighter != null && ".html".equals(outputFileExtension)
+				&& containsHighlightCodeBlock(highlighter)){
+			log.debug("The content contains highlight code block.");
+			rootMap.put("highlighter", highlighter.getHighlighterName());
 		}
 	}
 	

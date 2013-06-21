@@ -42,6 +42,7 @@ import org.opoo.press.Site;
 import org.opoo.press.SiteBuilder;
 import org.opoo.press.StaticFile;
 import org.opoo.press.converter.IdentityConverter;
+import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.plugin.DefaultPlugin;
 import org.opoo.press.source.NoFrontMatterException;
 import org.opoo.press.source.Source;
@@ -49,6 +50,7 @@ import org.opoo.press.source.SourceEntry;
 import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceParser;
 import org.opoo.press.template.CategoryLinksModel;
+import org.opoo.press.template.TagLinksModel;
 import org.opoo.press.template.TitleCaseModel;
 import org.opoo.press.util.MapUtils;
 import org.opoo.press.util.Utils;
@@ -92,6 +94,7 @@ public class SiteImpl implements Site, SiteBuilder{
 //	private List<String> excludes;
 	private RegistryImpl registry;
 	private Locale locale;
+	private Highlighter highlighter;
 	
 	/**
 	 * @param config
@@ -239,6 +242,12 @@ public class SiteImpl implements Site, SiteBuilder{
 			log.debug("Set locale: " + locale);
 		}
 		
+		String highlighterClassName = (String) config.get("highlighter");
+		if(highlighterClassName != null){
+			highlighter = (Highlighter) Utils.newInstance(highlighterClassName, this);
+			log.debug("Set highlighter: " + highlighterClassName);
+		}
+		
 		this.registry = new RegistryImpl(this);
 		//register default converter
 		this.registry.registerConverter(new IdentityConverter());
@@ -343,7 +352,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		List<String> cats = post.getCategories();
 		if(cats != null){
 			for(String cat: cats){
-				String key = cat.toLowerCase();
+				String key = Utils.toSlug(cat);
 				if(!categoryNames.containsKey(key)){
 					categoryNames.put(key, cat);
 				}
@@ -359,7 +368,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		List<String> tagsList = post.getTags();
 		if(tagsList != null){
 			for(String tag: tagsList){
-				String key = tag.toLowerCase();
+				String key = Utils.toSlug(tag);
 				if(!tagNames.containsKey(key)){
 					tagNames.put(key, tag);
 				}
@@ -447,6 +456,7 @@ public class SiteImpl implements Site, SiteBuilder{
 //		String rootUrl = (String)config.get("root");
 		map.put("root_url", getRoot());
 		map.put("category_links", new CategoryLinksModel(this));
+		map.put("tag_links", new TagLinksModel(this));
 		
 		Map<String, TemplateModel> models = registry.getTemplateModels();
 		if(models != null && !models.isEmpty()){
@@ -697,5 +707,13 @@ public class SiteImpl implements Site, SiteBuilder{
 	@Override
 	public Locale getLocale() {
 		return locale;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Site#getHighlighter()
+	 */
+	@Override
+	public Highlighter getHighlighter() {
+		return highlighter;
 	}
 }

@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Converter;
 import org.opoo.press.Initializable;
 import org.opoo.press.Site;
+import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
 import org.opoo.press.util.MapUtils;
 import org.opoo.press.util.Utils;
@@ -37,7 +38,7 @@ import com.github.rjeschke.txtmark.Processor;
  * @author Alex Lin
  *
  */
-public class TxtmarkMarkdownConverter implements Converter, Initializable, HighlighterSupportConverter {
+public class TxtmarkMarkdownConverter implements Converter, Initializable {
 	private static final Log log = LogFactory.getLog(TxtmarkMarkdownConverter.class);
 	private Configuration config;
 	private Highlighter highlighter;
@@ -101,14 +102,6 @@ public class TxtmarkMarkdownConverter implements Converter, Initializable, Highl
 		return ".html";
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.HighlighterSupportConverter#getHighlighter()
-	 */
-	@Override
-	public Highlighter getHighlighter() {
-		return highlighter;
-	}
-	
 	/**
 	 * A BlockEmitter to process highlight code block. 
 	 */

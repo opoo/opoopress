@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
 
 /**
@@ -63,6 +64,7 @@ public interface Site extends SiteBuilder{
 	
 	Renderer getRenderer();
 	Converter getConverter(Source source);
-	
 	Locale getLocale();
+	
+	Highlighter getHighlighter();
 }

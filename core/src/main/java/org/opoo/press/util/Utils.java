@@ -76,4 +76,16 @@ public abstract class Utils {
 		String categoryDir = (String) site.getConfig().get("category_dir");
 		return /*rootUrl + */ categoryDir + "/" + categoryName + "/";
 	}
+	
+	public static String buildTagUrl(Site site, String tagName){
+		//String rootUrl = (String) site.getConfig().get("root");
+		String tagDir = (String) site.getConfig().get("tag_dir");
+		return /*rootUrl + */ tagDir + "/" + tagName + "/";
+	}
+	
+	public static String toSlug(String string){
+		string = string.toLowerCase();
+		//return StringUtils.remove(string, " ");
+		return StringUtils.replace(string, " ", "-");
+	}
 }

@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.opoo.press.Post;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
+import org.opoo.press.util.Utils;
 
 /**
  * @author Alex Lin
@@ -91,7 +92,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	private void extractExcerpt(String content) {
 		String excerptSeparator = (String) getSite().getConfig().get("excerpt_separator");
 		if(excerptSeparator == null){
-			excerptSeparator = "<!-- more -->";
+			excerptSeparator = "<!--more-->";
 		}
 		int index = content.indexOf(excerptSeparator);
 		if(index != -1){
@@ -252,7 +253,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		Map<String, List<Post>> map = getSite().getCategories();
 		List<Post> allRelatedPosts = new ArrayList<Post>();
 		for(String cat: list){
-			String lo = cat.toLowerCase();
+			String lo = Utils.toSlug(cat);
 			List<Post> posts = map.get(lo);
 			mergeRelatedPosts(allRelatedPosts, posts);
 		}

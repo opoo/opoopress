@@ -33,7 +33,7 @@ public class TitleCaseModel implements TemplateMethodModel {
 			"if", "in", "of", "on", "or", "the", "to", "v", "v.", "via", "vs", "vs."};
 	private static List<String> smallWordList = Arrays.asList(smallWords);
 			
-	private String titleCase(String string){
+	public static String toTitleCase(String string){
 		StringTokenizer st = new StringTokenizer(string);
 		StringBuffer sb = new StringBuffer();
 		while(st.hasMoreTokens()){
@@ -64,6 +64,6 @@ public class TitleCaseModel implements TemplateMethodModel {
 		}
 		String str = (String)arguments.get(0);
 //		return WordUtils.capitalizeFully(str);
-		return titleCase(str);
+		return toTitleCase(str);
 	}
 }
