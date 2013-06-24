@@ -75,11 +75,11 @@ root: /
 # category folder
 category_dir: /category
 
-# Define the mapping of category name (using in url) and display name.
+# Define the mapping of category name (using as slug) and display name.
 # The categories not defined here will be appropriate process.
 category_names: {"opoopress": "OpooPress", "blog": "Blog"}
 
-# 标签所在的目录
+# tag directory
 tag_dir: /tag
 
 # 标签名称与标题对照关系。通常名称用于组成 URL，小写切不含空格，标题则用于显示。
