@@ -29,7 +29,7 @@ public class Application {
 	
 	/**
 	 * Check whether the application is initialized.
-	 * @return
+	 * @return return true if context is present
 	 */
 	public static boolean isInitialized(){
 		return context != null;

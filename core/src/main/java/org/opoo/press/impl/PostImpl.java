@@ -212,9 +212,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	}
 	
 	
-	/**
-	 * @param rootModel
-	 */
+	@Override
 	public void render(Map<String, Object> rootMap) {
 		super.render(rootMap);
 		renderExcerpt(rootMap);

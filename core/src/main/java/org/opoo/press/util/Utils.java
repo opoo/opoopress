@@ -15,8 +15,10 @@
  */
 package org.opoo.press.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Initializable;
 import org.opoo.press.Site;
 
 /**
@@ -24,40 +26,6 @@ import org.opoo.press.Site;
  *
  */
 public abstract class Utils {
-	//private static final Log log = LogFactory.getLog(Utils.class);
-	
-	/**
-	 * Create a new instance for the specified class name and call 
-	 * {@link Initializable#initialize(Site)} if required.
-	 * @param className class name
-	 * @param site site object
-	 * @return new instance
-	 */
-	public static Object newInstance(String className, Site site){
-		Object instance = newInstance(className);
-		if(instance instanceof Initializable){
-			((Initializable) instance).initialize(site);
-		}
-		return instance;
-	}
-	
-	/**
-	 * Create a new instance for the specified class name.
-	 * @param className class name
-	 * @return new instance
-	 */
-	public static Object newInstance(String className){
-		try {
-			Class<?> class1 = Class.forName(className);
-			return class1.newInstance();
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Create instance failed: " + className, e);
-		} catch (InstantiationException e) {
-			throw new RuntimeException("Create instance failed: " + className, e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("Create instance failed: " + className, e);
-		}
-	}
 
 	public static String buildCanonical(Site site, String url){
 		String canonical = "" + site.getConfig().get("url");
@@ -74,13 +42,21 @@ public abstract class Utils {
 	public static String buildCategoryUrl(Site site, String categoryName){
 		//String rootUrl = (String) site.getConfig().get("root");
 		String categoryDir = (String) site.getConfig().get("category_dir");
-		return /*rootUrl + */ categoryDir + "/" + categoryName + "/";
+		return /*rootUrl + */ categoryDir + "/" + encodeURL(categoryName) + "/";
 	}
 	
 	public static String buildTagUrl(Site site, String tagName){
 		//String rootUrl = (String) site.getConfig().get("root");
 		String tagDir = (String) site.getConfig().get("tag_dir");
-		return /*rootUrl + */ tagDir + "/" + tagName + "/";
+		return /*rootUrl + */ tagDir + "/" + encodeURL(tagName) + "/";
+	}
+	
+	public static String encodeURL(String url){
+		try {
+			return URLEncoder.encode(url, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public static String toSlug(String string){

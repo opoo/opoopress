@@ -57,9 +57,8 @@ public class RendererImpl implements Renderer {
 	private long start = System.currentTimeMillis();
 	
 	/**
-	 * @param templateLoaders 
-	 * @param templateDir
-	 * @throws IOException 
+	 * @param site 
+	 * @param templateLoaders
 	 */
 	@SuppressWarnings("unchecked")
 	public RendererImpl(Site site, List<TemplateLoader> templateLoaders) {

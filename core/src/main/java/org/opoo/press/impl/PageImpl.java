@@ -35,9 +35,9 @@ public class PageImpl extends AbstractBase implements Page{
 	private Pager pager;
 	
 	/**
-	 * 
+	 * Construct a page instance.
 	 * @param site
-	 * @param frontMatterSource
+	 * @param source
 	 */
 	public PageImpl(Site site, Source source) {
 		super(site, source);
@@ -154,7 +154,7 @@ public class PageImpl extends AbstractBase implements Page{
 	 * 
 	 * @param current
 	 * @param targetPageNumber
-	 * @return
+	 * @return the page object by the specified page number.
 	 */
 	public Page getPage(Page current, int targetPageNumber){
 		if(current == null){
@@ -177,9 +177,9 @@ public class PageImpl extends AbstractBase implements Page{
 	}
 	
 	/**
-	 * 
+	 * 查找指定页码的 page 对象。
 	 * @param targetPageNumber
-	 * @return
+	 * @return the target page
 	 */
 	public Page getPage(int targetPageNumber){
 		return getPage(this, targetPageNumber);

@@ -28,13 +28,13 @@ import java.util.Map;
 public interface Convertible {
 
 	/**
-	 * @param model
+	 * @param rootMap root object for FreeMarker template
 	 */
 	void render(Map<String, Object> rootMap);
 
 	/**
 	 * @param dest
-	 * @return
+	 * @return output file
 	 */
 	File getOutputFile(File dest);
 

@@ -25,7 +25,7 @@ public interface StaticFile {
 
 	/**
 	 * @param dest
-	 * @return
+	 * @return output file
 	 */
 	File getOutputFile(File dest);
 

@@ -29,7 +29,7 @@ public interface SourceEntryLoader {
 	 * Load all source file entries.
 	 * @param sourcePath
 	 * @param fileFilter
-	 * @return
+	 * @return the list of all source entries
 	 */
 	List<SourceEntry> loadSourceEntries(File sourcePath, FileFilter fileFilter);
 }

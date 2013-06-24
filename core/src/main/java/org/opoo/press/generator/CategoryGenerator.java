@@ -62,7 +62,7 @@ public class CategoryGenerator implements Generator {
 				Collections.sort(posts);
 				Collections.reverse(posts);
 				
-				CategoryIndexPage page = new CategoryIndexPage(site, renderer);
+				CategoryPage page = new CategoryPage(site, renderer);
 				page.setTitle(/*"Category: " + */category);
 				page.setUrl(Utils.buildCategoryUrl(site, neme));
 				page.setPosts(posts);
@@ -73,7 +73,7 @@ public class CategoryGenerator implements Generator {
 	}
 	
 	
-	public static class CategoryIndexPage extends AbstractConvertible implements Page{
+	public static class CategoryPage extends AbstractConvertible implements Page{
 		public static final String TEMPLATE = "category_index.ftl";
 		private String url;
 		private Renderer renderer;
@@ -82,7 +82,7 @@ public class CategoryGenerator implements Generator {
 		private String title;
 		private List<Post> posts;
 		
-		private CategoryIndexPage(Site site, Renderer renderer) {
+		private CategoryPage(Site site, Renderer renderer) {
 			super();
 			this.site = site;
 			this.renderer = renderer;

@@ -264,7 +264,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	
 	/**
 	 * For freemarker template.
-	 * @return
+	 * @return the date formatted string
 	 */
 	public String getDate_formatted(){
 		return getDateFormatted();
@@ -272,7 +272,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	
 	/**
 	 * For freemarker template.
-	 * @return
+	 * @return the update date formatted string
 	 */
 	public String getUpdated_formatted(){
 		return getUpdatedFormatted();

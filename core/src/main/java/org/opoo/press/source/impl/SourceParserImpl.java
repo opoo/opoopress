@@ -39,7 +39,6 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class SourceParserImpl implements SourceParser {
 	private static final Log log = LogFactory.getLog(SourceParserImpl.class);
-	public static final String TRIPLE_DASHED_LINE = "---";
 	private Yaml yaml = new Yaml();
 	
 	/**

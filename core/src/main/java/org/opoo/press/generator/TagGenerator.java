@@ -62,7 +62,7 @@ public class TagGenerator implements Generator {
 				Collections.sort(posts);
 				Collections.reverse(posts);
 				
-				TagIndexPage page = new TagIndexPage(site, renderer);
+				TagPage page = new TagPage(site, renderer);
 				page.setTitle(/*"Tag: " + */tag);
 				page.setUrl(Utils.buildTagUrl(site, neme));
 				page.setPosts(posts);
@@ -73,7 +73,7 @@ public class TagGenerator implements Generator {
 	}
 	
 	
-	public static class TagIndexPage extends AbstractConvertible implements Page{
+	public static class TagPage extends AbstractConvertible implements Page{
 		public static final String TEMPLATE = "category_index.ftl";
 		private String url;
 		private Renderer renderer;
@@ -82,7 +82,7 @@ public class TagGenerator implements Generator {
 		private String title;
 		private List<Post> posts;
 		
-		private TagIndexPage(Site site, Renderer renderer) {
+		private TagPage(Site site, Renderer renderer) {
 			super();
 			this.site = site;
 			this.renderer = renderer;

@@ -52,6 +52,7 @@ import org.opoo.press.source.SourceParser;
 import org.opoo.press.template.CategoryLinksModel;
 import org.opoo.press.template.TagLinksModel;
 import org.opoo.press.template.TitleCaseModel;
+import org.opoo.press.util.ClassUtils;
 import org.opoo.press.util.MapUtils;
 import org.opoo.press.util.Utils;
 
@@ -244,7 +245,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		
 		String highlighterClassName = (String) config.get("highlighter");
 		if(highlighterClassName != null){
-			highlighter = (Highlighter) Utils.newInstance(highlighterClassName, this);
+			highlighter = (Highlighter) ClassUtils.newInstance(highlighterClassName, this);
 			log.debug("Set highlighter: " + highlighterClassName);
 		}
 		
@@ -259,7 +260,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		List<String> pluginClassNames = (List<String>) config.get("plugins");
 		if(pluginClassNames != null && !pluginClassNames.isEmpty()){
 			for(String className: pluginClassNames){
-				Plugin p = (Plugin) Utils.newInstance(className);
+				Plugin p = (Plugin) ClassUtils.newInstance(className);
 				p.initialize(registry);
 			}
 		}
@@ -521,7 +522,9 @@ public class SiteImpl implements Site, SiteBuilder{
 	 */
 	private List<File> getAllDestFiles(File dest) {
 		List<File> files = new ArrayList<File>();
-		listDestFiles(files, dest);
+		if(dest != null && dest.exists()){
+			listDestFiles(files, dest);
+		}
 		return files;
 	}
 	

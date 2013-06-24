@@ -27,15 +27,18 @@ public interface Source {
 	
 	/**
 	 * 
-	 * @return
+	 * @return source entry
 	 */
 	SourceEntry getSourceEntry();
 	
 	/**
 	 * YAML front-matter header.
-	 * @return
+	 * @return map object
 	 */
 	Map<String,Object> getMeta();
 	
+	/**
+	 * @return content
+	 */
 	String getContent();
 }

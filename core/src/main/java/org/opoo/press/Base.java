@@ -29,14 +29,14 @@ public interface Base {
 
 	/**
 	 * The file source.
-	 * @return
+	 * @return source
 	 */
 	Source getSource();
 	
 	/**
 	 * Return the post or page content. 
 	 * Content might be changed by {@link Converter} in generate processing.
-	 * @return
+	 * @return the content text of post or page
 	 */
 	String getContent();
 	

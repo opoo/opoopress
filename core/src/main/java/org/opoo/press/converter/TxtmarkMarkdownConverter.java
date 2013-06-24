@@ -26,17 +26,16 @@ import org.opoo.press.Initializable;
 import org.opoo.press.Site;
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
+import org.opoo.press.util.ClassUtils;
 import org.opoo.press.util.MapUtils;
-import org.opoo.press.util.Utils;
 
 import com.github.rjeschke.txtmark.BlockEmitter;
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
 
 /**
- * A txtmark implemented converter.
+ * A <code>txtmark</code> implemented converter.
  * @author Alex Lin
- *
  */
 public class TxtmarkMarkdownConverter implements Converter, Initializable {
 	private static final Log log = LogFactory.getLog(TxtmarkMarkdownConverter.class);
@@ -57,7 +56,7 @@ public class TxtmarkMarkdownConverter implements Converter, Initializable {
 		if(highlighterClassName == null){
 			log.warn("This converter might be need a Highlighter.");
 		}else{
-			highlighter = (Highlighter) Utils.newInstance(highlighterClassName, site);
+			highlighter = (Highlighter) ClassUtils.newInstance(highlighterClassName, site);
 			config = Configuration.builder()
 					.setCodeBlockEmitter(new BlockEmitterImpl(highlighter))
 					.forceExtentedProfile()
