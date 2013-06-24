@@ -26,7 +26,7 @@ import org.opoo.press.Plugin;
 import org.opoo.press.Registry;
 import org.opoo.press.Site;
 import org.opoo.press.SiteFilter;
-import org.opoo.press.util.Utils;
+import org.opoo.press.util.ClassUtils;
 
 /**
  * The default site Plugin that instance all Converters and Generators 
@@ -52,7 +52,7 @@ public class DefaultPlugin implements Plugin {
 		
 		if(converterNames != null && !converterNames.isEmpty()){
 			for(String converterName: converterNames){
-				Converter c = (Converter) Utils.newInstance(converterName, site);
+				Converter c = (Converter) ClassUtils.newInstance(converterName, site);
 				registry.registerConverter(c);
 				log.info("Register converter: " + converterName);
 			}
@@ -60,7 +60,7 @@ public class DefaultPlugin implements Plugin {
 		
 		if(generatorNames != null && !generatorNames.isEmpty()){
 			for(String generatorName: generatorNames){
-				Generator g = (Generator) Utils.newInstance(generatorName, site);
+				Generator g = (Generator) ClassUtils.newInstance(generatorName, site);
 				registry.registerGenerator(g);
 				log.info("Register generator: " + generatorName);
 			}
@@ -68,7 +68,7 @@ public class DefaultPlugin implements Plugin {
 		
 		if(siteFilters != null && !siteFilters.isEmpty()){
 			for(String filterName: siteFilters){
-				SiteFilter f = (SiteFilter) Utils.newInstance(filterName, site);
+				SiteFilter f = (SiteFilter) ClassUtils.newInstance(filterName, site);
 				registry.registerSiteFilter(f);
 				log.info("Register site filter: " + filterName);
 			}
