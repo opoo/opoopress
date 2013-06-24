@@ -1,0 +1,31 @@
+<#if (page.no_header)!false == false>
+  <header>
+	<#if index??>
+      <h1 class="entry-title"><a href="${ root_url }${ post.url }"><#if (site.titlecase)!false = true>${titlecase(post.title)}<#else>${post.title}</#if></a></h1>
+	<#else>
+      <h1 class="entry-title"><#if (site.titlecase)!false = true>${titlecase(page.title)}<#else>${page.title}</#if></h1>
+	</#if>
+
+	<#if (page.meta)!true == true>
+      <p class="meta">
+		<#include "post/date.ftl">${time}
+		<#if site.disqus_short_name?? && (page.comments)!true != false && (post.comments)!true != false && (site.disqus_show_comment_count)!false == true>
+         | <a href="<#if index??>${root_url}${post.url}</#if>#disqus_thread">Comments</a>
+        </#if>
+        <#-- permalink -->
+        <#-- &bull; <a rel="bookmark" href="${root_url}<#if index??>${post.url}<#else>${page.url}</#if>">${ site.permalink_label }</a> -->
+      </p>
+    </#if>
+  </header>
+</#if>
+
+<#if index??>
+  <div class="entry-content">${post.excerpt}</div>
+  <#if post.excerpted == true>
+    <footer>
+      <a rel="full-article" href="${ root_url }${ post.url }">${site.excerpt_link}</a>
+    </footer>
+  </#if>
+<#else>
+<#-- <div class="entry-content">${content}</div> -->
+</#if>

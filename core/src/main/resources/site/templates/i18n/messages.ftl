@@ -1,0 +1,1 @@
+<#macro msg name>${name}</#macro>

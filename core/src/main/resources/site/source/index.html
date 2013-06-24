@@ -1,0 +1,30 @@
+---
+layout: default
+---
+<div class="blog-index">
+<#assign index = true >
+<#list paginator.posts as post>
+	<#assign content = post.content>
+    <article>
+      <#include "article.ftl">
+    </article>
+</#list>
+  
+  <div class="pagination">
+    <#-- simple page bar -->
+  	<#--
+  	<#if (paginator.next)??>
+      <a class="prev" href="${root_url}${paginator.next.url}">&larr; Older</a>
+    </#if>
+    <a href="${root_url}/archives">Blog Archives</a>
+    <#if (paginator.previous)??>
+    <a class="next" href="${root_url}${paginator.previous.url}">Newer &rarr;</a>
+    </#if>
+	-->
+	<#-- new page bar -->
+    <#include "custom/pagination.ftl">
+  </div>
+</div>
+<aside class="sidebar">
+  <#include "asides/blog_index_asides.ftl">
+</aside>

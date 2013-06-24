@@ -1,0 +1,19 @@
+---
+layout: page
+title: 分类目录
+footer: false
+---
+
+<#if site.categoryNames?? && (site.categoryNames?size > 0) 
+	&& site.categories?? &&  (site.categories?size > 0)>
+<div id="blog-archives">
+<ul style="padding-left:40px;">
+<#list site.categoryNames?keys as categoryName>
+<#if site.categories[categoryName]??>
+<#assign size = site.categories[categoryName]?size>
+<li><a href="/categories/${categoryName}/">${site.categoryNames[categoryName]}</a><span style="float:right;">共 ${size} 篇</span></li>
+</#if>
+</#list>
+</ul>
+</div>
+</#if>
