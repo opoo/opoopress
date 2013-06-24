@@ -37,6 +37,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -44,38 +46,48 @@ import org.dom4j.Namespace;
 import org.dom4j.QName;
 import org.dom4j.io.SAXReader;
 import org.opoo.press.Site;
-import org.opoo.press.source.impl.SourceParserImpl;
-
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
+import org.opoo.press.source.SourceParser;
 
 /**
  * Import posts and pages from WordPress exported XML file.
  * 
- * <p> The namespace in the XML as below:
- * <pre>
- * 	xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
- * 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
- *	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
- *	xmlns:dc="http://purl.org/dc/elements/1.1/"
- *	xmlns:wp="http://wordpress.org/export/1.2/"</pre>
- *
  * @author Alex Lin
  *
  */
 public class WordPressImporter implements Importer {
+	private static final Log log = LogFactory.getLog(WordPressImporter.class);
+	/**
+	 * xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
+	 */
 	public static Namespace NS_EXCERPT = new Namespace("excerpt", "http://wordpress.org/export/1.2/excerpt/");
+	/**
+	 * xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	 */
 	public static Namespace NS_CONTENT = new Namespace("content", "http://purl.org/rss/1.0/modules/content/");
-	
+	/**
+	 * xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	 */
+	public static Namespace NS_WFW = new Namespace("wfw", "http://wellformedweb.org/CommentAPI/");
+	/**
+	 * xmlns:dc="http://purl.org/dc/elements/1.1/"
+	 */
+	public static Namespace NS_DC = new Namespace("dc", "http://purl.org/dc/elements/1.1/");
+	/**
+	 * xmlns:wp="http://wordpress.org/export/1.2/"
+	 */
+	public static Namespace NS_WP = new Namespace("wp", "http://wordpress.org/export/1.2/");
+	/**
+	 * DateFormat for parse the post date in WordPress XML exported file.
+	 */
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	/**
+	 * for the file name.
+	 */
 	private static final SimpleDateFormat NAME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private Map<String,Object> props;
-	private Configuration config;
 	public WordPressImporter(Map<String,Object> props){
 		this.props = props;
-		this.config = new Configuration();
-		config.setObjectWrapper(new DefaultObjectWrapper());
 	}
 	
 	
@@ -161,10 +173,11 @@ public class WordPressImporter implements Importer {
 		String url = buildURL(parse, postname, postid, author);
 		
 		if(!includeDrafts && !published){
-			System.out.println(name + " is draft, skiping import.");
+			log.info(name + " is draft, skiping import. Set 'include_drafts' peroperty to enabled import drafts.");
+			return;
 		}
 		
-		
+		//excerpt
 		boolean excerpted = StringUtils.isNotBlank(excerpt);
 		StringBuilder excerptBuilder = excerpted ? null : new StringBuilder();
 		if(isPage){
@@ -191,8 +204,7 @@ public class WordPressImporter implements Importer {
 		List<Element> list = e.elements("category");
 		for(Element n: list){
 			String domain = n.attributeValue("domain");
-			String nicename = n.attributeValue("nicename");
-			System.out.println(nicename);
+			//String nicename = n.attributeValue("nicename");
 			if("post_tag".equals(domain)){
 				String tagName = getTagName(site, n.getTextTrim());
 				tags.add(tagName);
@@ -204,7 +216,7 @@ public class WordPressImporter implements Importer {
 		}
 		
 		List<String> lines = new ArrayList<String>();
-		lines.add(SourceParserImpl.TRIPLE_DASHED_LINE);
+		lines.add(SourceParser.TRIPLE_DASHED_LINE);
 		lines.add("layout: " + postType);
 		lines.add("title: '" + title + "'");
 //		lines.add("name", name);
@@ -218,13 +230,14 @@ public class WordPressImporter implements Importer {
 		
 		lines.add("link: " + link);
 		lines.add("post_id: " + postid);
-		lines.add("url: '" + url + "'");
+		if(url != null){
+			lines.add("url: '" + url + "'");
+		}
 
 		if(StringUtils.isNotBlank(excerpt)){
 			excerpt = excerpt.replace('"', '\'');
 			lines.add("excerpt: \"" + excerpt + "\"");
 		}
-		
 		
 		if(!cats.isEmpty()){
 			lines.add("categories: " + cats);
@@ -233,20 +246,37 @@ public class WordPressImporter implements Importer {
 			lines.add("tags: " + tags);
 		}
 		
-		lines.add(SourceParserImpl.TRIPLE_DASHED_LINE);
+		List<Element> meta = e.elements("postmeta");
+		for(Element n: meta){
+			String key = n.elementTextTrim("meta_key");
+			String value = n.elementTextTrim("meta_value");
+			if(key.startsWith("_")){
+				log.debug("It's a WordPress intenal meta, skip parse: " + key);
+				continue;
+			}
+			lines.add(key + ": \"" + value + "\"");
+		}
+		
+		
+		lines.add(SourceParser.TRIPLE_DASHED_LINE);
 		lines.addAll(contentLines);
 		
 		//filename
 		String filename = NAME_FORMAT.format(parse) + "-" + postname + ".html";
-		System.out.println(filename);
 
+		String importDir = (String) props.get("import_dir");
+		if(StringUtils.isBlank(importDir)){
+			importDir = "wordpress";
+		}
+		
 		File dir = site.getSource();
-		File file = new File(dir, "wordpress/" + filename);
+		File file = new File(dir, importDir + "/" + filename);
 
 		if(!file.getParentFile().exists()){
 			file.getParentFile().mkdir();
 		}
-		FileUtils.writeLines(file, lines);
+		log.info("Writing file " + file);
+		FileUtils.writeLines(file, "UTF-8", lines);
 	}
 	
 	private String getTagName(Site site, String tag){
@@ -323,26 +353,23 @@ public class WordPressImporter implements Importer {
 	}
 	
 	/**
-	 * Build post/page url.
+	 *  Build post/page url.
 	 * 
 	 * <p>Permalink details: http://codex.wordpress.org/Using_Permalinks.
-	 * <pre>
-	 * %year% 
-		%monthnum% 
-		%day% 
-		%hour% 
-		%minute% 
-		%second% 
-		%postname% 
-		%post_id% 
-		%category% 
-		%tag%
-		%author%</pre> 
-	 * @param params
+	 * <p> %year%, %monthnum%, %day%, %hour%, %minute%, %second%, %postname%, %post_id%, 
+	 * %category%,%tag%,%author%</p> 
 	 * @param date
-	 * @return
+	 * @param postname
+	 * @param post_id
+	 * @param author
+	 * @return page/post url, return null if no 'permalink_style' defined.
 	 */
 	private String buildURL(Date date, String postname, String post_id, String author){
+		String permalinStyle = (String) props.get("permalink_style");
+		if(StringUtils.isBlank(permalinStyle)){
+			return null;
+		}
+		
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);
 		int year = c.get(Calendar.YEAR);
@@ -352,18 +379,17 @@ public class WordPressImporter implements Importer {
 		int minute = c.get(Calendar.MINUTE);
 		int second = c.get(Calendar.SECOND);
 		
-		String permalink_style = (String) props.get("permalink_style");
-		permalink_style = StringUtils.replace(permalink_style, "%postname%", postname);
-		permalink_style = StringUtils.replace(permalink_style, "%post_id%", post_id);
-		permalink_style = StringUtils.replace(permalink_style, "%author%", author);
-		permalink_style = StringUtils.replace(permalink_style, "%year%", year + "");
-		permalink_style = StringUtils.replace(permalink_style, "%monthnum%", toTwoChar(monthnum));
-		permalink_style = StringUtils.replace(permalink_style, "%day%", toTwoChar(day));
-		permalink_style = StringUtils.replace(permalink_style, "%hour%", toTwoChar(hour));
-		permalink_style = StringUtils.replace(permalink_style, "%minute%", toTwoChar(minute));
-		permalink_style = StringUtils.replace(permalink_style, "%second%", toTwoChar(second));
+		permalinStyle = StringUtils.replace(permalinStyle, "%postname%", postname);
+		permalinStyle = StringUtils.replace(permalinStyle, "%post_id%", post_id);
+		permalinStyle = StringUtils.replace(permalinStyle, "%author%", author);
+		permalinStyle = StringUtils.replace(permalinStyle, "%year%", year + "");
+		permalinStyle = StringUtils.replace(permalinStyle, "%monthnum%", toTwoChar(monthnum));
+		permalinStyle = StringUtils.replace(permalinStyle, "%day%", toTwoChar(day));
+		permalinStyle = StringUtils.replace(permalinStyle, "%hour%", toTwoChar(hour));
+		permalinStyle = StringUtils.replace(permalinStyle, "%minute%", toTwoChar(minute));
+		permalinStyle = StringUtils.replace(permalinStyle, "%second%", toTwoChar(second));
 		
-		return permalink_style;
+		return permalinStyle;
 	}
 	
 	private String toTwoChar(int i){
