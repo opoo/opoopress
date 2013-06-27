@@ -23,7 +23,7 @@
 #     |
 #     +- (site2) the output directory for site2
 
-# 'site' set the root directory of your site/blog. 
+# 'site' set the root directory of your site or blog, default value is the parent directory of this file. 
 # The subdirectory of 'site' are:
 # 	source：        must be exists, store all YAML front-matter header files.
 #   templates：if not exists, the lookup 'site/source/_templates' subdirectory, 
@@ -31,7 +31,7 @@
 #					store all FreeMarker template files.
 #	assets:    an optional subdirectory. store all static file(JavaScripts, images, ..)
 #                   int this folder will make the generate process more faster. 
-site: site
+# site: site
 
 # The output directory, default value is './public/site'
 # destination: public/site

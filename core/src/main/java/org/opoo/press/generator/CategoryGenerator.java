@@ -15,6 +15,7 @@
  */
 package org.opoo.press.generator;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -259,6 +260,14 @@ public class CategoryGenerator implements Generator {
 		
 		public Object get(String string){
 			return null;
+		}
+		
+		@Override
+		public File getOutputFile(File dest) {
+			String url = getUrl() + "index.html";
+			url = Utils.decodeURL(url);
+			File target = new File(dest, url);
+			return target;
 		}
 	}
 }

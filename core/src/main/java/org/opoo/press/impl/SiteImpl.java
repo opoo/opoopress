@@ -17,6 +17,8 @@ package org.opoo.press.impl;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +34,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Application;
+import org.opoo.press.Context;
 import org.opoo.press.Converter;
 import org.opoo.press.Generator;
 import org.opoo.press.Page;
@@ -55,6 +58,7 @@ import org.opoo.press.template.TitleCaseModel;
 import org.opoo.press.util.ClassUtils;
 import org.opoo.press.util.MapUtils;
 import org.opoo.press.util.Utils;
+import org.yaml.snakeyaml.Yaml;
 
 import freemarker.template.TemplateModel;
 
@@ -97,9 +101,15 @@ public class SiteImpl implements Site, SiteBuilder{
 	private Locale locale;
 	private Highlighter highlighter;
 	
-	/**
-	 * @param config
-	 */
+	
+	public SiteImpl(File siteDir){
+		this(siteDir, null);
+	}
+	
+	public SiteImpl(File siteDir, Map<String,Object> extraConfig){
+		this(loadConfig(siteDir, extraConfig));
+	}
+
 	public SiteImpl(Map<String, Object> config) {
 		super();
 		this.config = config;
@@ -111,6 +121,43 @@ public class SiteImpl implements Site, SiteBuilder{
 
 		reset();
 		setup();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> loadConfig(File siteDir, Map<String,Object> extraConfig){
+		Context context = Application.getContext();
+		Yaml yaml = context.getYaml();
+		File configFile = new File(siteDir, "config.yml");
+		Map<String,Object> config = null;
+		try {
+			config = (Map<String, Object>) yaml.load(new FileInputStream(configFile));
+		} catch (FileNotFoundException e) {
+			throw new IllegalArgumentException("Site config file not found: " + e.getMessage());
+		}
+		
+		if(extraConfig != null && !extraConfig.isEmpty()){
+			log.debug("Merge extra config to main config map.");
+			config.putAll(extraConfig);
+		}
+		
+		config.put("site", siteDir);
+		
+		//show drafts
+		if("true".equals(config.get("show_drafts"))){
+			log.info("+ Show drafts option set 'ON'");
+		}
+		
+		//debug option
+		boolean debug = "true".equals(config.get("debug"));
+		
+		if(debug){
+			for(Map.Entry<String, Object> en: config.entrySet()){
+				String name = en.getKey();
+				name = StringUtils.leftPad(name, 25);
+				log.info(name + ": " + en.getValue());
+			}
+		}
+		return config;
 	}
 	
 	static String fixAndGetRoot(Map<String, Object> config){
@@ -135,10 +182,19 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 	
 	private void setupDirs(){
-		String siteDir = (String) config.get("site");
-		File site = new File(siteDir);
+		File site = null;
+		Object siteObject = config.get("site");
+		if(siteObject instanceof File){
+			site = (File) siteObject;
+		}else{
+			String siteDir = (String) siteObject;
+			site = new File(siteDir);
+		}
+		
+//		String siteDir = (String) config.get("site");
+//		File site = new File(siteDir);
 		if(!site.exists() || !site.isDirectory() || !site.canRead()){
-			throw new IllegalArgumentException("Site directory not exists or not a directory: " + siteDir);
+			throw new IllegalArgumentException("Site directory not exists or not a directory: " + site);
 		}
 		
 		source = new File(site, "source");

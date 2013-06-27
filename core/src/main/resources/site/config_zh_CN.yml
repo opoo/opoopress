@@ -24,13 +24,13 @@
 #
 
 
-# 指定站点目录。对于站点中的子目录，有以下要求（或规则）
+# 指定站点目录，默认是当前文件所在的目录。对于站点中的子目录，有以下要求（或规则）
 #   source：   必须存在
 #   templates：如果该目录不存在，则取目录 source/_templates。二者之一必须存在。
 #   assets:    如果该目录不存在，则表示所有的静态资源都在 source目录中，并没有单独
 #                分出来。分了站点生成效率，建议将静态资源分离出来放置在改目录中。
 # 进行版本管理（备份）时，管理 site 这一个目录即可。
-site: site
+# site: site
 
 # 站点生成的目标目录。如果在本机分布，可以是 "/var/www/html"。
 # 如果不指定，默认在 site 父级目录中创建 public/site 作为该属性的值。
@@ -77,7 +77,7 @@ category_dir: /category
 
 # 分类目录名称与标题对照关系。通常名称用于组成 URL，小写切不含空格，标题则用于显示。
 # 未在此处指定的分类 OpooPress 会自行处理。
-# category_names: {"opoopress": "OpooPress", "blog": "博客"}
+category_names: {"opoopress": "OpooPress", "blog": "博客"}
 
 # 标签所在的目录
 tag_dir: /tag

@@ -124,7 +124,7 @@ public class WordPressImporter implements Importer {
 	@SuppressWarnings("unchecked")
 	private void importFromtFile(Site site, File file) throws DocumentException, ParseException, IOException {
 		FileInputStream fileInputStream = new FileInputStream(file);
-		InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+		InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
 		Reader reader = new BufferedReader(inputStreamReader);
 		try{
 			SAXReader xmlReader = new SAXReader();

@@ -16,6 +16,7 @@
 package org.opoo.press.util;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import org.apache.commons.lang.StringUtils;
@@ -54,6 +55,14 @@ public abstract class Utils {
 	public static String encodeURL(String url){
 		try {
 			return URLEncoder.encode(url, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static String decodeURL(String url){
+		try {
+			return URLDecoder.decode(url, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
