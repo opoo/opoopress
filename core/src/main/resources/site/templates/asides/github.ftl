@@ -18,9 +18,9 @@
         }
 
         github.showRepos({
-            user: '{{site.github_user}}',
-            count: {{site.github_repo_count}},
-            skip_forks: {{site.github_skip_forks}},
+            user: '${site.github_user}',
+            count: ${site.github_repo_count},
+            skip_forks: ${site.github_skip_forks?string},
             target: '#gh_repos'
         });
     });

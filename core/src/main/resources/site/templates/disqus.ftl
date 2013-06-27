@@ -5,8 +5,8 @@
       <#if (page.comments)!true == true>
         <#--`page.comments` can be only be set to true on pages/posts, so we embed the comments here. -->
         // var disqus_developer = 1;
-        var disqus_identifier = '${ site.url }${ page.url }';
-        var disqus_url = '${ site.url }${ page.url }';
+        var disqus_identifier = '${ site.url }${root_url}${ page.url }';
+        var disqus_url = '${ site.url }${root_url}${ page.url }';
         var disqus_script = 'embed.js';
       <#else>
         <#-- As `page.comments` is empty, we must be on the index page. -->
