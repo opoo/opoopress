@@ -6,7 +6,7 @@
 <article role="article">
   <#if (page.title)??>
   <header>
-    <h1 class="entry-title"><#if (site.titlecase)!false == true>${titlecase(page.title)}<#else>${ page.title }</#if></h1>
+    <h1 class="entry-title">${titlecase(page.title)}</h1>
     <#if (page.date)??><p class="meta"><#include "post/date.ftl">${ time }</p></#if>
   </header>
   </#if>

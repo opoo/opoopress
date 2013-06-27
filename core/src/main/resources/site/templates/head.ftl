@@ -30,5 +30,6 @@
   <script>!window.jQuery && document.write(unescape('%3Cscript src="${root_url}/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
   <script src="${ root_url }/javascripts/octopress.js" type="text/javascript"></script>
   <#include "custom/head.ftl">
-  <#include "google_analytics.ftl">
+  <#-- move to footer -->
+  <#-- <#include "google_analytics.ftl"> -->
 </head>

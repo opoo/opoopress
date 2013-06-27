@@ -3,7 +3,7 @@
   <ul style="padding-left:40px;padding-top:-20px;">
     <#list page.related_posts as post>
       <li class="post">
-        <a href="${ root_url }${ post.url }"><#if (site.titlecase)!false = true>${titlecase(post.title)}<#else>${post.title}</#if></a>
+        <a href="${ root_url }${ post.url }">${titlecase(post.title)}</a>
       </li>
     </#list>
   </ul>

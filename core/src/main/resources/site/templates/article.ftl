@@ -1,9 +1,9 @@
 <#if (page.no_header)!false == false>
   <header>
 	<#if index??>
-      <h1 class="entry-title"><a href="${ root_url }${ post.url }"><#if (site.titlecase)!false = true>${titlecase(post.title)}<#else>${post.title}</#if></a></h1>
+      <h1 class="entry-title"><a href="${ root_url }${ post.url }">${titlecase(post.title)}</a></h1>
 	<#else>
-      <h1 class="entry-title"><#if (site.titlecase)!false = true>${titlecase(page.title)}<#else>${page.title}</#if></h1>
+      <h1 class="entry-title">${titlecase(page.title)}</h1>
 	</#if>
 
 	<#if (page.meta)!true == true>

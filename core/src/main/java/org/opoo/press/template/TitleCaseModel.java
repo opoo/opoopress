@@ -17,7 +17,11 @@ package org.opoo.press.template;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
+
+import org.opoo.press.Site;
+import org.opoo.press.util.MapUtils;
 
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;
@@ -54,6 +58,13 @@ public class TitleCaseModel implements TemplateMethodModel {
 		return sb.toString();
 	}
 	
+	
+	private boolean titlecase;
+	public TitleCaseModel(Site site){
+		Map<String, Object> config = site.getConfig();
+		titlecase = MapUtils.get(config, "titlecase", false);
+	}
+	
 	/* (non-Javadoc)
 	 * @see freemarker.template.TemplateMethodModel#exec(java.util.List)
 	 */
@@ -64,6 +75,6 @@ public class TitleCaseModel implements TemplateMethodModel {
 		}
 		String str = (String)arguments.get(0);
 //		return WordUtils.capitalizeFully(str);
-		return toTitleCase(str);
+		return titlecase ? toTitleCase(str) : str;
 	}
 }

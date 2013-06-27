@@ -10,7 +10,7 @@
   
     <#list recent_posts as post>
       <li class="post">
-        <a href="${ root_url }${ post.url }"><#if (site.titlecase)!false = true>${titlecase(post.title)}<#else>${post.title}</#if></a>
+        <a href="${ root_url }${ post.url }">${titlecase(post.title)}</a>
       </li>
     </#list>
   </ul>
