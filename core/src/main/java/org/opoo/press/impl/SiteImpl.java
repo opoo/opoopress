@@ -520,7 +520,7 @@ public class SiteImpl implements Site, SiteBuilder{
 			map.putAll(models);
 		}
 		
-		TitleCaseModel model = new TitleCaseModel();
+		TitleCaseModel model = new TitleCaseModel(this);
 		map.put("titleCase", model);
 		map.put("titlecase", model);
 		
