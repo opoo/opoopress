@@ -31,6 +31,12 @@
 	<url>http://press.opoo.org/</url>
 	<inceptionYear>2013</inceptionYear>
 	
+	<scm>
+	    <connection>scm:git:git@github.com/opoo/opoopress.git</connection>
+	    <developerConnection>scm:git:ssh://git@github.com/opoo/opoopress.git</developerConnection>
+		<url>https://github.com/opoo/opoopress/core</url>
+	</scm>
+	
     <dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -86,6 +92,20 @@
 			<artifactId>dom4j</artifactId>
 			<version>1.6.1</version>
 			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<version>6.1.25</version>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.belerweb</groupId>
+		    <artifactId>pinyin4j</artifactId>
+		    <version>2.5.0</version>
+		    <optional>true</optional>
 		</dependency>
 	</dependencies>
 
@@ -164,7 +184,6 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.8.1</version>
                 <configuration>
-                    <aggregate>true</aggregate>
                     <header>OpooPress Blogging Framework</header>
                     <quiet>true</quiet>
                     <excludePackageNames>sample,zzz</excludePackageNames>                                        
