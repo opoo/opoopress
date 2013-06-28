@@ -5,3 +5,6 @@
 *.iml
 *.db
 target/
+.DS_Store
+src/test/java/*
+src/test/resources/*
