@@ -52,6 +52,8 @@ import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
 import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceParser;
+import org.opoo.press.template.BuildCategoryUrlModel;
+import org.opoo.press.template.BuildTagUrlModel;
 import org.opoo.press.template.CategoryLinksModel;
 import org.opoo.press.template.TagLinksModel;
 import org.opoo.press.template.TitleCaseModel;
@@ -523,6 +525,9 @@ public class SiteImpl implements Site, SiteBuilder{
 		TitleCaseModel model = new TitleCaseModel(this);
 		map.put("titleCase", model);
 		map.put("titlecase", model);
+		
+		map.put("buildCategoryUrl", new BuildCategoryUrlModel(this));
+		map.put("buildTagUrl", new BuildTagUrlModel(this));
 		
 		return map;
 	}
