@@ -27,7 +27,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;
 
 /**
- * ${titlecase(post.title)}
+ * Usage: ${titlecase(post.title)}
  * 
  * @author Alex Lin
  *

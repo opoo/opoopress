@@ -56,7 +56,7 @@ public class TagLinksModel implements TemplateMethodModelEx{
 			String lo = Utils.toSlug(tag);
 			String tagName = site.getTagNames().get(lo);
 			String rootUrl = (String) site.getConfig().get("root");
-			sb.append("<a class=\"category\" href=\"").append(rootUrl)
+			sb.append("<a class=\"tag\" href=\"").append(rootUrl)
 				.append(Utils.buildTagUrl(site, lo))
 				.append("\">").append(tagName).append("</a>");
 		}
