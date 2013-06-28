@@ -2,6 +2,7 @@
   <script type="text/javascript">
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', '${site.google_analytics_tracking_id }']);
+    <#if site.google_analytics_tracking_domain??>_gaq.push(['_setDomainName', '${site.google_analytics_tracking_domain }']);</#if>
     _gaq.push(['_trackPageview']);
 
     (function() {

@@ -8,6 +8,7 @@
 "Posted by" : "作者",
 "Related Posts" : "相关文章",
 "Recent Posts" : "近期文章",
+"Recent Comments" : "近期评论",
 "Search" : "搜索",
 "Tags" : "标签",
 "Categories" : "分类",

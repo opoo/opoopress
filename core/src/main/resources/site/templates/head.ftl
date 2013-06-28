@@ -25,7 +25,9 @@
   <link href="${ root_url }/favicon.ico" rel="icon">
   <link href="${ root_url }/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="${ site.subscribe_rss }" rel="alternate" title="${site.title}" type="application/atom+xml">
-  <script src="${ root_url }/javascripts/modernizr-2.0.js"></script>
+  <!--[if (gt IE 8)|(gt IEMobile 7)|!(IE)]><!--><script src="${ root_url }/javascripts/modernizr-2.6.2.js"></script><!--<![endif]-->
+  <!--[if lt IE 9]><script src="${ root_url }/javascripts/modernizr-2.6.2.shiv.js"></script>
+  <script src="${ root_url }/javascripts/respond.min.js"></script><![endif]-->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="${root_url}/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
   <script src="${ root_url }/javascripts/octopress.js" type="text/javascript"></script>

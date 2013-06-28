@@ -9,7 +9,7 @@
 	<#if (page.meta)!true == true>
       <p class="meta">
 		<#include "post/date.ftl">${time}
-		<#if site.disqus_short_name?? && (page.comments)!true != false && (post.comments)!true != false && (site.disqus_show_comment_count)!false == true>
+		<#if site.disqus_short_name?? && (page.comments)!true == true && (post.comments)!true == true && (site.disqus_show_comment_count)!false == true>
          | <a href="<#if index??>${root_url}${post.url}</#if>#disqus_thread">Comments</a>
         </#if>
         <#-- permalink -->
