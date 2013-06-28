@@ -1,3 +1,7 @@
+/**
+ * Octopress.org
+ * MIT License
+ */
 function getNav() {
   var mainNav = $('ul.main-navigation, ul[role=main-navigation]').before('<fieldset class="mobile-nav">')
   var mobileNav = $('fieldset.mobile-nav').append('<select>');
@@ -117,6 +121,7 @@ $('document').ready(function() {
   getNav();
   addSidebarToggler();
 });
+
 
 // iOS scaling bug fix
 // Rewritten version
