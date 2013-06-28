@@ -269,5 +269,9 @@ public class CategoryGenerator implements Generator {
 			File target = new File(dest, url);
 			return target;
 		}
+		
+		public boolean isComments(){
+			return false;
+		}
 	}
 }
