@@ -82,7 +82,7 @@ category_names: {"opoopress": "OpooPress", "blog": "Blog"}
 # tag directory
 tag_dir: /tag
 
-# 标签名称与标题对照关系。通常名称用于组成 URL，小写切不含空格，标题则用于显示。
+# Define the mapping of tag name (using as slug) and display name.
 # tag_names: {}
 
 # Posts per page on the blog index
