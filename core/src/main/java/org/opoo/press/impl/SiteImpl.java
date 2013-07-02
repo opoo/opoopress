@@ -405,12 +405,32 @@ public class SiteImpl implements Site, SiteBuilder{
 		return !b.booleanValue();
 	}
 	
+	private static void addPostToMapList(Post post, String name, Map<String,String> names, Map<String,List<Post>> listMap){
+		String slug = null;
+		if(names.containsValue(name)){
+			slug = MapUtils.getKeyByValue(names, name);
+		}else{
+			slug = Utils.toSlug(name);
+			if(!names.containsKey(slug)){
+				names.put(slug, name);
+			}
+		}
+		
+		List<Post> posts = listMap.get(slug);
+		if(posts == null){
+			posts = new ArrayList<Post>();
+			listMap.put(slug, posts);
+		}
+		posts.add(post);
+	}
+	
 	private void addPost(PostImpl post){
 		posts.add(post);
 		
 		List<String> cats = post.getCategories();
 		if(cats != null){
 			for(String cat: cats){
+				/*
 				String key = Utils.toSlug(cat);
 				if(!categoryNames.containsKey(key)){
 					categoryNames.put(key, cat);
@@ -421,12 +441,16 @@ public class SiteImpl implements Site, SiteBuilder{
 					categories.put(key, list2);
 				}
 				list2.add(post);
+				*/
+				
+				addPostToMapList(post, cat, categoryNames, categories);
 			}
 		}
 		
 		List<String> tagsList = post.getTags();
 		if(tagsList != null){
 			for(String tag: tagsList){
+				/*
 				String key = Utils.toSlug(tag);
 				if(!tagNames.containsKey(key)){
 					tagNames.put(key, tag);
@@ -437,6 +461,9 @@ public class SiteImpl implements Site, SiteBuilder{
 					tags.put(key, list2);
 				}
 				list2.add(post);
+				*/
+				
+				addPostToMapList(post, tag, tagNames, tags);
 			}
 		}
 	}
@@ -626,8 +653,8 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(assets != null){
 			try {
 				log.debug("Copying assets...");
-				FileUtils.copyDirectory(assets, dest);
-
+				FileUtils.copyDirectory(assets, dest, buildFilter());
+				
 				log.debug("All asset files copied.");
 			} catch (IOException e) {
 				log.error("Copy assets error", e);
