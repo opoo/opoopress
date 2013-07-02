@@ -16,8 +16,10 @@
 package org.opoo.press.template;
 
 import java.util.List;
+import java.util.Map;
 
 import org.opoo.press.Site;
+import org.opoo.press.util.MapUtils;
 import org.opoo.press.util.Utils;
 
 import freemarker.template.SimpleSequence;
@@ -53,12 +55,22 @@ public class TagLinksModel implements TemplateMethodModelEx{
 				sb.append(", ");
 			}
 
-			String lo = Utils.toSlug(tag);
-			String tagName = site.getTagNames().get(lo);
+			Map<String, String> names = site.getTagNames();
+			String slug = null;
+			if(names.containsValue(tag)){
+				slug = MapUtils.getKeyByValue(names, tag);
+			}else{
+				slug = Utils.toSlug(tag);
+			}
+			String name = names.get(slug);
+			
+			
+//			String lo = Utils.toSlug(tag);
+//			String tagName = site.getTagNames().get(lo);
 			String rootUrl = (String) site.getConfig().get("root");
 			sb.append("<a class=\"tag\" href=\"").append(rootUrl)
-				.append(Utils.buildTagUrl(site, lo))
-				.append("\">").append(tagName).append("</a>");
+				.append(Utils.buildTagUrl(site, slug))
+				.append("\">").append(name).append("</a>");
 		}
 		return sb.toString();
 	}

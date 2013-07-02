@@ -16,8 +16,10 @@
 package org.opoo.press.template;
 
 import java.util.List;
+import java.util.Map;
 
 import org.opoo.press.Site;
+import org.opoo.press.util.MapUtils;
 import org.opoo.press.util.Utils;
 
 import freemarker.template.SimpleSequence;
@@ -52,13 +54,22 @@ public class CategoryLinksModel implements TemplateMethodModelEx{
 			if(sb.length() > 0){
 				sb.append(", ");
 			}
-
-			String lo = Utils.toSlug(cat);
-			String capCat = site.getCategoryNames().get(lo);
+			
+			Map<String, String> names = site.getCategoryNames();
+			String slug = null;
+			if(names.containsValue(cat)){
+				slug = MapUtils.getKeyByValue(names, cat);
+			}else{
+				slug = Utils.toSlug(cat);
+			}
+			String name = names.get(slug);
+			
+//			String lo = Utils.toSlug(cat);
+//			String capCat = site.getCategoryNames().get(lo);
 			String rootUrl = (String) site.getConfig().get("root");
 			sb.append("<a class=\"category\" href=\"").append(rootUrl)
-				.append(Utils.buildCategoryUrl(site, lo))
-				.append("\">").append(capCat).append("</a>");
+				.append(Utils.buildCategoryUrl(site, slug))
+				.append("\">").append(name).append("</a>");
 		}
 		return sb.toString();
 	}
