@@ -40,16 +40,16 @@ public abstract class Utils {
 		return canonical;
 	}
 	
-	public static String buildCategoryUrl(Site site, String categoryName){
+	public static String buildCategoryUrl(Site site, String slug){
 		//String rootUrl = (String) site.getConfig().get("root");
 		String categoryDir = (String) site.getConfig().get("category_dir");
-		return /*rootUrl + */ categoryDir + "/" + encodeURL(categoryName) + "/";
+		return /*rootUrl + */ categoryDir + "/" + encodeURL(slug) + "/";
 	}
 	
-	public static String buildTagUrl(Site site, String tagName){
+	public static String buildTagUrl(Site site, String slug){
 		//String rootUrl = (String) site.getConfig().get("root");
 		String tagDir = (String) site.getConfig().get("tag_dir");
-		return /*rootUrl + */ tagDir + "/" + encodeURL(tagName) + "/";
+		return /*rootUrl + */ tagDir + "/" + encodeURL(slug) + "/";
 	}
 	
 	public static String encodeURL(String url){

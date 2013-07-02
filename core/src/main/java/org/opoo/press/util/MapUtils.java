@@ -50,4 +50,17 @@ public abstract class MapUtils {
 		}
 		return "true".equalsIgnoreCase(object.toString());
 	}
+	
+	
+	public static <K,V> K getKeyByValue(Map<K,V> map, V value){
+		if(map == null || map.isEmpty()){
+			return null;
+		}
+		for(Map.Entry<K, V> en: map.entrySet()){
+			if(value.equals(en.getValue())){
+				return en.getKey();
+			}
+		}
+		return null;
+	}
 }
