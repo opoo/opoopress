@@ -47,6 +47,7 @@ import org.dom4j.QName;
 import org.dom4j.io.SAXReader;
 import org.opoo.press.Site;
 import org.opoo.press.source.SourceParser;
+import org.opoo.press.util.MapUtils;
 
 /**
  * Import posts and pages from WordPress exported XML file.
@@ -288,14 +289,16 @@ public class WordPressImporter implements Importer {
 		boolean b = names.containsValue(tag);
 		if(!b){
 			return tag;
+		}else{
+			return MapUtils.getKeyByValue(names, tag);
 		}
 		
-		for(Map.Entry<String, String> en: names.entrySet()){
-			if(tag.equals(en.getValue())){
-				return en.getKey();
-			}
-		}
-		return tag;
+//		for(Map.Entry<String, String> en: names.entrySet()){
+//			if(tag.equals(en.getValue())){
+//				return en.getKey();
+//			}
+//		}
+//		return tag;
 	}
 	
 	private String getCategoryName(Site site, String category){
@@ -307,14 +310,16 @@ public class WordPressImporter implements Importer {
 		boolean b = names.containsValue(category);
 		if(!b){
 			return category;
+		}else{
+			return MapUtils.getKeyByValue(names, category);
 		}
 		
-		for(Map.Entry<String, String> en: names.entrySet()){
-			if(category.equals(en.getValue())){
-				return en.getKey();
-			}
-		}
-		return category;
+//		for(Map.Entry<String, String> en: names.entrySet()){
+//			if(category.equals(en.getValue())){
+//				return en.getKey();
+//			}
+//		}
+//		return category;
 	}
 	
 	private List<String> processContent(String content, StringBuilder excerptBuilder) {
