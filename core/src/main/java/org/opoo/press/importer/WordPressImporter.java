@@ -297,12 +297,13 @@ public class WordPressImporter implements Importer {
 		List<String> contentLines = new ArrayList<String>();
 		boolean lastLineIsBlank = true;
 		LineIterator it = IOUtils.lineIterator(new StringReader(content));
+		int preCount = 0;
 		while(it.hasNext()){
 			String line = it.next();
 			boolean isBlank = StringUtils.isBlank(line);
 			if(!isBlank){
 				String lower = line.toLowerCase().trim();
-				if(lastLineIsBlank && !lower.startsWith("<h") && !lower.startsWith("<!--more-->")){
+				if(preCount == 0 && lastLineIsBlank && !lower.startsWith("<h") && !lower.startsWith("<!--more-->")){
 					line = "<p>" + line;
 				}
 				contentLines.add(line);
@@ -317,6 +318,12 @@ public class WordPressImporter implements Importer {
 							excerptBuilder.append(line);
 						}
 					}
+				}
+				if(lower.contains("<pre>") || lower.contains("<pre ")){
+					preCount++;
+				}
+				if(lower.contains("</pre>")){
+					preCount--;
 				}
 				lastLineIsBlank = false;
 			}else{
