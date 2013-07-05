@@ -27,7 +27,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>OpooPress Blogging Framework: Core</name>
-	<description>OpooPress Blogging Framework is a Java basesd blog aware static site generator.</description>
+	<description>OpooPress Blogging Framework is a Java based blog aware static site generator.</description>
 	<url>http://press.opoo.org/</url>
 	<inceptionYear>2013</inceptionYear>
 	
