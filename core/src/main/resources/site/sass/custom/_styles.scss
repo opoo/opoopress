@@ -1,0 +1,75 @@
+// This File is imported last, and will override other styles in the cascade
+// Add styles here to make changes without digging in too much
+
+.syntaxhighlighter {
+  border: 1px solid $pre-border;
+  @include border-radius(.4em);
+  //background: $pre-bg $noise-bg;
+  @include box-shadow(rgba(#000, .06) 0 0 10px);
+}
+
+body {
+  //for not supported ie 
+  //background:#fff;
+  //box-shadow: 0 2px 6px rgba(100, 100, 100, 0.4);
+  @include box-shadow(rgba(100, 100, 100, 0.6) 0 2px 6px, rgba(100, 100, 100, 0.6) 0 1px 3px inset);
+  //@include border-top-radius(.4em);
+}
+
+
+div.pagination span.current-page{
+    background: #bbb;
+    display: inline-block;
+    padding: .4em .8em;
+    margin-right: .5em;
+    text-decoration: none;
+    color: #fff;
+    @extend .serif;
+}
+div.pagination span.nolink-page{
+    background: #eeeeee;
+    display: inline-block;
+    padding: .4em .8em;
+    margin-right: .5em;
+    text-decoration: none;
+    color: #666;
+    @extend .serif;
+}
+div.pagination span.pagebar{float:left;}
+
+//#blog-archives .entry-title{font-size:1.1em;}
+//#blog-archives article footer{font-size:0.85em;}
+
+.unsupported-browser {
+	padding:15px 0;
+	color:#211e14;
+	background-color:#fae692;
+	background-image:-moz-linear-gradient(#feefae,#fae692);
+	background-image:-webkit-linear-gradient(#feefae,#fae692);
+	background-image:linear-gradient(#feefae,#fae692);
+	background-repeat:repeat-x;
+	border-bottom:1px solid #b3a569
+}
+.unsupported-browser .container {
+	background:image-url("ie-notice.png") no-repeat
+}
+.unsupported-browser h5 {
+	font-size:13px;
+	padding-left:48px
+}
+.unsupported-browser p {
+	margin:0;
+	padding-left:48px
+}
+.unsupported-browser .button {
+	float:right;
+	padding:5px 9px;
+	margin-top:15px;
+	color:#fff;
+	background-color:#b3a569;
+	background-image:none
+}
+.unsupported-browser .button:hover {
+	text-decoration:none;
+	background-color:#9b8c4e
+}
