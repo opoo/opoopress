@@ -1,4 +1,9 @@
-OpooPress
+About OpooPress
 =========
 
-OpooPress blogging framework is a java basesd blog aware static site generator.
+OpooPress blogging framework is a java based blog-aware static site generator.
+
+## Documentation
+
+## Quick Start
+
