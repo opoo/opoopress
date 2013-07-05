@@ -6,5 +6,5 @@
 *.db
 target/
 .DS_Store
-src/test/java/*
-src/test/resources/*
+core/src/test/
+exec/src/test/
