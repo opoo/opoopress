@@ -16,7 +16,7 @@
       <#if (page.date)?? || (page.author)?? ><p class="meta">
         <#if (page.author)?? ><#include "post/author.ftl"></#if>
         <#include "post/date.ftl"><#if was_updated??>${updated}<#else>${time}</#if>
-        <#if (page.categories)?? ><# include "post/categories.ftl"> </#if>
+        <#if (page.categories)?? ><#include "post/categories.ftl"> </#if>
       </p></#if>
       <#if (page.sharing)!true == true>
         <#include "post/sharing.ftl">
