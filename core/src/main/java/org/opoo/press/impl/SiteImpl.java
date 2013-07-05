@@ -110,7 +110,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		this.config = config;
 		
 		this.root = (String)config.get("root");
-		System.out.println("root........." + root);
+		
 		this.showDrafts = MapUtils.get(config, "show_drafts", false);
 		this.data = new HashMap<String,Object>(config);
 
@@ -173,8 +173,7 @@ public class SiteImpl implements Site, SiteBuilder{
 			this.working = new File(workingDir);
 		}else{
 			String tmpdir = System.getProperty("java.io.tmpdir");
-			System.out.println(tmpdir);
-			working = new File(tmpdir, "opoopresscache/" + site.getName());
+			working = new File(tmpdir, "opoopress_cache/" + site.getName());
 		}
 //		if(!working.exists()){
 //			working.mkdirs();
