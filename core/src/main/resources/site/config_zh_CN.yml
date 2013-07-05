@@ -52,7 +52,8 @@ title: 我的 OpooPress 博客
 subtitle: 又一个 OpooPress.com 站点
 author: 您的姓名
 simple_search: http://google.com/search
-description: OpooPress 博客系统是一个基于 Java 的静态博客（网站）生成器。
+description: "OpooPress 博客系统是一个基于 Java 的静态博客（网站）生成器。"
+keywords: "OpooPress, 博客"
 
 # 默认的日期格式是 "ordinal"(相当于 java 日期格式的 "MMM d yyyy"，输出 "四月 15 2013")
 # 可以直接指定一个 java 日期格式字符串，例如 "yyyy年MM月dd日"

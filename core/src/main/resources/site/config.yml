@@ -53,6 +53,7 @@ subtitle: Just another OpooPress.com site.
 author: Your Name
 simple_search: http://google.com/search
 description: OpooPress blogging framework is a java basesd static blog/site generator.
+keywords: "OpooPress, Blog"
 
 # Default date format is "ordinal" (resulting in 'Jun 20 2013', java date format pattern
 # is 'MMM d yyyy'). You can specified a custom java date format string here such as 'yyyy-MM-dd'
