@@ -79,11 +79,17 @@ category_dir: /category
 # 未在此处指定的分类 OpooPress 会自行处理。
 category_names: {"opoopress": "OpooPress", "blog": "博客"}
 
+# Category title prefix.
+category_title_prefix: "分类: "
+
 # 标签所在的目录
 tag_dir: /tag
 
 # 标签名称与标题对照关系。通常名称用于组成 URL，小写切不含空格，标题则用于显示。
 tag_names: {"opensource":"开源项目"}
+
+# 标签标题前缀
+tag_title_prefix: "标签："
 
 # 首页每页显示的文章数
 paginate: 10          		
@@ -105,7 +111,7 @@ titlecase: true
 
 # 侧边栏默认包含的模板数组。
 # 被设置的模板片段应该位于  [模板路径]/asides 目录，例如 site/templates/asides 或者 site/source/_templates/asides.
-default_asides: [recent_posts.ftl, github.ftl, delicious.ftl, pinboard.ftl, googleplus.ftl]
+default_asides: [recent_posts.ftl, github.ftl, delicious.ftl, pinboard.ftl, googleplus.ftl, categories.ftl]
 
 # 首页侧边栏包含的模板，未设置使用 default_asides
 # blog_index_asides:
@@ -178,6 +184,8 @@ generators:
 # siteFilters:
 #  - org.opoo.press.filter.SampleSiteFilter
 
+# SlugHelper
+slugHelper: org.opoo.press.slug.ChineseToPinyinSlugHelper
 
 # ----------------------- #
 #   Code Block Settings   #
