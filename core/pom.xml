@@ -87,6 +87,7 @@
 		    <version>2.6</version>
 		</dependency>
 		
+		<!-- for wordpress importer -->
 		<dependency>
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>
@@ -94,6 +95,7 @@
 			<optional>true</optional>
 		</dependency>
 		
+		<!-- for preview -->
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
@@ -101,11 +103,12 @@
 			<optional>true</optional>
 		</dependency>
 		
+		<!-- for chinese title/name -->
 		<dependency>
 		    <groupId>com.belerweb</groupId>
 		    <artifactId>pinyin4j</artifactId>
 		    <version>2.5.0</version>
-		    <optional>true</optional>
+		    <!-- <optional>true</optional> -->
 		</dependency>
 	</dependencies>
 
