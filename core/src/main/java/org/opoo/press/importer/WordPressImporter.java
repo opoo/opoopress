@@ -48,7 +48,7 @@ import org.dom4j.io.SAXReader;
 import org.opoo.press.Category;
 import org.opoo.press.Site;
 import org.opoo.press.Tag;
-import org.opoo.press.source.SourceParser;
+import org.opoo.press.source.Source;
 
 /**
  * Import posts and pages from WordPress exported XML file.
@@ -229,7 +229,7 @@ public class WordPressImporter implements Importer {
 		}
 		
 		List<String> lines = new ArrayList<String>();
-		lines.add(SourceParser.TRIPLE_DASHED_LINE);
+		lines.add(Source.TRIPLE_DASHED_LINE);
 		lines.add("layout: " + postType);
 		lines.add("title: '" + title + "'");
 //		lines.add("name", name);
@@ -271,7 +271,7 @@ public class WordPressImporter implements Importer {
 		}
 		
 		
-		lines.add(SourceParser.TRIPLE_DASHED_LINE);
+		lines.add(Source.TRIPLE_DASHED_LINE);
 		lines.addAll(contentLines);
 		
 		//filename

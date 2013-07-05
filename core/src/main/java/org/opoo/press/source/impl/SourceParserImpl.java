@@ -116,6 +116,6 @@ public class SourceParserImpl implements SourceParser {
 	}
 	
 	private static boolean isFrontMatterStartOrEndLine(String line){
-		return TRIPLE_DASHED_LINE.equals(line);
+		return Source.TRIPLE_DASHED_LINE.equals(line);
 	}
 }

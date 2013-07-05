@@ -13,33 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.source;
+package org.opoo.press.tool;
 
-import java.util.Map;
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opoo.press.Site;
 
 /**
- * Source of site/blog.
- * 
  * @author Alex Lin
  *
  */
-public interface Source {
-	public static final String TRIPLE_DASHED_LINE = "---";
-	
-	/**
-	 * 
-	 * @return source entry
-	 */
-	SourceEntry getSourceEntry();
-	
-	/**
-	 * YAML front-matter header.
-	 * @return map object
-	 */
-	Map<String,Object> getMeta();
-	
-	/**
-	 * @return content
-	 */
-	String getContent();
+public class Cleaner {
+	private static final Log log = LogFactory.getLog(Cleaner.class);
+
+	public void clean(Site site) throws Exception{
+		File destination = site.getDestination();
+		File working  = site.getWorking();
+		
+		log.info("Cleaning destination directory " + destination);
+		FileUtils.deleteDirectory(destination);
+		
+		log.info("Cleaning working directory " + working);
+		FileUtils.deleteDirectory(working);
+	}
 }

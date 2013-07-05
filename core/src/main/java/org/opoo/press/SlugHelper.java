@@ -15,24 +15,11 @@
  */
 package org.opoo.press;
 
-import org.opoo.press.source.SourceEntryLoader;
-import org.opoo.press.source.SourceParser;
-import org.yaml.snakeyaml.Yaml;
-
 /**
- * The global application context.
- * 
  * @author Alex Lin
+ *
  */
-public interface Context {
+public interface SlugHelper {
 	
-	Yaml getYaml();
-	
-	SourceEntryLoader getSourceEntryLoader();
-	
-	SourceParser getSourceParser();
-	
-	SiteManager getSiteManager();
-	
-	<T> T get(String name, Class<T> clazz);
+	String toSlug(String text);
 }

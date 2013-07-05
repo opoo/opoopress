@@ -20,8 +20,6 @@ package org.opoo.press.source;
  *
  */
 public interface SourceParser {
-	public static final String TRIPLE_DASHED_LINE = "---";
-	
 	/**
 	 * Parse SourceEntry to Source.
 	 * @param sourceEntry

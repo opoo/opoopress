@@ -15,9 +15,14 @@
  */
 package org.opoo.press.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opoo.press.Application;
 import org.opoo.press.Context;
 import org.opoo.press.SiteManager;
+import org.opoo.press.slug.ChineseToPinyinSlugHelper;
+import org.opoo.press.slug.DefaultSlugHelper;
 import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceParser;
 import org.opoo.press.source.impl.SourceEntryLoaderImpl;
@@ -33,6 +38,7 @@ public class ContextImpl implements Context{
 	private SiteManagerImpl siteManager;
 	private SourceEntryLoaderImpl sourceEntryLoader;
 	private SourceParserImpl sourceParser;
+	private Map<String, Object> beans = new HashMap<String,Object>();
 	
 	public void initialize() {
 		if(!Application.isInitialized()){
@@ -44,6 +50,10 @@ public class ContextImpl implements Context{
 			sourceParser.setYaml(yaml);
 			
 			siteManager = new SiteManagerImpl();
+
+			set(DefaultSlugHelper.class.getName(), new DefaultSlugHelper());
+			set(ChineseToPinyinSlugHelper.class.getName(), new ChineseToPinyinSlugHelper());
+
 			Application.setContext(this);
 		}
 	}
@@ -75,5 +85,18 @@ public class ContextImpl implements Context{
 	@Override
 	public Yaml getYaml() {
 		return yaml;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Context#get(java.lang.String, java.lang.Class)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T get(String name, Class<T> clazz) {
+		return (T) beans.get(name);
+	}
+	
+	public void set(String name, Object bean){
+		beans.put(name, bean);
 	}
 }

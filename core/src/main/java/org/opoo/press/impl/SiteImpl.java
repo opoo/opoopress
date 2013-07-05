@@ -17,8 +17,6 @@ package org.opoo.press.impl;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -38,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Application;
 import org.opoo.press.Category;
-import org.opoo.press.Context;
 import org.opoo.press.Converter;
 import org.opoo.press.Generator;
 import org.opoo.press.Page;
@@ -47,11 +44,13 @@ import org.opoo.press.Post;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.SiteBuilder;
+import org.opoo.press.SlugHelper;
 import org.opoo.press.StaticFile;
 import org.opoo.press.Tag;
 import org.opoo.press.converter.IdentityConverter;
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.plugin.DefaultPlugin;
+import org.opoo.press.slug.DefaultSlugHelper;
 import org.opoo.press.source.NoFrontMatterException;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
@@ -60,7 +59,6 @@ import org.opoo.press.source.SourceParser;
 import org.opoo.press.template.TitleCaseModel;
 import org.opoo.press.util.ClassUtils;
 import org.opoo.press.util.MapUtils;
-import org.yaml.snakeyaml.Yaml;
 
 import freemarker.template.TemplateModel;
 
@@ -105,85 +103,19 @@ public class SiteImpl implements Site, SiteBuilder{
 	private RegistryImpl registry;
 	private Locale locale;
 	private Highlighter highlighter;
+	private SlugHelper slugHelper;
 	
-	
-	public SiteImpl(File siteDir){
-		this(siteDir, null);
-	}
-	
-	public SiteImpl(File siteDir, Map<String,Object> extraConfig){
-		this(loadConfig(siteDir, extraConfig));
-	}
-
-	public SiteImpl(Map<String, Object> config) {
+	SiteImpl(Map<String, Object> config) {
 		super();
 		this.config = config;
-		//fix root
-		root = fixAndGetRoot(config);
-
+		
+		this.root = (String)config.get("root");
+		System.out.println("root........." + root);
 		this.showDrafts = MapUtils.get(config, "show_drafts", false);
 		this.data = new HashMap<String,Object>(config);
 
 		reset();
 		setup();
-	}
-	
-	@SuppressWarnings("unchecked")
-	private static Map<String, Object> loadConfig(File siteDir, Map<String,Object> extraConfig){
-		Context context = Application.getContext();
-		Yaml yaml = context.getYaml();
-		File configFile = new File(siteDir, "config.yml");
-		Map<String,Object> config = null;
-		try {
-			config = (Map<String, Object>) yaml.load(new FileInputStream(configFile));
-		} catch (FileNotFoundException e) {
-			throw new IllegalArgumentException("Site config file not found: " + e.getMessage());
-		}
-		
-		if(extraConfig != null && !extraConfig.isEmpty()){
-			log.debug("Merge extra config to main config map.");
-			config.putAll(extraConfig);
-		}
-		
-		config.put("site", siteDir);
-		
-		//show drafts
-		if("true".equals(config.get("show_drafts"))){
-			log.info("+ Show drafts option set 'ON'");
-		}
-		
-		//debug option
-		boolean debug = "true".equals(config.get("debug"));
-		
-		if(debug){
-			for(Map.Entry<String, Object> en: config.entrySet()){
-				String name = en.getKey();
-				name = StringUtils.leftPad(name, 25);
-				log.info(name + ": " + en.getValue());
-			}
-		}
-		return config;
-	}
-	
-	static String fixAndGetRoot(Map<String, Object> config){
-		String rootUrl = (String)config.get("root");
-		if(rootUrl == null){
-			config.put("root", "");
-			return "";
-		}
-		rootUrl = rootUrl.trim();
-		if(rootUrl.equals("/") || "".equals(rootUrl)){
-			config.put("root", "");
-			return "";
-		}
-		if(rootUrl.endsWith("/")){
-			rootUrl = StringUtils.removeEnd(rootUrl, "/");
-		}
-		if(!rootUrl.startsWith("/")){
-			rootUrl = "/" + rootUrl;
-		}
-		config.put("root", rootUrl);
-		return rootUrl;
 	}
 	
 	private void setupDirs(){
@@ -336,6 +268,21 @@ public class SiteImpl implements Site, SiteBuilder{
 			log.debug("Set highlighter: " + highlighterClassName);
 		}
 		
+		//slug
+		String slugHelperClassName = (String) config.get("slugHelper");
+		if(slugHelperClassName == null){
+			slugHelper = new DefaultSlugHelper();
+			log.debug("Set SlugHelper: " + DefaultSlugHelper.class.getName());
+		}else{
+			slugHelper = Application.getContext().get(slugHelperClassName, SlugHelper.class);
+			if(slugHelper != null){
+				log.debug("Set SlugHelper from Context object: " + slugHelper);
+			}else{
+				slugHelper = (SlugHelper) ClassUtils.newInstance(slugHelperClassName, this);
+				log.debug("Set SlugHelper: " + slugHelperClassName);
+			}
+		}
+		
 		this.registry = new RegistryImpl(this);
 		//register default converter
 		this.registry.registerConverter(new IdentityConverter());
@@ -359,7 +306,6 @@ public class SiteImpl implements Site, SiteBuilder{
 
 	void read(){
 		log.info("Reading sources ...");
-		
 		SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
 		SourceParser parser = Application.getContext().getSourceParser();
 		List<SourceEntry> list = loader.loadSourceEntries(source, buildFilter());
@@ -797,7 +743,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 */
 	@Override
 	public String toSlug(String tagName) {
-		return toNicename(tagName);
+		return slugHelper.toSlug(tagName);
 	}
 
 	/* (non-Javadoc)
@@ -805,13 +751,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 */
 	@Override
 	public String toNicename(String categoryName) {
-		//TODO: translate, pinyin or others
-		//String nicenameConverter = config.get("category_nicename_converter");
-		//CategoryNicenameConverter converter = newInstance(nicenameConverter);
-		//return converter.convert(categoryName);
-		
-		categoryName = categoryName.toLowerCase();
-		return StringUtils.replace(categoryName, " ", "-");
+		return slugHelper.toSlug(categoryName);
 	}
 
 	/* (non-Javadoc)

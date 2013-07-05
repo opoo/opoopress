@@ -15,6 +15,7 @@
  */
 package org.opoo.press;
 
+import java.io.File;
 import java.util.Map;
 
 
@@ -23,22 +24,10 @@ import java.util.Map;
  *
  */
 public interface SiteManager {
+
+	Site getSite(File siteDir);
 	
-//	Map<String,Object> getConfig();
+	Site getSite(File siteDir, Map<String,Object> extraOptions);
 	
 	Site getSite(Map<String, Object> config);
-
-//	List<SiteFilter> getSiteFilters();
-//	
-//	List<Generator> getGenerators();
-//	
-//	Converter getConverter(Source source) throws RuntimeException;
-//
-//	Renderer getRenderer(Site site);
-//	
-//	Map<String, TemplateModel> getTemplateModels();
-//	 
-//	<F extends RenderFilter> List<F> getRenderFilter(Class<F> clazz);
-//	
-//	List<TemplateLoader> getTemplateLoaders();
 }
