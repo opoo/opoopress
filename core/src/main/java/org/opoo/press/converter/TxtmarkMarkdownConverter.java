@@ -27,7 +27,6 @@ import org.opoo.press.Site;
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
 import org.opoo.press.util.ClassUtils;
-import org.opoo.press.util.MapUtils;
 
 import com.github.rjeschke.txtmark.BlockEmitter;
 import com.github.rjeschke.txtmark.Configuration;
@@ -52,7 +51,7 @@ public class TxtmarkMarkdownConverter implements Converter, Initializable {
 	@Override
 	public void initialize(Site site) {
 		Map<String, Object> map = site.getConfig();
-		String highlighterClassName = MapUtils.get(map, "highlighter");
+		String highlighterClassName = (String) map.get("highlighter");
 		if(highlighterClassName == null){
 			log.warn("This converter might be need a Highlighter.");
 		}else{

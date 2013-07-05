@@ -65,14 +65,14 @@ public class RendererImpl implements Renderer {
 		super();
 		this.site = site;
 		templateDir = site.getTemplates();
-		log.info("Template directory is " + templateDir.getAbsolutePath());
+		log.debug("Template directory: " + templateDir.getAbsolutePath());
 		
 		//Working directory
 		workingTemplateDir = new File( site.getWorking(), "templates");
 		if(!workingTemplateDir.exists()){
 			workingTemplateDir.mkdirs();
 		}
-		log.info("Working template directory is " + workingTemplateDir.getAbsolutePath());
+		log.debug("Working template directory: " + workingTemplateDir.getAbsolutePath());
 		
 		//configuration
 		configuration = new Configuration();

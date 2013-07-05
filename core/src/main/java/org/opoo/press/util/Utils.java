@@ -19,38 +19,35 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Site;
-
 /**
  * @author Alex Lin
  *
  */
 public abstract class Utils {
 
-	public static String buildCanonical(Site site, String url){
-		String canonical = "" + site.getConfig().get("url");
-		String permalink = (String) site.getConfig().get("permalink");
-		String pageUrl = url;
-		if(permalink != null && permalink.endsWith(".html")){
-			canonical += pageUrl;
-		}else{
-			canonical += StringUtils.removeEnd(pageUrl, "index.html");
-		}
-		return canonical;
-	}
-	
-	public static String buildCategoryUrl(Site site, String slug){
-		//String rootUrl = (String) site.getConfig().get("root");
-		String categoryDir = (String) site.getConfig().get("category_dir");
-		return /*rootUrl + */ categoryDir + "/" + encodeURL(slug) + "/";
-	}
-	
-	public static String buildTagUrl(Site site, String slug){
-		//String rootUrl = (String) site.getConfig().get("root");
-		String tagDir = (String) site.getConfig().get("tag_dir");
-		return /*rootUrl + */ tagDir + "/" + encodeURL(slug) + "/";
-	}
+//	public static String buildCanonical(Site site, String url){
+//		String canonical = "" + site.getConfig().get("url");
+//		String permalink = (String) site.getConfig().get("permalink");
+//		String pageUrl = url;
+//		if(permalink != null && permalink.endsWith(".html")){
+//			canonical += pageUrl;
+//		}else{
+//			canonical += StringUtils.removeEnd(pageUrl, "index.html");
+//		}
+//		return canonical;
+//	}
+//	
+//	public static String buildCategoryUrl(Site site, String nicename){
+//		//String rootUrl = (String) site.getConfig().get("root");
+//		String categoryDir = (String) site.getConfig().get("category_dir");
+//		return /*rootUrl + */ categoryDir + "/" + encodeURL(nicename) + "/";
+//	}
+//	
+//	public static String buildTagUrl(Site site, String slug){
+//		//String rootUrl = (String) site.getConfig().get("root");
+//		String tagDir = (String) site.getConfig().get("tag_dir");
+//		return /*rootUrl + */ tagDir + "/" + encodeURL(slug) + "/";
+//	}
 	
 	public static String encodeURL(String url){
 		try {
@@ -68,9 +65,14 @@ public abstract class Utils {
 		}
 	}
 	
-	public static String toSlug(String string){
-		string = string.toLowerCase();
-		//return StringUtils.remove(string, " ");
-		return StringUtils.replace(string, " ", "-");
-	}
+//	public static String toSlug(String string){
+//		string = string.toLowerCase();
+//		//return StringUtils.remove(string, " ");
+//		//TODO: translate, pinyin or others
+//		return StringUtils.replace(string, " ", "-");
+//	}
+//	
+//	public static String toNicename(String category){
+//		return toSlug(category);
+//	}
 }

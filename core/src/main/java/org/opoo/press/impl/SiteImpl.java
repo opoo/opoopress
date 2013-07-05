@@ -20,13 +20,16 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.LocaleUtils;
@@ -34,6 +37,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Application;
+import org.opoo.press.Category;
 import org.opoo.press.Context;
 import org.opoo.press.Converter;
 import org.opoo.press.Generator;
@@ -44,6 +48,7 @@ import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.SiteBuilder;
 import org.opoo.press.StaticFile;
+import org.opoo.press.Tag;
 import org.opoo.press.converter.IdentityConverter;
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.plugin.DefaultPlugin;
@@ -52,14 +57,9 @@ import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
 import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceParser;
-import org.opoo.press.template.BuildCategoryUrlModel;
-import org.opoo.press.template.BuildTagUrlModel;
-import org.opoo.press.template.CategoryLinksModel;
-import org.opoo.press.template.TagLinksModel;
 import org.opoo.press.template.TitleCaseModel;
 import org.opoo.press.util.ClassUtils;
 import org.opoo.press.util.MapUtils;
-import org.opoo.press.util.Utils;
 import org.yaml.snakeyaml.Yaml;
 
 import freemarker.template.TemplateModel;
@@ -86,10 +86,13 @@ public class SiteImpl implements Site, SiteBuilder{
 	private List<Post> posts;
 	private List<StaticFile> staticFiles;
 	
-	private Map<String, List<Post>> categories;
-	private Map<String, List<Post>> tags;
-	private Map<String, String> categoryNames;
-	private Map<String, String> tagNames;
+//	private Map<String, List<Post>> categories;
+//	private Map<String, List<Post>> tags;
+//	private Map<String, String> categoryNames;
+//	private Map<String, String> tagNames;
+	
+	private Map<String, Category> categories;
+	private List<Tag> tags;
 	
 	private Date time;
 	private boolean showDrafts;
@@ -267,29 +270,55 @@ public class SiteImpl implements Site, SiteBuilder{
 		this.pages = new ArrayList<Page>();
 		this.posts = new ArrayList<Post>();
 		this.staticFiles = new ArrayList<StaticFile>();
-		this.categories = new HashMap<String, List<Post>>();
-		this.tags = new HashMap<String, List<Post>>();
 		
-		resetCategoryNames();
-		resetTagNames();
+		resetCategories();
+		resetTags();
 	}
 	
-	void resetCategoryNames(){
-		this.categoryNames = new HashMap<String, String>();
+	void resetCategories(){
+		this.categories = new LinkedHashMap<String,Category>();
 		@SuppressWarnings("unchecked")
-		Map<String,String> map = (Map<String, String>) config.get("category_names");
-		if(map != null && !map.isEmpty()){
-			categoryNames.putAll(map);
+		Map<String,String> names = (Map<String,String>) config.get("category_names");
+		if(names == null || names.isEmpty()){
+			return;
+		}
+		//sort name
+		names = new TreeMap<String,String>(names);
+		for(Map.Entry<String, String> en: names.entrySet()){
+			String path = en.getKey();
+			String name = en.getValue();
+			
+			String nicename = path;
+			String parentPath = null;
+			int index = path.lastIndexOf('.');
+			if(index != -1){
+				nicename = path.substring(index + 1);
+				parentPath = path.substring(0, index);
+			}
+			
+			Category parent = null;
+			if(parentPath != null){
+				parent = categories.get(parentPath);
+				if(parent == null){
+					throw new IllegalArgumentException("Parent category not found: " + parentPath);
+				}
+			}
+			CategoryImpl category = new CategoryImpl(nicename, name, parent, this);
+			categories.put(path, category);
 		}
 	}
 	
-	void resetTagNames(){
-		this.tagNames = new HashMap<String, String>();
+	void resetTags(){
+		this.tags = new ArrayList<Tag>();
 		@SuppressWarnings("unchecked")
-		Map<String,String> map = (Map<String, String>) config.get("tag_names");
-		if(map != null && !map.isEmpty()){
-			tagNames.putAll(map);
+		Map<String,String> names = (Map<String, String>) config.get("tag_names");
+		if(names == null || names.isEmpty()){
+			return;
 		}
+		
+		for(Map.Entry<String, String> en: names.entrySet()){
+			 tags.add(new TagImpl(en.getKey(), en.getValue(), this));
+		 }
 	}
 	
 	void setup(){
@@ -329,6 +358,8 @@ public class SiteImpl implements Site, SiteBuilder{
 
 
 	void read(){
+		log.info("Reading sources ...");
+		
 		SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
 		SourceParser parser = Application.getContext().getSourceParser();
 		List<SourceEntry> list = loader.loadSourceEntries(source, buildFilter());
@@ -390,10 +421,10 @@ public class SiteImpl implements Site, SiteBuilder{
 	private void readPost(Source src){
 		if(isDraft(src.getMeta())){
 			if(showDrafts){
-				addPost(new Draft(this, src));
+				posts.add(new Draft(this, src));
 			}
 		}else{
-			addPost(new PostImpl(this, src));
+			posts.add(new PostImpl(this, src));
 		}
 	}
 	
@@ -405,69 +436,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		return !b.booleanValue();
 	}
 	
-	private static void addPostToMapList(Post post, String name, Map<String,String> names, Map<String,List<Post>> listMap){
-		String slug = null;
-		if(names.containsValue(name)){
-			slug = MapUtils.getKeyByValue(names, name);
-		}else{
-			slug = Utils.toSlug(name);
-			if(!names.containsKey(slug)){
-				names.put(slug, name);
-			}
-		}
-		
-		List<Post> posts = listMap.get(slug);
-		if(posts == null){
-			posts = new ArrayList<Post>();
-			listMap.put(slug, posts);
-		}
-		posts.add(post);
-	}
-	
-	private void addPost(PostImpl post){
-		posts.add(post);
-		
-		List<String> cats = post.getCategories();
-		if(cats != null){
-			for(String cat: cats){
-				/*
-				String key = Utils.toSlug(cat);
-				if(!categoryNames.containsKey(key)){
-					categoryNames.put(key, cat);
-				}
-				List<Post> list2 = categories.get(key);
-				if(list2 == null){
-					list2 = new ArrayList<Post>();
-					categories.put(key, list2);
-				}
-				list2.add(post);
-				*/
-				
-				addPostToMapList(post, cat, categoryNames, categories);
-			}
-		}
-		
-		List<String> tagsList = post.getTags();
-		if(tagsList != null){
-			for(String tag: tagsList){
-				/*
-				String key = Utils.toSlug(tag);
-				if(!tagNames.containsKey(key)){
-					tagNames.put(key, tag);
-				}
-				List<Post> list2 = tags.get(key);
-				if(list2 == null){
-					list2 = new ArrayList<Post>();
-					tags.put(key, list2);
-				}
-				list2.add(post);
-				*/
-				
-				addPostToMapList(post, tag, tagNames, tags);
-			}
-		}
-	}
-
 	FileFilter buildFilter(){
 		@SuppressWarnings("unchecked")
 		final List<String> includes = (List<String>) config.get("includes");
@@ -516,6 +484,8 @@ public class SiteImpl implements Site, SiteBuilder{
 
 
 	void render(){
+		log.info("Rendering ...");
+		
 		Map<String, Object> rootMap = buildRootMap();
 		
 		for(Post post: posts){
@@ -541,8 +511,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		
 //		String rootUrl = (String)config.get("root");
 		map.put("root_url", getRoot());
-		map.put("category_links", new CategoryLinksModel(this));
-		map.put("tag_links", new TagLinksModel(this));
 		
 		Map<String, TemplateModel> models = registry.getTemplateModels();
 		if(models != null && !models.isEmpty()){
@@ -552,22 +520,9 @@ public class SiteImpl implements Site, SiteBuilder{
 		TitleCaseModel model = new TitleCaseModel(this);
 		map.put("titleCase", model);
 		map.put("titlecase", model);
-		
-		map.put("buildCategoryUrl", new BuildCategoryUrlModel(this));
-		map.put("buildTagUrl", new BuildTagUrlModel(this));
-		
 		return map;
 	}
 	
-	
-//	private List<Post> buildRecentPosts(){
-//		int size = ((Number)config.get("recent_posts")).intValue();
-//		if(size < 0 || size > 100){
-//			size = 10;
-//		}
-//		return posts.subList(0, size);
-//	}
-//	
 	/**
 	 * 
 	 */
@@ -635,23 +590,32 @@ public class SiteImpl implements Site, SiteBuilder{
 
 
 	void write(){
+		log.info("Writing files ...");
+
 		if(!dest.exists()){
 			dest.mkdirs();
 		}
+
+		log.info("Writing " + posts.size() + " posts");
 		for(Post post: posts){
 			post.write(dest);
 		}
 		
+		log.info("Writing " + pages.size() + " pages");
 		for(Page page: pages){
 			page.write(dest);
 		}
 		
-		for(StaticFile sf: staticFiles){
-			sf.write(dest);
+		if(!staticFiles.isEmpty()){
+			log.info("Copying " + staticFiles.size() + " static files");
+			for(StaticFile sf: staticFiles){
+				sf.write(dest);
+			}
 		}
 
 		if(assets != null){
 			try {
+				log.info("Copying 1 assets directory");
 				log.debug("Copying assets...");
 				FileUtils.copyDirectory(assets, dest, buildFilter());
 				
@@ -720,40 +684,8 @@ public class SiteImpl implements Site, SiteBuilder{
 		return time;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getCategories()
-	 */
-	@Override
-	public Map<String, List<Post>> getCategories() {
-		return categories;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getTags()
-	 */
-	@Override
-	public Map<String, List<Post>> getTags() {
-		return tags;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getCategiryNames()
-	 */
-	@Override
-	public Map<String, String> getCategoryNames() {
-		return categoryNames;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getTagNames()
-	 */
-	@Override
-	public Map<String, String> getTagNames() {
-		return tagNames;
-	}
-	
 	public Object get(String name){
-		return MapUtils.get(data, name);
+		return data.get(name);
 	}
 
 	/* (non-Javadoc)
@@ -806,5 +738,148 @@ public class SiteImpl implements Site, SiteBuilder{
 	@Override
 	public Highlighter getHighlighter() {
 		return highlighter;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Site#getCategories()
+	 */
+	@Override
+	public List<Category> getCategories() {
+		//return categories;
+		return new CategoriesList(categories);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Site#getTags()
+	 */
+	@Override
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.SiteHelper#buildCanonical(java.lang.String)
+	 */
+	@Override
+	public String buildCanonical(String url) {
+		String canonical = (String) config.get("url");
+		String permalink = (String) config.get("permalink");
+		String pageUrl = url;
+		if(permalink != null && permalink.endsWith(".html")){
+			canonical += pageUrl;
+		}else{
+			canonical += StringUtils.removeEnd(pageUrl, "index.html");
+		}
+		return canonical;
+	}
+
+//	/* (non-Javadoc)
+//	 * @see org.opoo.press.SiteHelper#buildCategoryUrl(org.opoo.press.Category)
+//	 */
+//	@Override
+//	public String buildCategoryUrl(Category category) {
+//		//String rootUrl = (String) site.getConfig().get("root");
+//		String categoryDir = (String) config.get("category_dir");
+//		return /*rootUrl + */ categoryDir + "/" + category.getUrl() + "/";
+//	}
+
+//	/* (non-Javadoc)
+//	 * @see org.opoo.press.SiteHelper#buildTagUrl(org.opoo.press.Tag)
+//	 */
+//	@Override
+//	public String buildTagUrl(TagImpl tag) {
+//		String tagDir = (String) config.get("tag_dir");
+//		return /*rootUrl + */ tagDir + "/" + Utils.encodeURL(tag.getSlug()) + "/";
+//	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.SiteHelper#toSlug(java.lang.String)
+	 */
+	@Override
+	public String toSlug(String tagName) {
+		return toNicename(tagName);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.SiteHelper#toNicename(java.lang.String)
+	 */
+	@Override
+	public String toNicename(String categoryName) {
+		//TODO: translate, pinyin or others
+		//String nicenameConverter = config.get("category_nicename_converter");
+		//CategoryNicenameConverter converter = newInstance(nicenameConverter);
+		//return converter.convert(categoryName);
+		
+		categoryName = categoryName.toLowerCase();
+		return StringUtils.replace(categoryName, " ", "-");
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.SiteHelper#getCategory(java.lang.String)
+	 */
+	@Override
+	public Category getCategory(String categoryNameOrNicename) {
+		if(categories == null || categories.isEmpty()){
+			return null;
+		}
+		//If path equals
+		if(categories.containsKey(categoryNameOrNicename)){
+			return categories.get(categoryNameOrNicename);
+		}
+		for(Category category: categories.values()){
+			if(category.isNameOrNicename(categoryNameOrNicename)){
+				return category;
+			}
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.SiteHelper#getTag(java.lang.String)
+	 */
+	@Override
+	public Tag getTag(String tagNameOrSlug) {
+		if(tags == null || tags.isEmpty()){
+			return null;
+		}
+		for(Tag tag: tags){
+			if(tag.isNameOrSlug(tagNameOrSlug)){
+				return tag;
+			}
+		}
+		return null;
+	}
+	
+	
+	private static class CategoriesList extends AbstractList<Category>{
+		private final List<Category> list;
+		private final Map<String, Category> categories;
+		
+		private CategoriesList(Map<String, Category> categories) {
+			this.categories = categories;
+			this.list = new ArrayList<Category>(categories.values());
+		}
+
+		@Override
+		public boolean add(Category category){
+			categories.put(category.getPath(), category);
+			return list.add(category);
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.AbstractList#get(int)
+		 */
+		@Override
+		public Category get(int index) {
+			return list.get(index);
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.AbstractCollection#size()
+		 */
+		@Override
+		public int size() {
+			return list.size();
+		}
 	}
 }

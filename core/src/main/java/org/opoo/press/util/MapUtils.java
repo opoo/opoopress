@@ -31,15 +31,6 @@ public abstract class MapUtils {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <K,V> V get(Map<K,Object> map, K key){
-		Object value = map.get(key);
-		if(value instanceof Accessor){
-			return (V) ((Accessor) value).get();
-		}
-		return (V) value;
-	}
-	
 	public static <K,V> boolean get(Map<K,V> map, K key, boolean defaultValue){
 		Object object = map.get(key);
 		if(object == null){
@@ -49,6 +40,13 @@ public abstract class MapUtils {
 			return ((Boolean)object).booleanValue();
 		}
 		return "true".equalsIgnoreCase(object.toString());
+	}
+	
+	public static <K,V> V get(Map<K,V> map, K key, V defaultValue){
+		if(!map.containsKey(key)){
+			return defaultValue;
+		}
+		return map.get(key);
 	}
 	
 	

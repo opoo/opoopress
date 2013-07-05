@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opoo.press.Category;
 import org.opoo.press.Generator;
 import org.opoo.press.Page;
 import org.opoo.press.Pager;
@@ -30,6 +31,7 @@ import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.impl.AbstractConvertible;
 import org.opoo.press.source.Source;
+import org.opoo.press.util.MapUtils;
 import org.opoo.press.util.Utils;
 
 /**
@@ -51,25 +53,23 @@ public class CategoryGenerator implements Generator {
 	 */
 	@Override
 	public void generate(Site site) {
-		Map<String, List<Post>> map = site.getCategories();
-		Map<String, String> names = site.getCategoryNames();
+		List<Category> categories = site.getCategories();
+		String categoryTitlePrefix = (String) MapUtils.get(site.getConfig(), "category_title_prefix", "");
 		
-		Renderer renderer = site.getRenderer();
-		for(Map.Entry<String, String> en: names.entrySet()){
-			String neme = en.getKey();
-			String category = en.getValue();
-			List<Post> posts = map.get(neme);
-			if(posts != null && !posts.isEmpty()){
-				Collections.sort(posts);
-				Collections.reverse(posts);
-				
-				CategoryPage page = new CategoryPage(site, renderer);
-				page.setTitle(/*"Category: " + */category);
-				page.setUrl(Utils.buildCategoryUrl(site, neme));
-				page.setPosts(posts);
-				
-				site.getPages().add(page);
+		for(Category category: categories){
+			List<Post> posts = category.getPosts();
+			if(posts.isEmpty()){
+				continue;
 			}
+			Collections.sort(posts);
+			Collections.reverse(posts);
+			
+			CategoryPage page = new CategoryPage(site);
+			page.setTitle(categoryTitlePrefix + category.getTitle());
+			page.setUrl(category.getUrl());
+			page.setPosts(posts);
+			
+			site.getPages().add(page);
 		}
 	}
 	
@@ -83,10 +83,10 @@ public class CategoryGenerator implements Generator {
 		private String title;
 		private List<Post> posts;
 		
-		private CategoryPage(Site site, Renderer renderer) {
+		private CategoryPage(Site site) {
 			super();
 			this.site = site;
-			this.renderer = renderer;
+			this.renderer = site.getRenderer();
 		}
 
 		@Override
@@ -230,7 +230,7 @@ public class CategoryGenerator implements Generator {
 		 */
 		@Override
 		protected void mergeRootMap(Map<String, Object> rootMap) {
-			rootMap.put("canonical", Utils.buildCanonical(site, getUrl()));
+			rootMap.put("canonical", site.buildCanonical(getUrl()));
 			rootMap.put("page", this);
 		}
 
@@ -261,7 +261,7 @@ public class CategoryGenerator implements Generator {
 		public Object get(String string){
 			return null;
 		}
-		
+
 		@Override
 		public File getOutputFile(File dest) {
 			String url = getUrl() + "index.html";

@@ -65,7 +65,7 @@ public interface Base {
 	
 	/**
 	 * The layout of source file.
-	 * All build in layout is 'default', 'post', 'page' and 'nil'.
+	 * All build in layout are 'default', 'post', 'page' and 'nil'.
 	 * <p>'nil' means null, not apply any template.
 	 * <p>Every layout(except 'nil') has a template defined in templates directory.
 	 * the template file name is '_&lt;layout&gt;.ftl', can extend OpooPress layout
@@ -76,7 +76,7 @@ public interface Base {
 	String getLayout();
 	
 	/**
-	 * The permalink.
+	 * The permalink style.
 	 * @return permalink
 	 */
 	String getPermalink();

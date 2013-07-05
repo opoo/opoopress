@@ -15,46 +15,25 @@
  */
 package org.opoo.press;
 
-import java.util.List;
 
 
 /**
  * @author Alex Lin
  *
  */
-public interface Post extends Convertible, Comparable<Post>, Base{
+public interface SiteHelper {
 	
-	List<Category> getCategories();
+	String buildCanonical(String url);
+	
+//	String buildCategoryUrl(Category category);
+	
+//	String buildTagUrl(TagImpl tag);
+	
+	String toSlug(String tagName);
+	
+	String toNicename(String categoryName);
 
-	List<Tag> getTags();
+	Category getCategory(String categoryNameOrNicename);
 	
-	String getId();
-	
-	String getTitle();
-	
-	String getExcerpt();
-	
-	boolean isExcerpted();
-	
-	Post getNext();
-	
-	Post getPrevious();
-
-	/**
-	 * @param post
-	 */
-	void setPrevious(Post post);
-
-	/**
-	 * @param post
-	 */
-	void setNext(Post post);
-	
-	
-//	public static interface Title{
-//		
-//		String toString();
-//		
-//		String getTitleCase();
-//	}
+	Tag getTag(String tagNameOrSlug);
 }

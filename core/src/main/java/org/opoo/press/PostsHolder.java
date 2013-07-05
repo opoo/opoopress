@@ -17,44 +17,10 @@ package org.opoo.press;
 
 import java.util.List;
 
-
 /**
  * @author Alex Lin
  *
  */
-public interface Post extends Convertible, Comparable<Post>, Base{
-	
-	List<Category> getCategories();
-
-	List<Tag> getTags();
-	
-	String getId();
-	
-	String getTitle();
-	
-	String getExcerpt();
-	
-	boolean isExcerpted();
-	
-	Post getNext();
-	
-	Post getPrevious();
-
-	/**
-	 * @param post
-	 */
-	void setPrevious(Post post);
-
-	/**
-	 * @param post
-	 */
-	void setNext(Post post);
-	
-	
-//	public static interface Title{
-//		
-//		String toString();
-//		
-//		String getTitleCase();
-//	}
+public interface PostsHolder {
+	List<Post> getPosts();
 }

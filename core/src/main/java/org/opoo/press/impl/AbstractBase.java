@@ -33,7 +33,6 @@ import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
 import org.opoo.press.util.MapUtils;
-import org.opoo.press.util.Utils;
 
 /**
  * @author Alex Lin
@@ -78,21 +77,9 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	}
 	
 	public Object get(String name){
-		return MapUtils.get(data, name);
+		return data.get(name);
 	}
 	
-//	
-//	protected Object get(String name){
-//		return data.get(name);
-//	}
-//	
-//	protected boolean isSet(String name){
-//		return data.containsKey(name);
-//	}
-	
-	/**
-	 * @param frontMatterSource2
-	 */
 	private void init() {
 		this.converter = site.getConverter(source);
 		this.outputFileExtension = this.converter.getOutputFileExtension(source);
@@ -202,7 +189,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	}
 	
 	protected void mergeRootMap(Map<String,Object> rootMap){
-		String canonical = Utils.buildCanonical(site, getUrl());
+		String canonical = site.buildCanonical(getUrl());
 		rootMap.put("canonical", canonical);
 		mergeHighlighterParam(rootMap);
 	}

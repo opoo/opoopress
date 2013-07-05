@@ -45,9 +45,10 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 import org.dom4j.io.SAXReader;
+import org.opoo.press.Category;
 import org.opoo.press.Site;
+import org.opoo.press.Tag;
 import org.opoo.press.source.SourceParser;
-import org.opoo.press.util.MapUtils;
 
 /**
  * Import posts and pages from WordPress exported XML file.
@@ -205,14 +206,25 @@ public class WordPressImporter implements Importer {
 		List<Element> list = e.elements("category");
 		for(Element n: list){
 			String domain = n.attributeValue("domain");
-			//String nicename = n.attributeValue("nicename");
+			String nicename = n.attributeValue("nicename");
+			String text = n.getTextTrim();
+
 			if("post_tag".equals(domain)){
-				String tagName = getTagName(site, n.getTextTrim());
-				tags.add(tagName);
+				String stringTag = text;
+				Tag tag = site.getTag(nicename);
+				if(tag != null){
+					stringTag = tag.getSlug();
+				}
+				
+				tags.add(stringTag);
 			}
 			if("category".equals(domain)){
-				String categoryName = getCategoryName(site, n.getTextTrim());
-				cats.add(categoryName);
+				String stringCategory = text;
+				Category category = site.getCategory(nicename);
+				if(category != null){
+					stringCategory = category.getNicename();
+				}
+				cats.add(stringCategory);
 			}
 		}
 		
@@ -280,48 +292,6 @@ public class WordPressImporter implements Importer {
 		FileUtils.writeLines(file, "UTF-8", lines);
 	}
 	
-	private String getTagName(Site site, String tag){
-		Map<String, String> names = site.getTagNames();
-		if(names == null){
-			return tag;
-		}
-		
-		boolean b = names.containsValue(tag);
-		if(!b){
-			return tag;
-		}else{
-			return MapUtils.getKeyByValue(names, tag);
-		}
-		
-//		for(Map.Entry<String, String> en: names.entrySet()){
-//			if(tag.equals(en.getValue())){
-//				return en.getKey();
-//			}
-//		}
-//		return tag;
-	}
-	
-	private String getCategoryName(Site site, String category){
-		Map<String, String> names = site.getCategoryNames();
-		if(names == null){
-			return category;
-		}
-		
-		boolean b = names.containsValue(category);
-		if(!b){
-			return category;
-		}else{
-			return MapUtils.getKeyByValue(names, category);
-		}
-		
-//		for(Map.Entry<String, String> en: names.entrySet()){
-//			if(category.equals(en.getValue())){
-//				return en.getKey();
-//			}
-//		}
-//		return category;
-	}
-	
 	private List<String> processContent(String content, StringBuilder excerptBuilder) {
 		boolean excerptFound = false;
 		List<String> contentLines = new ArrayList<String>();
@@ -370,8 +340,8 @@ public class WordPressImporter implements Importer {
 	 * @return page/post url, return null if no 'permalink_style' defined.
 	 */
 	private String buildURL(Date date, String postname, String post_id, String author){
-		String permalinStyle = (String) props.get("permalink_style");
-		if(StringUtils.isBlank(permalinStyle)){
+		String permalinkStyle = (String) props.get("permalink_style");
+		if(StringUtils.isBlank(permalinkStyle)){
 			return null;
 		}
 		
@@ -384,24 +354,16 @@ public class WordPressImporter implements Importer {
 		int minute = c.get(Calendar.MINUTE);
 		int second = c.get(Calendar.SECOND);
 		
-		permalinStyle = StringUtils.replace(permalinStyle, "%postname%", postname);
-		permalinStyle = StringUtils.replace(permalinStyle, "%post_id%", post_id);
-		permalinStyle = StringUtils.replace(permalinStyle, "%author%", author);
-		permalinStyle = StringUtils.replace(permalinStyle, "%year%", year + "");
-		permalinStyle = StringUtils.replace(permalinStyle, "%monthnum%", toTwoChar(monthnum));
-		permalinStyle = StringUtils.replace(permalinStyle, "%day%", toTwoChar(day));
-		permalinStyle = StringUtils.replace(permalinStyle, "%hour%", toTwoChar(hour));
-		permalinStyle = StringUtils.replace(permalinStyle, "%minute%", toTwoChar(minute));
-		permalinStyle = StringUtils.replace(permalinStyle, "%second%", toTwoChar(second));
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%postname%", postname);
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%post_id%", post_id);
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%author%", author);
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%year%", year + "");
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%monthnum%", StringUtils.leftPad(monthnum + "", 2, '0'));
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%day%", StringUtils.leftPad(day + "", 2, '0'));
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%hour%", StringUtils.leftPad(hour + "", 2, '0'));
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%minute%", StringUtils.leftPad(minute + "", 2, '0'));
+		permalinkStyle = StringUtils.replace(permalinkStyle, "%second%", StringUtils.leftPad(second + "", 2, '0'));
 		
-		return permalinStyle;
-	}
-	
-	private String toTwoChar(int i){
-		if(i < 10){
-			return "0" + i;
-		}else{
-			return Integer.toString(i);
-		}
+		return permalinkStyle;
 	}
 }

@@ -32,7 +32,7 @@ import org.opoo.press.source.Source;
  * @author Alex Lin
  *
  */
-public interface Site extends SiteBuilder{
+public interface Site extends SiteBuilder, SiteHelper{
 	File getSource();
 	
 	File getTemplates();
@@ -55,10 +55,13 @@ public interface Site extends SiteBuilder{
 	
 	Date getTime();
 	
-	Map<String, List<Post>> getCategories();
-	Map<String, List<Post>> getTags();
-	Map<String, String> getCategoryNames();
-	Map<String, String> getTagNames();
+//	Map<String, List<Post>> getCategories();
+//	Map<String, List<Post>> getTags();
+//	Map<String, String> getCategoryNames();
+//	Map<String, String> getTagNames();
+	
+	List<Category> getCategories();
+	List<Tag> getTags();
 	
 	//void build();
 	

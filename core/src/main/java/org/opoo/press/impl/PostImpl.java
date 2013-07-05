@@ -22,18 +22,26 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.opoo.press.Category;
 import org.opoo.press.Post;
+import org.opoo.press.Site;
+import org.opoo.press.Tag;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
-import org.opoo.press.util.Utils;
 
 /**
  * @author Alex Lin
  *
  */
 public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
-	private List<String> categories;
-	private List<String> tags;
+	public static final String DEFAUL_EXCERPT_SEPARATOR = "<!--more-->";
+	//excerptSeparator = "<!--more-->";
+	
+	private List<String> stringCategories;
+	private List<String> stringTags;
+	private List<Category> categories = new ArrayList<Category>();
+	private List<Tag> tags = new ArrayList<Tag>();
+	
 	private String id;
 	private boolean published = true;
 	private String title;
@@ -64,9 +72,13 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		
 		title = (String) frontMatter.get("title");
 
-		categories = getStringList(frontMatter, "categories", "category");
+		stringCategories = getStringList(frontMatter, "categories", "category");
 		
-		tags = getStringList(frontMatter, "tags", "tag");
+		initCategories(stringCategories);
+		
+		stringTags = getStringList(frontMatter, "tags", "tag");
+		
+		initTags(stringTags);
 		
 		String url = (String)frontMatter.get("url");
 		if(url == null){
@@ -89,10 +101,46 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		}
 	}
 
+	private void initCategories(List<String> stringCategories) {
+		if(stringCategories == null || stringCategories.isEmpty()){
+			return;
+		}
+		Site site = getSite();
+		for(String stringCategory: stringCategories){
+			Category category = site.getCategory(stringCategory);
+			if(category == null){
+				String nicename = site.toNicename(stringCategory);
+				category = new CategoryImpl(nicename, stringCategory, site);
+				//add to site categories
+				site.getCategories().add(category);
+			}
+			category.getPosts().add(this);
+			this.categories.add(category);
+		}
+	}
+	
+	private void initTags(List<String> stringTags) {
+		if(stringTags == null || stringTags.isEmpty()){
+			return;
+		}
+		Site site = getSite();
+		for(String stringTag: stringTags){
+			Tag tag = site.getTag(stringTag);
+			if(tag == null){
+				String slug = site.toSlug(stringTag);
+				tag = new TagImpl(slug, stringTag, site);
+				//add to site tags list
+				site.getTags().add(tag);
+			}
+			tag.getPosts().add(this);
+			this.tags.add(tag);
+		}
+	}
+	
 	private void extractExcerpt(String content) {
 		String excerptSeparator = (String) getSite().getConfig().get("excerpt_separator");
 		if(excerptSeparator == null){
-			excerptSeparator = "<!--more-->";
+			excerptSeparator = DEFAUL_EXCERPT_SEPARATOR; //"<!--more-->";
 		}
 		int index = content.indexOf(excerptSeparator);
 		if(index != -1){
@@ -118,7 +166,6 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	}
 
 	
-	
 	/* (non-Javadoc)
 	 * @see org.opoo.joctopress.impl.Convertible#convert()
 	 */
@@ -130,18 +177,12 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		}
 	}
 
-	/**
-	 * @return the categories
-	 */
-	public List<String> getCategories() {
-		return categories;
+	public List<String> getStringCategories() {
+		return stringCategories;
 	}
 
-	/**
-	 * @return the tags
-	 */
-	public List<String> getTags() {
-		return tags;
+	public List<String> getStringTags() {
+		return stringTags;
 	}
 
 	/**
@@ -244,17 +285,20 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 			return null;
 		}
 		
-		List<String> list = getCategories();
-		if(list == null || list.isEmpty()){
+		if(categories.isEmpty() || tags.isEmpty()){
 			return null;
 		}
-		Map<String, List<Post>> map = getSite().getCategories();
+		
 		List<Post> allRelatedPosts = new ArrayList<Post>();
-		for(String cat: list){
-			String lo = Utils.toSlug(cat);
-			List<Post> posts = map.get(lo);
-			mergeRelatedPosts(allRelatedPosts, posts);
+		
+		for(Category category: categories){
+			mergeRelatedPosts(allRelatedPosts, category.getPosts());
 		}
+		
+		for(Tag tag: tags){
+			mergeRelatedPosts(allRelatedPosts, tag.getPosts());
+		}
+		
 		if(allRelatedPosts.isEmpty()){
 			return Collections.emptyList();
 		}
@@ -293,6 +337,34 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		if(isExcerptRenderRequired){
 			excerpt = getRenderer().renderContent(excerpt, rootMap);
 		}
+	}
+
+	/**
+	 * @return the categories
+	 */
+	public List<Category> getCategories() {
+		return categories;
+	}
+
+	/**
+	 * @param categories the categories to set
+	 */
+	public void setCategories(List<Category> categories) {
+		this.categories = categories;
+	}
+
+	/**
+	 * @return the tags
+	 */
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
 	}
 
 

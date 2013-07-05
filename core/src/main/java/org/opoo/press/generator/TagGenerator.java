@@ -28,8 +28,10 @@ import org.opoo.press.Pager;
 import org.opoo.press.Post;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
+import org.opoo.press.Tag;
 import org.opoo.press.impl.AbstractConvertible;
 import org.opoo.press.source.Source;
+import org.opoo.press.util.MapUtils;
 import org.opoo.press.util.Utils;
 
 /**
@@ -51,25 +53,23 @@ public class TagGenerator implements Generator {
 	 */
 	@Override
 	public void generate(Site site) {
-		Map<String, List<Post>> map = site.getTags();
-		Map<String, String> names = site.getTagNames();
+		List<Tag> tags = site.getTags();
+		String tagTitlePrefix = (String) MapUtils.get(site.getConfig(), "tag_title_prefix", "");
 		
-		Renderer renderer = site.getRenderer();
-		for(Map.Entry<String, String> en: names.entrySet()){
-			String neme = en.getKey();
-			String tag = en.getValue();
-			List<Post> posts = map.get(neme);
-			if(posts != null && !posts.isEmpty()){
-				Collections.sort(posts);
-				Collections.reverse(posts);
-				
-				TagPage page = new TagPage(site, renderer);
-				page.setTitle(/*"Tag: " + */tag);
-				page.setUrl(Utils.buildTagUrl(site, neme));
-				page.setPosts(posts);
-				
-				site.getPages().add(page);
+		for(Tag tag : tags){
+			List<Post> posts = tag.getPosts();
+			if(posts.isEmpty()){
+				continue;
 			}
+			Collections.sort(posts);
+			Collections.reverse(posts);
+
+			TagPage page = new TagPage(site);
+			page.setTitle(tagTitlePrefix + tag.getName());
+			page.setUrl(tag.getUrl());
+			page.setPosts(posts);
+			
+			site.getPages().add(page);
 		}
 	}
 	
@@ -83,10 +83,10 @@ public class TagGenerator implements Generator {
 		private String title;
 		private List<Post> posts;
 		
-		private TagPage(Site site, Renderer renderer) {
+		private TagPage(Site site) {
 			super();
 			this.site = site;
-			this.renderer = renderer;
+			this.renderer = site.getRenderer();
 		}
 
 		@Override
@@ -230,7 +230,7 @@ public class TagGenerator implements Generator {
 		 */
 		@Override
 		protected void mergeRootMap(Map<String, Object> rootMap) {
-			rootMap.put("canonical", Utils.buildCanonical(site, getUrl()));
+			rootMap.put("canonical", site.buildCanonical(getUrl()));
 			rootMap.put("page", this);
 		}
 
