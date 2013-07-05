@@ -56,7 +56,7 @@ public class CategoryImpl implements Category{
 		if(parent != null){
 			parent.getChildren().add(this);
 		}
-		boolean categoryTree = MapUtils.get(site.getConfig(), "category_tree", false);
+		boolean categoryTree = MapUtils.get(site.getConfig(), "category_tree", true);
 		
 		if(categoryTree && parent != null){
 			path =  parent.getPath() + "." + nicename;
