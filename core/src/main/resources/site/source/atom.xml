@@ -15,10 +15,10 @@ layout: nil
   </author>
   <generator uri="http://press.opoo.org/">OpooPress</generator>
 
-  <#if (site.posts?size < 20)>
+  <#if (site.posts?size <= 20)>
 	<#assign the_posts = site.posts >
   <#else>
-    <#assign the_posts = site.posts[0..20]>
+    <#assign the_posts = site.posts[0..19]>
   </#if>
   <#list the_posts as post>
   <entry>
