@@ -10,7 +10,7 @@
       <p class="meta">
 		<#include "post/date.ftl">${time}
 		<#if site.disqus_short_name?? && (page.comments)!true == true && (post.comments)!true == true && (site.disqus_show_comment_count)!false == true>
-         | <a href="<#if index??>${root_url}${post.url}</#if>#disqus_thread">Comments</a>
+         | <a href="<#if index??>${root_url}${post.url}</#if>#disqus_thread"><@i18n.msg "Comments"/></a>
         </#if>
         <#-- permalink -->
         <#-- &bull; <a rel="bookmark" href="${root_url}<#if index??>${post.url}<#else>${page.url}</#if>">${ site.permalink_label }</a> -->
