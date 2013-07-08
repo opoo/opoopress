@@ -690,7 +690,6 @@ public class SiteImpl implements Site, SiteBuilder{
 	 */
 	@Override
 	public List<Category> getCategories() {
-		//return categories;
 		return new CategoriesList(categories);
 	}
 
@@ -791,12 +790,17 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	
 	private static class CategoriesList extends AbstractList<Category>{
-		private final List<Category> list;
+		private final List<Category> list = new ArrayList<Category>();
 		private final Map<String, Category> categories;
 		
 		private CategoriesList(Map<String, Category> categories) {
 			this.categories = categories;
-			this.list = new ArrayList<Category>(categories.values());
+			//this.list = new ArrayList<Category>(categories.values());
+			for(Category category: categories.values()){
+				if(!category.getPosts().isEmpty()){
+					list.add(category);
+				}
+			}
 		}
 
 		@Override
