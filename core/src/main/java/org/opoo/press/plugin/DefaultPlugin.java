@@ -37,6 +37,7 @@ import org.opoo.press.util.ClassUtils;
  */
 public class DefaultPlugin implements Plugin {
 	private static final Log log = LogFactory.getLog(DefaultPlugin.class);
+	private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Plugin#initialize(org.opoo.press.Registry)
@@ -54,7 +55,9 @@ public class DefaultPlugin implements Plugin {
 			for(String converterName: converterNames){
 				Converter c = (Converter) ClassUtils.newInstance(converterName, site);
 				registry.registerConverter(c);
-				log.info("Register converter: " + converterName);
+				if(IS_DEBUG_ENABLED){
+					log.debug("Register converter: " + converterName);
+				}
 			}
 		}
 		
@@ -62,7 +65,9 @@ public class DefaultPlugin implements Plugin {
 			for(String generatorName: generatorNames){
 				Generator g = (Generator) ClassUtils.newInstance(generatorName, site);
 				registry.registerGenerator(g);
-				log.info("Register generator: " + generatorName);
+				if(IS_DEBUG_ENABLED){
+					log.debug("Register generator: " + generatorName);
+				}
 			}
 		}
 		
@@ -70,7 +75,9 @@ public class DefaultPlugin implements Plugin {
 			for(String filterName: siteFilters){
 				SiteFilter f = (SiteFilter) ClassUtils.newInstance(filterName, site);
 				registry.registerSiteFilter(f);
-				log.info("Register site filter: " + filterName);
+				if(IS_DEBUG_ENABLED){
+					log.debug("Register site filter: " + filterName);
+				}
 			}
 		}
 	}

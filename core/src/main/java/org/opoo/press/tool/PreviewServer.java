@@ -19,10 +19,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.NCSARequestLog;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerList;
+import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.opoo.press.Site;
@@ -54,6 +56,10 @@ public class PreviewServer {
         Connector defaultConnector = getDefaultConnector(null, port);
         server.setConnectors( new Connector[] { defaultConnector } );
 
+        NCSARequestLog requestLog = new NCSARequestLog();
+        RequestLogHandler logHandler = new RequestLogHandler();
+        logHandler.setRequestLog(requestLog);
+        
         //contextPath = site.root
         String root = site.getRoot();
 		if("".equals(root)){
@@ -67,8 +73,9 @@ public class PreviewServer {
 			log.info("Server resource base: " + base);
 			
 			HandlerList handlers = new HandlerList();
-			handlers.setHandlers(new Handler[] { resource_handler, new DefaultHandler() });
-			server.setHandler(handlers);
+			handlers.setHandlers(new Handler[] { resource_handler, new DefaultHandler()});
+			//server.setHandler(handlers);
+			server.setHandlers(new Handler[]{handlers, logHandler});
 			
 			log.info( "Starting Jetty on http://localhost:" + port + "/" );
 		}else{
@@ -77,7 +84,8 @@ public class PreviewServer {
 			contextHandler.setContextPath(root);
 			contextHandler.setHandler(new ResourceHandler());
 			contextHandler.setResourceBase(site.getDestination().getPath());
-			server.setHandler(contextHandler);
+			//server.setHandler(contextHandler);
+			server.setHandlers(new Handler[]{contextHandler, logHandler});
 			
 			log.info( "Starting Jetty on http://localhost:" + port + root );
 		}

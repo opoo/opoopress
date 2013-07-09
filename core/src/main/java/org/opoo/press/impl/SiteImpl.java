@@ -717,25 +717,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		return canonical;
 	}
 
-//	/* (non-Javadoc)
-//	 * @see org.opoo.press.SiteHelper#buildCategoryUrl(org.opoo.press.Category)
-//	 */
-//	@Override
-//	public String buildCategoryUrl(Category category) {
-//		//String rootUrl = (String) site.getConfig().get("root");
-//		String categoryDir = (String) config.get("category_dir");
-//		return /*rootUrl + */ categoryDir + "/" + category.getUrl() + "/";
-//	}
-
-//	/* (non-Javadoc)
-//	 * @see org.opoo.press.SiteHelper#buildTagUrl(org.opoo.press.Tag)
-//	 */
-//	@Override
-//	public String buildTagUrl(TagImpl tag) {
-//		String tagDir = (String) config.get("tag_dir");
-//		return /*rootUrl + */ tagDir + "/" + Utils.encodeURL(tag.getSlug()) + "/";
-//	}
-
 	/* (non-Javadoc)
 	 * @see org.opoo.press.SiteHelper#toSlug(java.lang.String)
 	 */
