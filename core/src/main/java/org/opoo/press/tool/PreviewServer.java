@@ -56,9 +56,7 @@ public class PreviewServer {
         Connector defaultConnector = getDefaultConnector(null, port);
         server.setConnectors( new Connector[] { defaultConnector } );
 
-        NCSARequestLog requestLog = new NCSARequestLog();
-        RequestLogHandler logHandler = new RequestLogHandler();
-        logHandler.setRequestLog(requestLog);
+        //RequestLogHandler logHandler = createRequestLogHandler(site);
         
         //contextPath = site.root
         String root = site.getRoot();
@@ -74,8 +72,8 @@ public class PreviewServer {
 			
 			HandlerList handlers = new HandlerList();
 			handlers.setHandlers(new Handler[] { resource_handler, new DefaultHandler()});
-			//server.setHandler(handlers);
-			server.setHandlers(new Handler[]{handlers, logHandler});
+			server.setHandler(handlers);
+//			server.setHandlers(new Handler[]{handlers, logHandler});
 			
 			log.info( "Starting Jetty on http://localhost:" + port + "/" );
 		}else{
@@ -84,8 +82,8 @@ public class PreviewServer {
 			contextHandler.setContextPath(root);
 			contextHandler.setHandler(new ResourceHandler());
 			contextHandler.setResourceBase(site.getDestination().getPath());
-			//server.setHandler(contextHandler);
-			server.setHandlers(new Handler[]{contextHandler, logHandler});
+			server.setHandler(contextHandler);
+//			server.setHandlers(new Handler[]{contextHandler, logHandler});
 			
 			log.info( "Starting Jetty on http://localhost:" + port + root );
 		}
@@ -104,6 +102,21 @@ public class PreviewServer {
         catch ( InterruptedException e ){
             log.warn( "Jetty was interrupted", e );
         }
+    }
+    
+    RequestLogHandler createRequestLogHandler(Site site){
+    	boolean showRequestLog = Boolean.getBoolean("requestLog");
+    	if(!showRequestLog){
+    		return null;
+    	}
+    	
+    	NCSARequestLog requestLog = new NCSARequestLog();
+        requestLog.setLogDateFormat(null);
+        
+        RequestLogHandler logHandler = new RequestLogHandler();
+        logHandler.setRequestLog(requestLog);
+    	
+        return logHandler;
     }
     
     /**
