@@ -15,9 +15,6 @@
  */
 package org.opoo.press.slug;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-
 import org.opoo.press.SlugHelper;
 
 /**

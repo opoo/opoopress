@@ -183,7 +183,7 @@ generators:
   - org.opoo.press.generator.TagGenerator
   
 # siteFilters:
-#  - org.opoo.press.filter.SampleSiteFilter
+#  - org.opoo.press.filter.FixUrlSiteFilter
 
 # SlugHelper
 slugHelper: org.opoo.press.slug.ChineseToPinyinSlugHelper
