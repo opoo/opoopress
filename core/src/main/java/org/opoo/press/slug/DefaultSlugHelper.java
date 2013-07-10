@@ -49,8 +49,4 @@ public class DefaultSlugHelper implements SlugHelper {
 			result.append(c);
 		}
 	}
-
-	public static void main(String[] args) throws MalformedURLException, IOException{
-		System.out.println(new DefaultSlugHelper().toSlug("aslkdja中09sd:u0912u0-12ojdasjd dslkajda sd;la skd"));
-	}
 }
