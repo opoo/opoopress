@@ -69,7 +69,7 @@ public class StaticFileImpl implements StaticFile {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.StaticFile#getOutputFile(java.io.File)
+	 * @see org.opoo.press.StaticFile#getOutputFile(java.io.File)
 	 */
 	@Override
 	public File getOutputFile(File dest) {
@@ -78,7 +78,7 @@ public class StaticFileImpl implements StaticFile {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.StaticFile#write(java.io.File)
+	 * @see org.opoo.press.StaticFile#write(java.io.File)
 	 */
 	@Override
 	public void write(File dest) {

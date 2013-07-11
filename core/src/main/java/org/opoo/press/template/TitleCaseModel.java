@@ -34,7 +34,7 @@ import freemarker.template.TemplateModelException;
  */
 public class TitleCaseModel implements TemplateMethodModel {
 	private static String[] smallWords = {"a", "an", "am", "and", "as", "at", "but", "by", "en", "for", 
-			"if", "in", "of", "on", "or", "the", "to", "v", "v.", "via", "vs", "vs."};
+			"if", "in", "of", "on", "or", "the", "to", "v", "v.", "via", "vs", "vs.", "be"};
 	private static List<String> smallWordList = Arrays.asList(smallWords);
 			
 	public static String toTitleCase(String string){

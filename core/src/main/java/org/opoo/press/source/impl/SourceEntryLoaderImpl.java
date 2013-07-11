@@ -30,7 +30,7 @@ import org.opoo.press.source.SourceEntryLoader;
 public class SourceEntryLoaderImpl  implements SourceEntryLoader {
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.source.SourceEntryLoader#loadSourceEntries(java.io.File, java.io.FileFilter)
+	 * @see org.opoo.press.source.SourceEntryLoader#loadSourceEntries(java.io.File, java.io.FileFilter)
 	 */
 	@Override
 	public List<SourceEntry> loadSourceEntries(File sourcePath, FileFilter fileFilter) {

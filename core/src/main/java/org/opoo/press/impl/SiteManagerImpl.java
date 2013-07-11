@@ -38,7 +38,7 @@ public class SiteManagerImpl implements SiteManager {
 	private static final Log log = LogFactory.getLog(SiteManagerImpl.class);
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.SiteManager#getSite(java.util.Map)
+	 * @see org.opoo.press.SiteManager#getSite(java.util.Map)
 	 */
 	@Override
 	public Site getSite(Map<String, Object> config) {

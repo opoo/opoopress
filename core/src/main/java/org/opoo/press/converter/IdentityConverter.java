@@ -26,7 +26,7 @@ import org.opoo.press.source.Source;
 public class IdentityConverter implements Converter {
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Ordered#getOrder()
+	 * @see org.opoo.press.Ordered#getOrder()
 	 */
 	@Override
 	public int getOrder() {
@@ -34,7 +34,6 @@ public class IdentityConverter implements Converter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Converter#matches(org.opoo.joctopress.source.Source)
 	 */
 	@Override
 	public boolean matches(Source src) {
@@ -42,7 +41,7 @@ public class IdentityConverter implements Converter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Converter#convert(java.lang.String)
+	 * @see org.opoo.press.Converter#convert(java.lang.String)
 	 */
 	@Override
 	public String convert(String content) {
@@ -50,7 +49,7 @@ public class IdentityConverter implements Converter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Converter#getOutputFileExtension(org.opoo.joctopress.source.Source)
+	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.source.Source)
 	 */
 	@Override
 	public String getOutputFileExtension(Source src) {

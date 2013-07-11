@@ -49,12 +49,4 @@ public interface Post extends Convertible, Comparable<Post>, Base{
 	 * @param post
 	 */
 	void setNext(Post post);
-	
-	
-//	public static interface Title{
-//		
-//		String toString();
-//		
-//		String getTitleCase();
-//	}
 }

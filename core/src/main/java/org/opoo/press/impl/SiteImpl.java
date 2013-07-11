@@ -594,7 +594,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getConfig()
+	 * @see org.opoo.press.Site#getConfig()
 	 */
 	@Override
 	public Map<String, Object> getConfig() {
@@ -602,7 +602,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getSouce()
+	 * @see org.opoo.press.Site#getSouce()
 	 */
 	@Override
 	public File getSource() {
@@ -610,7 +610,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getDestination()
+	 * @see org.opoo.press.Site#getDestination()
 	 */
 	@Override
 	public File getDestination() {
@@ -622,7 +622,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getTime()
+	 * @see org.opoo.press.Site#getTime()
 	 */
 	@Override
 	public Date getTime() {
@@ -634,7 +634,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Site#getRenderer()
+	 * @see org.opoo.press.Site#getRenderer()
 	 */
 	@Override
 	public Renderer getRenderer() {

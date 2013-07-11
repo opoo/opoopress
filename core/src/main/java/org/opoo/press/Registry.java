@@ -35,7 +35,5 @@ public interface Registry {
 	
 	void registerTemplateModel(String name, TemplateModel model);
 
-//	void registerRenderFilter(RenderFilter filter);
-	
 	void registerTemplateLoader(TemplateLoader loader);
 }

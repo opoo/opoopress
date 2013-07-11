@@ -63,8 +63,6 @@ public interface Site extends SiteBuilder, SiteHelper{
 	List<Category> getCategories();
 	List<Tag> getTags();
 	
-	//void build();
-	
 	Renderer getRenderer();
 	Converter getConverter(Source source);
 	Locale getLocale();

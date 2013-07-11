@@ -41,7 +41,7 @@ import org.opoo.press.util.Utils;
 public class TagGenerator implements Generator {
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Ordered#getOrder()
+	 * @see org.opoo.press.Ordered#getOrder()
 	 */
 	@Override
 	public int getOrder() {
@@ -49,7 +49,7 @@ public class TagGenerator implements Generator {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Generator#generate(org.opoo.joctopress.Site)
+	 * @see org.opoo.press.Generator#generate(org.opoo.press.Site)
 	 */
 	@Override
 	public void generate(Site site) {
@@ -107,7 +107,7 @@ public class TagGenerator implements Generator {
 		}
 		
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getSource()
+		 * @see org.opoo.press.Base#getSource()
 		 */
 		@Override
 		public Source getSource() {
@@ -115,7 +115,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getContent()
+		 * @see org.opoo.press.Base#getContent()
 		 */
 		@Override
 		public String getContent() {
@@ -123,7 +123,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getPath()
+		 * @see org.opoo.press.Base#getPath()
 		 */
 		@Override
 		public String getPath() {
@@ -131,7 +131,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getLayout()
+		 * @see org.opoo.press.Base#getLayout()
 		 */
 		@Override
 		public String getLayout() {
@@ -139,7 +139,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getPermalink()
+		 * @see org.opoo.press.Base#getPermalink()
 		 */
 		@Override
 		public String getPermalink() {
@@ -147,7 +147,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getDate()
+		 * @see org.opoo.press.Base#getDate()
 		 */
 		@Override
 		public Date getDate() {
@@ -155,7 +155,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getUpdated()
+		 * @see org.opoo.press.Base#getUpdated()
 		 */
 		@Override
 		public Date getUpdated() {
@@ -163,7 +163,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getDateFormatted()
+		 * @see org.opoo.press.Base#getDateFormatted()
 		 */
 		@Override
 		public String getDateFormatted() {
@@ -171,7 +171,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Base#getUpdatedFormatted()
+		 * @see org.opoo.press.Base#getUpdatedFormatted()
 		 */
 		@Override
 		public String getUpdatedFormatted() {
@@ -179,7 +179,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Page#getPager()
+		 * @see org.opoo.press.Page#getPager()
 		 */
 		@Override
 		public Pager getPager() {
@@ -187,14 +187,14 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.Page#setPager(org.opoo.joctopress.Pager)
+		 * @see org.opoo.press.Page#setPager(org.opoo.press.Pager)
 		 */
 		@Override
 		public void setPager(Pager pager) {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.impl.AbstractConvertible#setContent(java.lang.String)
+		 * @see org.opoo.press.impl.AbstractConvertible#setContent(java.lang.String)
 		 */
 		@Override
 		public void setContent(String content) {
@@ -202,7 +202,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.impl.AbstractConvertible#getOutputFileExtension()
+		 * @see org.opoo.press.impl.AbstractConvertible#getOutputFileExtension()
 		 */
 		@Override
 		public String getOutputFileExtension() {
@@ -210,7 +210,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.impl.AbstractConvertible#getRenderer()
+		 * @see org.opoo.press.impl.AbstractConvertible#getRenderer()
 		 */
 		@Override
 		protected Renderer getRenderer() {
@@ -218,7 +218,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.impl.AbstractConvertible#convert()
+		 * @see org.opoo.press.impl.AbstractConvertible#convert()
 		 */
 		@Override
 		protected void convert() {
@@ -226,7 +226,7 @@ public class TagGenerator implements Generator {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.opoo.joctopress.impl.AbstractConvertible#mergeRootMap(java.util.Map)
+		 * @see org.opoo.press.impl.AbstractConvertible#mergeRootMap(java.util.Map)
 		 */
 		@Override
 		protected void mergeRootMap(Map<String, Object> rootMap) {

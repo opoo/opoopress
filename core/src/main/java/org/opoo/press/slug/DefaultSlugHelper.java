@@ -24,7 +24,7 @@ import org.opoo.press.SlugHelper;
 public class DefaultSlugHelper implements SlugHelper {
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.SlugTransformer#transform(java.lang.String)
+	 * @see org.opoo.press.SlugHelper#transform(java.lang.String)
 	 */
 	@Override
 	public String toSlug(String text) {

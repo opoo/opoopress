@@ -31,7 +31,6 @@ import org.opoo.press.source.SourceEntry;
  *
  */
 public class PageImpl extends AbstractBase implements Page{
-	//private static final Log log = LogFactory.getLog(PageImpl.class);
 	private Pager pager;
 	
 	/**
@@ -83,7 +82,7 @@ public class PageImpl extends AbstractBase implements Page{
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Page#setPager(org.opoo.joctopress.Pager)
+	 * @see org.opoo.press.Page#setPager(org.opoo.press.Pager)
 	 */
 	@Override
 	public void setPager(Pager pager) {
@@ -93,7 +92,7 @@ public class PageImpl extends AbstractBase implements Page{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Page#getPager()
+	 * @see org.opoo.press.Page#getPager()
 	 */
 	@Override
 	public Pager getPager() {
@@ -129,27 +128,6 @@ public class PageImpl extends AbstractBase implements Page{
 		return false;
 	}
 
-//	/* (non-Javadoc)
-//	 * @see org.opoo.joctopress.Page#write(java.io.File)
-//	 */
-//	@Override
-//	public void write(File dest) {
-//		File file = getOutputFile(dest);
-//		FileWriter fw = null;
-//		try {
-////			FileUtils.write(file, getContent(), "UTF-8");
-//			fw = new FileWriter(file);
-//			IOUtils.write(getContent(), fw);
-//			fw.flush();
-//		} catch (IOException e) {
-//			log.error("Write page file error: " + file, e);
-//			throw new RuntimeException(e);
-//		}finally{
-//			IOUtils.closeQuietly(fw);
-//		}
-//	}
-	
-	
 	/**
 	 * 
 	 * @param current

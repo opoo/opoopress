@@ -37,7 +37,7 @@ public class MultiSiteFilter implements SiteFilter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.filter.SiteFilter#postSetup(org.opoo.joctopress.Site)
+	 * @see org.opoo.press.filter.SiteFilter#postSetup(org.opoo.press.Site)
 	 */
 	@Override
 	public void postSetup(Site site) {
@@ -49,7 +49,7 @@ public class MultiSiteFilter implements SiteFilter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.filter.SiteFilter#postRead(org.opoo.joctopress.Site)
+	 * @see org.opoo.press.filter.SiteFilter#postRead(org.opoo.press.Site)
 	 */
 	@Override
 	public void postRead(Site site) {
@@ -61,7 +61,7 @@ public class MultiSiteFilter implements SiteFilter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.filter.SiteFilter#postGenerate(org.opoo.joctopress.Site)
+	 * @see org.opoo.press.filter.SiteFilter#postGenerate(org.opoo.press.Site)
 	 */
 	@Override
 	public void postGenerate(Site site) {
@@ -73,7 +73,7 @@ public class MultiSiteFilter implements SiteFilter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.filter.SiteFilter#postRender(org.opoo.joctopress.Site)
+	 * @see org.opoo.press.filter.SiteFilter#postRender(org.opoo.press.Site)
 	 */
 	@Override
 	public void postRender(Site site) {
@@ -85,7 +85,7 @@ public class MultiSiteFilter implements SiteFilter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.filter.SiteFilter#postWrite(org.opoo.joctopress.Site)
+	 * @see org.opoo.press.filter.SiteFilter#postWrite(org.opoo.press.Site)
 	 */
 	@Override
 	public void postWrite(Site site) {
@@ -97,7 +97,7 @@ public class MultiSiteFilter implements SiteFilter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.filter.SiteFilter#getOrder()
+	 * @see org.opoo.press.filter.SiteFilter#getOrder()
 	 */
 	@Override
 	public int getOrder() {

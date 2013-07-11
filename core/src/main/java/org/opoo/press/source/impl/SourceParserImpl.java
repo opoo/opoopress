@@ -56,7 +56,7 @@ public class SourceParserImpl implements SourceParser {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.source.FrontMatterSourceParser#parse(org.opoo.joctopress.source.SourceEntry)
+	 * @see org.opoo.press.source.SourceParser#parse(org.opoo.press.source.SourceEntry)
 	 */
 	@Override
 	public Source parse(SourceEntry sourceEntry)	throws NoFrontMatterException {

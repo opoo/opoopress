@@ -32,7 +32,7 @@ import org.opoo.press.impl.PageImpl;
 public class PaginationGenerator implements Generator {
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Generator#generate(org.opoo.joctopress.Site)
+	 * @see org.opoo.press.Generator#generate(org.opoo.press.Site)
 	 */
 	@Override
 	public void generate(Site site) {
@@ -90,7 +90,7 @@ public class PaginationGenerator implements Generator {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Ordered#getOrder()
+	 * @see org.opoo.press.Ordered#getOrder()
 	 */
 	@Override
 	public int getOrder() {

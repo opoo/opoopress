@@ -25,10 +25,6 @@ public interface SiteHelper {
 	
 	String buildCanonical(String url);
 	
-//	String buildCategoryUrl(Category category);
-	
-//	String buildTagUrl(TagImpl tag);
-	
 	String toSlug(String tagName);
 	
 	String toNicename(String categoryName);

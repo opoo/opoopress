@@ -25,27 +25,19 @@ import org.opoo.press.source.SourceEntry;
  *
  */
 public interface Renderer {
-//	@Deprecated
-//	String render(String layout, String content, Map<String,Object> rootMap);
 	
-//	@Deprecated
-//	void render(String layout, String content, Map<String,Object> rootMap, Writer out);
-	
-	String render(String templateName, Map<String,Object> rootMap);
-	void render(String templateName, Map<String, Object> rootMap, Writer out);
-	
-	String renderContent(String templateContent, Map<String,Object> rootMap);
-	void renderContent(String templateContent, Map<String,Object> rootMap, Writer out);
-	
-//	String render(String layout, String content, SourceEntry entry, Map<String,Object> rootMap);
-//	void render(String layout, String content, SourceEntry entry, Map<String, Object> rootMap, Writer out);
-	
-//	 PrepareResult prepareWorkingTemplate(String layout, String content, SourceEntry entry);
-	
-	 String prepareWorkingTemplate(String layout, boolean isValidLayout, 
-			 String content, boolean isContentRenderRequired, SourceEntry entry);
+	String render(String templateName, Map<String, Object> rootMap);
 
-	 boolean isRenderRequired(String content);
-	 
-	 boolean isValidLayout(String layout);
+	void render(String templateName, Map<String, Object> rootMap, Writer out);
+
+	String renderContent(String templateContent, Map<String, Object> rootMap);
+
+	void renderContent(String templateContent, Map<String, Object> rootMap,	Writer out);
+
+	String prepareWorkingTemplate(String layout, boolean isValidLayout,
+			String content, boolean isContentRenderRequired, SourceEntry entry);
+
+	boolean isRenderRequired(String content);
+
+	boolean isValidLayout(String layout);
 }

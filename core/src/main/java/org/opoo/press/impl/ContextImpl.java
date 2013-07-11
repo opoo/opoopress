@@ -59,7 +59,7 @@ public class ContextImpl implements Context{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Context#getSiteManager()
+	 * @see org.opoo.press.Context#getSiteManager()
 	 */
 	@Override
 	public SiteManager getSiteManager() {
@@ -67,7 +67,7 @@ public class ContextImpl implements Context{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Context#getSourceEntryLoader()
+	 * @see org.opoo.press.Context#getSourceEntryLoader()
 	 */
 	@Override
 	public SourceEntryLoader getSourceEntryLoader() {
@@ -75,7 +75,7 @@ public class ContextImpl implements Context{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Context#getSourceParser()
+	 * @see org.opoo.press.Context#getSourceParser()
 	 */
 	@Override
 	public SourceParser getSourceParser() {

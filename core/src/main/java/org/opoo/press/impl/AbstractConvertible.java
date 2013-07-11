@@ -53,7 +53,7 @@ public abstract class AbstractConvertible implements Convertible {
 	public abstract Source getSource();
 	
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Convertible#render(java.util.Map)
+	 * @see org.opoo.press.Convertible#render(java.util.Map)
 	 */
 	@Override
 	public void render(Map<String, Object> rootMap) {
@@ -87,7 +87,7 @@ public abstract class AbstractConvertible implements Convertible {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Convertible#getOutputFile(java.io.File)
+	 * @see org.opoo.press.Convertible#getOutputFile(java.io.File)
 	 */
 	@Override
 	public File getOutputFile(File dest) {
@@ -100,7 +100,7 @@ public abstract class AbstractConvertible implements Convertible {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.Convertible#write(java.io.File)
+	 * @see org.opoo.press.Convertible#write(java.io.File)
 	 */
 	@Override
 	public void write(File dest) {

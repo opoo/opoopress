@@ -69,7 +69,7 @@ public class CachedSource implements Source {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.source.Source#getSourceEntry()
+	 * @see org.opoo.press.source.Source#getSourceEntry()
 	 */
 	@Override
 	public SourceEntry getSourceEntry() {
@@ -77,7 +77,7 @@ public class CachedSource implements Source {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.source.Source#getFrontMatter()
+	 * @see org.opoo.press.source.Source#getFrontMatter()
 	 */
 	@Override
 	public Map<String, Object> getMeta() {
@@ -85,7 +85,7 @@ public class CachedSource implements Source {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.source.Source#getContent()
+	 * @see org.opoo.press.source.Source#getContent()
 	 */
 	@Override
 	public String getContent() {

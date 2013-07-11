@@ -43,7 +43,7 @@ public class SimpleSource implements Source {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.source.FrontMatterSource#getSourceEntry()
+	 * @see org.opoo.press.source.Source#getSourceEntry()
 	 */
 	@Override
 	public SourceEntry getSourceEntry() {
@@ -51,7 +51,7 @@ public class SimpleSource implements Source {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.source.FrontMatterSource#getFrontMatter()
+	 * @see org.opoo.press.source.Source#getMeta()
 	 */
 	@Override
 	public Map<String, Object> getMeta() {
@@ -59,7 +59,7 @@ public class SimpleSource implements Source {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.source.FrontMatterSource#getContent()
+	 * @see org.opoo.press.source.Source#getContent()
 	 */
 	@Override
 	public String getContent() {

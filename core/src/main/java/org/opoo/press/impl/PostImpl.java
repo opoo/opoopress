@@ -167,7 +167,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 
 	
 	/* (non-Javadoc)
-	 * @see org.opoo.joctopress.impl.Convertible#convert()
+	 * @see org.opoo.press.impl.Convertible#convert()
 	 */
 	@Override
 	protected void convert() {
@@ -269,10 +269,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		//Related posts
 		//Map<String, Object> site = (Map<String, Object>) rootMap.get("site");
 		//site.put("related_posts", "");
-		//long start = System.currentTimeMillis();
 		set("related_posts", findRelatedPost());
-		//long time = System.currentTimeMillis() - start;
-		//log.info("findRelatedPost =========> " + time + "ms");
 	}
 	
 	private List<Post> findRelatedPost(){
@@ -366,45 +363,4 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	public void setTags(List<Tag> tags) {
 		this.tags = tags;
 	}
-
-
-//	/* (non-Javadoc)
-//	 * @see org.opoo.joctopress.Post#write(java.io.File)
-//	 */
-//	@Override
-//	public void write(File dest) {
-//		super.write(dest);
-//	}
-	
-	
-    /**
-     * title
-    url
-    date
-    id
-    categories
-    next
-    previous
-    tags
-    content
-    excerpt
-    path
-     */
-//	public Map<String, Object> toModel(){
-//		Map<String, Object> map = super.toModel();
-//		map.put("excerpt", getExcerpt());
-//		map.put("excerpted", isExcerpted());
-//		map.put("title", getTitle());
-//		map.put("id", getId());
-//		map.put("categories", getCategories());
-//		map.put("tags", getTags());
-//		map.put("published", isPublished());
-//		if(next != null){
-//			map.put("next", next.toModel());
-//		}
-//		if(previous != null){
-//			map.put("previous", previous.toModel());
-//		}
-//		return map;
-//	}
 }
