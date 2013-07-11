@@ -25,15 +25,15 @@
 
 # 'site' set the root directory of your site or blog, default value is the parent directory of this file. 
 # The subdirectory of 'site' are:
-# 	source：        must be exists, store all YAML front-matter header files.
-#   templates：if not exists, the lookup 'site/source/_templates' subdirectory, 
-#					one of 'site/templates' or 'site/source/_templates' must be exists.
+# 	source：        must exists, store all YAML front-matter header files.
+#   templates：if not exists, then 'site/source/_templates' subdirectory, 
+#					one of 'site/templates' or 'site/source/_templates' must exists.
 #					store all FreeMarker template files.
-#	assets:    an optional subdirectory. store all static file(JavaScripts, images, ..)
-#                   int this folder will make the generate process more faster. 
+#	assets:    an optional subdirectory. store all static files(JavaScripts, images, ..)
+#                   in this folder will make the generate process more faster. 
 # site: site
 
-# The output directory, default value is './public/site'
+# The output directory, default value is './public/${site}'. '${site}' value see above.
 # destination: public/site
 
 # The working directory, detault value is '${java.io.tmpdir}/opoopresscache'.
@@ -56,7 +56,7 @@ description: OpooPress blogging framework is a java basesd static blog/site gene
 keywords: "OpooPress, Blog"
 
 # Default date format is "ordinal" (resulting in 'Jun 20 2013', java date format pattern
-# is 'MMM d yyyy'). You can specified a custom java date format string here such as 'yyyy-MM-dd'
+# is 'MMM d yyyy'). You can specify a custom java date format style string here such as 'yyyy-MM-dd'
 date_format: "ordinal"
 
 # RSS / Email (optional) subscription links (change if using something like Feedburner)
@@ -76,8 +76,8 @@ root: /
 # category folder
 category_dir: /category
 
-# Define the mapping of category name (using as slug) and display name.
-# The categories not defined here will be appropriate process.
+# Define the mapping of category nicename and name.
+# The categories that not defined here will be appropriate processed.
 category_names: {"opoopress": "OpooPress", "blog": "Blog"}
 
 # Category title prefix.
@@ -86,7 +86,7 @@ category_title_prefix: "Category: "
 # tag directory
 tag_dir: /tag
 
-# Define the mapping of tag name (using as slug) and display name.
+# Define the mapping of tag slug and name.
 # tag_names: {}
 
 # tag title prefix
@@ -112,7 +112,7 @@ titlecase: true
 
 # list each of the sidebar modules you want to include, in the order you want them to appear.
 # To add custom asides, create files in 'site/templates/asides' or 'site/source/_templates/asides' 
-# and add them to the list like 'custom_aside_name.html'
+# and add them to the list like 'custom_aside_name.ftl'
 default_asides: [recent_posts.ftl, github.ftl, delicious.ftl, pinboard.ftl, googleplus.ftl, categories.ftl]
 
 # Each layout uses the default asides, but they can have their own asides instead. Simply uncomment the lines below
@@ -120,6 +120,7 @@ default_asides: [recent_posts.ftl, github.ftl, delicious.ftl, pinboard.ftl, goog
 # blog_index_asides:
 # post_asides:
 # page_asides:
+
 
 # ----------------------- #
 #   3rd Party Settings    #
@@ -165,6 +166,18 @@ facebook_like: false
 
 
 # ----------------------- #
+#   Deployment Settings   #
+# ----------------------- #
+# deploy_server: {id: my_vps_server, url: 'scp://my.vps.ip/var/www/html', user: 'ssh_username'}
+
+
+
+#####################################################################################
+## CONFIGURATION BELOW FOR DEVELOPER ONLY (Secondary development)
+## If you don't understand what they are, don't change them.
+#####################################################################################
+
+# ----------------------- #
 #   PlugIns Settings      #
 # ----------------------- #
 # plugins: 
@@ -185,7 +198,9 @@ generators:
 # siteFilters:
 #  - org.opoo.press.filter.FixUrlSiteFilter
 
-# SlugHelper
+# ----------------------- #
+#   SlugHelper            #
+# ----------------------- #
 slugHelper: org.opoo.press.slug.DefaultSlugHelper
 
 # ----------------------- #
