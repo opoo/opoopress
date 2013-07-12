@@ -15,7 +15,10 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import java.io.Console;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.manager.WagonConfigurationException;
@@ -36,6 +39,8 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.observers.Debug;
+import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.jsch.ScpWagon;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusConstants;
@@ -123,6 +128,7 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
 	        getLog().info( "op.deploy.skip = true: Skipping deployment" );
 	        return;
 	    }
+		
 		super.execute();
 		
 		createSite();
@@ -135,10 +141,6 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
 		File file = site.getDestination();
 		getLog().info("Destination [" + file + "]");
 		getLog().info("Site root [" + site.getRoot() + "]" );
-		
-//		deployTo( new Repository(
-//	            getDeployRepositoryID(),
-//	            appendSlash( getDeployRepositoryURL() ) ) );
 		
 		//deployTo(new Repository(id, appendSlash(url)), file);
 		deployTo(getDeployRepository(), file);
@@ -184,18 +186,15 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
 	 * @throws MojoExecutionException 
 	 */
 	private void deployTo(Repository repository, File destination) throws MojoExecutionException {
-		if ( !destination.exists() )
-        {
-            throw new MojoExecutionException( "The site does not exist, please run press:build first" );
+		if ( !destination.exists()) {
+            throw new MojoExecutionException( "The site does not exist, please run mvn op:generate first" );
         }
 		
-		if ( getLog().isDebugEnabled() )
-        {
-            getLog().debug( "Deploying to '" + repository.getUrl()
-                + "',\n    Using credentials from server id '" + repository.getId() + "'" );
+		if ( getLog().isDebugEnabled()){
+            getLog().debug( "Deploying to '" + repository.getUrl() + "',\n    Using credentials from server id '" + repository.getId() + "'" );
         }
 		
-		 deploy( destination, repository );
+		deploy( destination, repository );
 	}
 
 	private void deploy(final File directory, final Repository repository)
@@ -204,14 +203,16 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
 		// methods
 		final Wagon wagon = getWagon(repository, wagonManager);
 
-		System.out.println(wagon);
+		//Using System.console(), password will not display
+		if(System.console() != null && wagon instanceof ScpWagon){
+			((ScpWagon)wagon).setInteractiveUserInfo(new SystemConsoleInteractiveUserInfo());
+			getLog().debug("ScpWagon using SystemConsoleInteractiveUserInfo(Java 6+).");
+		}
 		
 		try {
-			configureWagon(wagon, repository.getId(), settings, container,
-					getLog());
+			configureWagon(wagon, repository.getId(), settings, container, getLog());
 		} catch (WagonConfigurationException e) {
-			throw new MojoExecutionException("Unable to configure Wagon: '"
-					+ repository.getProtocol() + "'", e);
+			throw new MojoExecutionException("Unable to configure Wagon: '"	+ repository.getProtocol() + "'", e);
 		}
 
 		String relativeDir = site.getRoot();
@@ -237,8 +238,7 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
 	}
 	
     private static Wagon getWagon( final Repository repository, final WagonManager manager )
-        throws MojoExecutionException
-    {
+        throws MojoExecutionException{
         final Wagon wagon;
 
         try{
@@ -340,17 +340,13 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
      * @return if url already ends with '/' it is returned unchanged,
      *      otherwise a '/' character is appended.
      */
-    protected static String appendSlash( final String url )
-    {
-        if ( url.endsWith( "/" ) )
-        {
-            return url;
-        }
-        else
-        {
-            return url + "/";
-        }
-    }
+	protected static String appendSlash(final String url) {
+		if (url.endsWith("/")) {
+			return url;
+		} else {
+			return url + "/";
+		}
+	}
     
     /**
      * Configure the Wagon with the information from serverConfigurationMap ( which comes from settings.xml )
@@ -363,99 +359,75 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
      * @param log
      * @throws WagonConfigurationException
      */
-    private static void configureWagon( Wagon wagon, String repositoryId, Settings settings, PlexusContainer container,
-                                        Log log )
-        throws WagonConfigurationException
-    {
+    private static void configureWagon( Wagon wagon, String repositoryId, Settings settings, PlexusContainer container, Log log )
+        throws WagonConfigurationException{
         log.debug( " configureWagon " );
 
         // MSITE-25: Make sure that the server settings are inserted
-        for ( Object o : settings.getServers() )
-        {
+        for ( Object o : settings.getServers() ) {
         	Server server = (Server) o;
             String id = server.getId();
 
             log.debug( "configureWagon server " + id );
 
-            if ( id != null && id.equals( repositoryId ) && ( server.getConfiguration() != null ) )
-            {
+            if ( id != null && id.equals( repositoryId ) && ( server.getConfiguration() != null ) ) {
                 final PlexusConfiguration plexusConf =
                     new XmlPlexusConfiguration( (Xpp3Dom) server.getConfiguration() );
 
                 ComponentConfigurator componentConfigurator = null;
-                try
-                {
+                try{
                     componentConfigurator = (ComponentConfigurator) container.lookup( ComponentConfigurator.ROLE );
                     componentConfigurator.configureComponent( wagon, plexusConf, container.getContainerRealm() );
-                }
-                catch ( final ComponentLookupException e )
-                {
+                } catch ( final ComponentLookupException e ) {
                     throw new WagonConfigurationException( repositoryId, "Unable to lookup wagon configurator."
                         + " Wagon configuration cannot be applied.", e );
-                }
-                catch ( ComponentConfigurationException e )
-                {
+                } catch ( ComponentConfigurationException e ){
                     throw new WagonConfigurationException( repositoryId, "Unable to apply wagon configuration.", e );
-                }
-                finally
-                {
-                    if ( componentConfigurator != null )
-                    {
-                        try
-                        {
-                            container.release( componentConfigurator );
-                        }
-                        catch ( ComponentLifecycleException e )
-                        {
-                            log.error( "Problem releasing configurator - ignoring: " + e.getMessage() );
-                        }
-                    }
-                }
+				} finally {
+					if (componentConfigurator != null) {
+						try {
+							container.release(componentConfigurator);
+						} catch (ComponentLifecycleException e) {
+							log.error("Problem releasing configurator - ignoring: " + e.getMessage());
+						}
+					}
+				}
             }
         }
     }
     
     
-    public static ProxyInfo getProxyInfo( Repository repository, WagonManager wagonManager )
-    {
-        ProxyInfo proxyInfo = wagonManager.getProxy( repository.getProtocol() );
+	public static ProxyInfo getProxyInfo(Repository repository, WagonManager wagonManager) {
+		ProxyInfo proxyInfo = wagonManager.getProxy(repository.getProtocol());
 
-        if ( proxyInfo == null )
-        {
-            return null;
-        }
+		if (proxyInfo == null) {
+			return null;
+		}
 
         String host = repository.getHost();
         String nonProxyHostsAsString = proxyInfo.getNonProxyHosts();
-        for ( String nonProxyHost : StringUtils.split( nonProxyHostsAsString, ",;|" ) )
-        {
-            if ( org.apache.commons.lang.StringUtils.contains( nonProxyHost, "*" ) )
-            {
+        for ( String nonProxyHost : StringUtils.split( nonProxyHostsAsString, ",;|" ) ){
+            if ( org.apache.commons.lang.StringUtils.contains( nonProxyHost, "*" ) ) {
                 // Handle wildcard at the end, beginning or middle of the nonProxyHost
                 final int pos = nonProxyHost.indexOf( '*' );
                 String nonProxyHostPrefix = nonProxyHost.substring( 0, pos );
                 String nonProxyHostSuffix = nonProxyHost.substring( pos + 1 );
                 // prefix*
                 if ( StringUtils.isNotEmpty( nonProxyHostPrefix ) && host.startsWith( nonProxyHostPrefix )
-                    && StringUtils.isEmpty( nonProxyHostSuffix ) )
-                {
+                    && StringUtils.isEmpty( nonProxyHostSuffix ) ) {
                     return null;
                 }
                 // *suffix
                 if ( StringUtils.isEmpty( nonProxyHostPrefix )
-                    && StringUtils.isNotEmpty( nonProxyHostSuffix ) && host.endsWith( nonProxyHostSuffix ) )
-                {
+                		&& StringUtils.isNotEmpty( nonProxyHostSuffix ) && host.endsWith( nonProxyHostSuffix ) ) {
                     return null;
                 }
                 // prefix*suffix
                 if ( StringUtils.isNotEmpty( nonProxyHostPrefix ) && host.startsWith( nonProxyHostPrefix )
-                    && StringUtils.isNotEmpty( nonProxyHostSuffix ) && host.endsWith( nonProxyHostSuffix ) )
-                {
+                    && StringUtils.isNotEmpty( nonProxyHostSuffix ) && host.endsWith( nonProxyHostSuffix ) ){
                     return null;
                 }
-            }
-            else if ( host.equals( nonProxyHost ) )
-            {
+            }else if ( host.equals( nonProxyHost ) ){
                 return null;
             }
         }
@@ -469,4 +441,52 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
 	public void contextualize(Context context) throws ContextException {
 		container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
 	}
+	
+	static class SystemConsoleInteractiveUserInfo implements InteractiveUserInfo {
+		private Console console = System.console();
+		/* (non-Javadoc)
+		 * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo#promptYesNo(java.lang.String)
+		 */
+		@Override
+		public boolean promptYesNo(String message) {
+			List<String> possibleValues = Arrays.asList(new String[] { "y", "n" });
+			message += " (y/n): ";
+			String line;
+
+			do {
+				line = new String(console.readLine(message));
+
+				if (line != null && !possibleValues.contains(line)) {
+					console.printf("Invalod selection");
+				}
+			} while (line == null || !possibleValues.contains(line));
+
+			return "y".equalsIgnoreCase(line);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo#showMessage(java.lang.String)
+		 */
+		@Override
+		public void showMessage(String message) {
+			console.printf("message");
+		}
+
+		/* (non-Javadoc)
+		 * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo#promptPassword(java.lang.String)
+		 */
+		@Override
+		public String promptPassword(String message) {
+			return new String(console.readPassword(message + ": "));
+		}
+
+		/* (non-Javadoc)
+		 * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo#promptPassphrase(java.lang.String)
+		 */
+		@Override
+		public String promptPassphrase(String message) {
+			return promptPassword(message);
+		}
+	}
+
 }
