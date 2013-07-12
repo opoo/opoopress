@@ -68,4 +68,10 @@ public interface Site extends SiteBuilder, SiteHelper{
 	Locale getLocale();
 	
 	Highlighter getHighlighter();
+	
+	/**
+	 * The site permalink style for all posts.
+	 * @return permalink
+	 */
+	String getPermalink();
 }

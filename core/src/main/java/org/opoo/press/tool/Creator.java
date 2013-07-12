@@ -18,12 +18,10 @@ package org.opoo.press.tool;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Site;
@@ -58,7 +56,7 @@ public class Creator {
 	}
 	
 	private File createNewFile(Site site, String title, String name, String dir, boolean draft, boolean isPost) throws Exception{
-		String permalinkStyle = (String)site.getConfig().get("permalink");
+		//String permalinkStyle = (String)site.getConfig().get("permalink");
 		
 		if(title == null){
 			throw new IllegalArgumentException("Title is required.");
@@ -85,7 +83,8 @@ public class Creator {
 			filename = NAME_FORMAT.format(date) + "-" + name + ".markdown";
 			filepath = new SimpleDateFormat(dir).format(date);
 			//url = "/" + filepath + name + "/";
-			url = buildPostUrl(date, name, filepath, permalinkStyle);
+			//If it's post, don't specify url, use site's 'permalink'
+			//url = buildPostUrl(date, name, filepath, permalinkStyle);
 		}else{
 			url = "/" + name + "/";
 		}
@@ -100,7 +99,9 @@ public class Creator {
 		lines.add("published: true");
 		lines.add("keywords: ");
 		lines.add("description: ");
-		lines.add("url: " + url);
+		if(url != null){
+			lines.add("url: " + url);
+		}
 		if(isPost){
 			lines.add("excerpt: ");
 			lines.add("categories: ");
@@ -113,7 +114,7 @@ public class Creator {
 		log.info("Write to file " + file);
 		return file;
 	}
-	
+	/*
 	private String buildPostUrl(Date date, String name, String filepath, String permalinkStyle) {
 		if(StringUtils.isBlank(permalinkStyle)){
 			return "/" + filepath + name + "/";
@@ -136,4 +137,5 @@ public class Creator {
 		permalinkStyle = StringUtils.replace(permalinkStyle, ":second", StringUtils.leftPad(second + "", 2, '0'));
 		return permalinkStyle;
 	}
+	*/
 }

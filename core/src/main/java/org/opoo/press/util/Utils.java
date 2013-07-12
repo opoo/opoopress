@@ -24,6 +24,7 @@ import java.net.URLEncoder;
  *
  */
 public abstract class Utils {
+
 	public static String encodeURL(String url){
 		try {
 			return URLEncoder.encode(url, "UTF-8");

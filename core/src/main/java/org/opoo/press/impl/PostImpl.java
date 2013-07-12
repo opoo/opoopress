@@ -16,9 +16,12 @@
 package org.opoo.press.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +38,7 @@ import org.opoo.press.source.SourceEntry;
  */
 public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	public static final String DEFAUL_EXCERPT_SEPARATOR = "<!--more-->";
+	public static Pattern FILENAME_PATTERN = Pattern.compile("[1-9][0-9]{3}[-][0-1][0-9][-][0-3][0-9][-](.*)");
 	//excerptSeparator = "<!--more-->";
 	
 	private List<String> stringCategories;
@@ -82,9 +86,10 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		
 		String url = (String)frontMatter.get("url");
 		if(url == null){
+			String permalinkStyle = getPossiblePermalink();
+			
 			SourceEntry sourceEntry = getSource().getSourceEntry();
-			String baseName = FilenameUtils.getBaseName(sourceEntry.getName());
-			/*String */url = sourceEntry.getPath() + "/" + baseName + "/";
+			url = buildPostUrl(getDate(), sourceEntry.getPath(), sourceEntry.getName(), permalinkStyle);
 		}
 		setUrl(url);
 		this.id = url;
@@ -362,5 +367,70 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	 */
 	public void setTags(List<Tag> tags) {
 		this.tags = tags;
+	}
+	
+	private String getPossiblePermalink(){
+		String link = getPermalink();
+		if(StringUtils.isNotBlank(link)){
+			return link;
+		}
+		return getSite().getPermalink();
+	}
+	
+	private static String buildPostUrl(Date date, String pathToFile, String fileName, String permalinkStyle) {
+		String baseName = FilenameUtils.getBaseName(fileName);
+		String name = baseName;
+		if(FILENAME_PATTERN.matcher(baseName).matches()){
+			name = baseName.substring(11);
+		}
+		
+		if(StringUtils.isBlank(permalinkStyle)){
+			return pathToFile + "/" + name + "/";
+		}
+		
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		int year = c.get(Calendar.YEAR);
+		int monthnum = c.get(Calendar.MONTH) + 1;
+		int day = c.get(Calendar.DAY_OF_MONTH);
+		int hour = c.get(Calendar.HOUR_OF_DAY);
+		int minute = c.get(Calendar.MINUTE);
+		int second = c.get(Calendar.SECOND);
+		
+		permalinkStyle = StringUtils.replace(permalinkStyle, ":title", name);
+		permalinkStyle = StringUtils.replace(permalinkStyle, ":year", year + "");
+		permalinkStyle = StringUtils.replace(permalinkStyle, ":month", StringUtils.leftPad(monthnum + "", 2, '0'));
+		permalinkStyle = StringUtils.replace(permalinkStyle, ":day", StringUtils.leftPad(day + "", 2, '0'));
+		permalinkStyle = StringUtils.replace(permalinkStyle, ":hour", StringUtils.leftPad(hour + "", 2, '0'));
+		permalinkStyle = StringUtils.replace(permalinkStyle, ":minute", StringUtils.leftPad(minute + "", 2, '0'));
+		permalinkStyle = StringUtils.replace(permalinkStyle, ":second", StringUtils.leftPad(second + "", 2, '0'));
+		return permalinkStyle;
+		
+//		Map<String,Object> map = new HashMap<String,Object>(postMeta);
+//		map.put("name", name);
+//		map.put("baseName", baseName);
+//		map.put("pathToFile", pathToFile);
+//		map.put("fileName", fileName);
+//		Configuration configuration = new Configuration();
+//		configuration.setObjectWrapper(new DefaultObjectWrapper());
+//		map.put("title", name);
+//		map.put("year", year + "");
+//		map.put("month", StringUtils.leftPad(monthnum + "", 2, '0'));
+//		map.put("day", StringUtils.leftPad(day + "", 2, '0'));
+//		map.put("hour", StringUtils.leftPad(hour + "", 2, '0'));
+//		map.put("minute", StringUtils.leftPad(minute + "", 2, '0'));
+//		map.put("second", StringUtils.leftPad(second + "", 2, '0'));
+//		
+//		StringReader reader = new StringReader(permalinkStyle);
+//		StringWriter writer = new StringWriter();
+//		try {
+//			Template template = new Template(pathToFile + "/" + fileName + ".title", reader, configuration);
+//			template.process(map, writer);
+//			return writer.toString();
+//		} catch (IOException e) {
+//			throw new RuntimeException(e);
+//		} catch (TemplateException e) {
+//			throw new RuntimeException(e);
+//		}
 	}
 }

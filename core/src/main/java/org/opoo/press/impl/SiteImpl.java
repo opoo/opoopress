@@ -31,7 +31,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Application;
@@ -104,6 +103,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	private Locale locale;
 	private Highlighter highlighter;
 	private SlugHelper slugHelper;
+	private String permalink;
 	
 	SiteImpl(Map<String, Object> config) {
 		super();
@@ -112,8 +112,9 @@ public class SiteImpl implements Site, SiteBuilder{
 		this.root = (String)config.get("root");
 		
 		this.showDrafts = MapUtils.get(config, "show_drafts", false);
+		this.permalink = (String) config.get("permalink");
 		this.data = new HashMap<String,Object>(config);
-
+		
 		reset();
 		setup();
 	}
@@ -706,6 +707,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 */
 	@Override
 	public String buildCanonical(String url) {
+		/*
 		String canonical = (String) config.get("url");
 		String permalink = (String) config.get("permalink");
 		String pageUrl = url;
@@ -715,6 +717,8 @@ public class SiteImpl implements Site, SiteBuilder{
 			canonical += StringUtils.removeEnd(pageUrl, "index.html");
 		}
 		return canonical;
+		*/
+		return url;
 	}
 
 	/* (non-Javadoc)
@@ -805,5 +809,14 @@ public class SiteImpl implements Site, SiteBuilder{
 		public int size() {
 			return list.size();
 		}
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Site#getPermalink()
+	 */
+	@Override
+	public String getPermalink() {
+		return permalink;
 	}
 }
