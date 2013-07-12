@@ -7,4 +7,6 @@
 target/
 .DS_Store
 core/src/test/
-exec/src/test/
+exec/
+samples/
+maven-plugins/opoopress-maven-plugin/src/test
