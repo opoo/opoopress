@@ -4,23 +4,29 @@
 # 默认（推荐）的目录结构如下
 #(.)
 # |
-# +- site
+# +- site 第一个站点(博客)，默认站点
 # |   |
-# |   +- config.yml (The site configuration file)
+# |   +- config.yml (站点的配置文件)
 # |   |
-# |   +- source (All YAML front-matter header files and some static files)
+# |   +- source (所有带有 YAML 头的站点有源文件，和静态文件)
 # |   |
-# |   +- templates (FreeMarker template ONLY)
+# |   +- templates (所有 FreeMarker 模板)
 # |   |
-# |   +- assets (All static files ONLY)
+# |   +- assets (静态资源，也可以直接放在 source 目录中)
 # |  
-# +- (site2) another site
+# +- site2 第二个站点，目录结构同第一个
 # |
-# +- public
+# +- target 目标目录，可安全删除
 #     |
-#     +- site the output directory for site
+#     +- public 静态网站（博客）的输出目录，每个站点一个子目录
+#     |    |
+#     |    +- site 第一个站点的输出目录
+#     |    |
+#     |    +- site2 第二个站点的输出目录
 #     |
-#     +- (site2) the output directory for site2
+#     +- sass-cache SASS编译时的临时缓存目录
+#     |
+#     +- work 工作目录
 #
 
 
@@ -33,13 +39,13 @@
 # site: site
 
 # 站点生成的目标目录。如果需要在本机发布（调试），该目录可以是 ‘/var/www/html’。
-# 如果不指定，默认在 ‘site’ 父级目录中创建 ‘public/${site}’ 作为该属性的值(site 变量取自上一项配置)。
-# destination: public/site
+# 如果不指定，默认在 ‘site’ 父级目录中创建 ‘target/public/${site}’ 作为该属性的值(site 变量取自上一项配置)。
+# destination: target/public/site
 
 # 工作目录。用于生成站点时的中间过程和模板缓存等。
-# 如果不指定，默认在 java 临时文件夹中创建 opoopresscache 用作工作目录。
+# 如果不指定，默认在 java 临时文件夹中创建 'opoopresscache/${site} 用作工作目录。
 # 参考 java 属性 java.io.tmpdir
-# working_dir: target/working_dir
+# working_dir: target/work/site
 
 
 # ----------------------- #
@@ -68,7 +74,7 @@ email:
 # 如果发布到子目录如 ‘http://site.com/project’ 则设置 'root: /project'
 root: /
 
-# 固定连接支持的变量  :year, :month, :day, :hour, :minute, :second, :title 
+# 固定链接支持的变量  :year, :month, :day, :hour, :minute, :second, :title 
 permalink: /article/:year/:month/:title/
 # permalink_label: "&infin;"
 # permalink_label_feed: "&#9875; 固定链接"

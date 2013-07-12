@@ -129,8 +129,6 @@ public class SiteImpl implements Site, SiteBuilder{
 			site = new File(siteDir);
 		}
 		
-//		String siteDir = (String) config.get("site");
-//		File site = new File(siteDir);
 		if(!site.exists() || !site.isDirectory() || !site.canRead()){
 			throw new IllegalArgumentException("Site directory not exists or not a directory: " + site);
 		}
@@ -158,12 +156,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(destDir != null){
 			this.dest = new File(destDir);
 		}else{
-			try {
-				this.dest = new File(site, "../public/" + site.getName());
-				dest = dest.getCanonicalFile();
-			} catch (IOException e) {
-				throw new IllegalArgumentException("Prepare destination directory error", e);
-			}
+			this.dest = new File(site.getParentFile(), "target/public/" + site.getName());
 		}
 //		if(!dest.exists()){
 //			dest.mkdirs();
@@ -173,8 +166,9 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(workingDir != null){
 			this.working = new File(workingDir);
 		}else{
-			String tmpdir = System.getProperty("java.io.tmpdir");
-			working = new File(tmpdir, "opoopress_cache/" + site.getName());
+			//String tmpdir = System.getProperty("java.io.tmpdir");
+			//this.working = new File(tmpdir, "opoopress_cache/" + site.getName());
+			this.working = new File(site.getParentFile(), "target/work/" + site.getName());
 		}
 //		if(!working.exists()){
 //			working.mkdirs();

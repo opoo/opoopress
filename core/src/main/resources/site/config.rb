@@ -5,7 +5,7 @@ sass_dir = "sass"
 css_dir = "assets/stylesheets"
 images_dir = "assets/images"
 javascripts_dir = "assets/javascripts"
-cache_dir = "../public/sass-cache"
+cache_dir = "../target/sass-cache/site"
 
 http_images_path = "/images"
 http_stylesheets_path = "/stylesheets"

@@ -5,7 +5,7 @@
 # The default layout like below
 #(.)
 # |
-# +- site
+# +- site the default site/blog directory.
 # |   |
 # |   +- config.yml (The site configuration file)
 # |   |
@@ -17,11 +17,18 @@
 # |  
 # +- (site2) another site
 # |
-# +- public
+# +- target
 #     |
-#     +- site the output directory for site
+#     +- public
+#     |    |
+#     |    +- site the output directory for site
+#     |    |
+#     |    +- (site2) the output directory for site2
 #     |
-#     +- (site2) the output directory for site2
+#     +- sass-cache
+#     |
+#     +- work
+
 
 # 'site' set the root directory of your site or blog, default value is the parent directory of this file. 
 # The subdirectory of 'site' are:
@@ -33,11 +40,11 @@
 #                   in this folder will make the generate process more faster. 
 # site: site
 
-# The output directory, default value is './public/${site}'. '${site}' value see above.
-# destination: public/site
+# The output directory, default value is '../target/public/${site}'. '${site}' value see above.
+# destination: target/public/site
 
-# The working directory, detault value is '${java.io.tmpdir}/opoopresscache'.
-# working_dir: target/working_dir
+# The working directory, default value is '../target/work/${site}''.
+# working_dir: target/work/site
 
 
 # ----------------------- #
