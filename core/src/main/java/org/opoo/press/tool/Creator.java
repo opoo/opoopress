@@ -16,16 +16,18 @@
 package org.opoo.press.tool;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opoo.press.Renderer;
 import org.opoo.press.Site;
-import org.opoo.press.source.Source;
 
 /**
  * @author Alex Lin
@@ -34,6 +36,9 @@ import org.opoo.press.source.Source;
 public class Creator {
 	private static final Log log = LogFactory.getLog(Creator.class);
 
+	public static final String DEFAULT_NEW_POST_TEMPLATE = "new_post.ftl";
+	public static final String DEFAULT_NEW_PAGE_TEMPLATE = "new_page.ftl";
+	
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private static final SimpleDateFormat NAME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	private static final String DEFAULT_POST_DIR = "'article/'yyyy/MM/";
@@ -57,7 +62,6 @@ public class Creator {
 	
 	private File createNewFile(Site site, String title, String name, String dir, boolean draft, boolean isPost) throws Exception{
 		//String permalinkStyle = (String)site.getConfig().get("permalink");
-		
 		if(title == null){
 			throw new IllegalArgumentException("Title is required.");
 		}
@@ -78,7 +82,6 @@ public class Creator {
 		Date date = new Date();
 		String filename = name + ".markdown";
 		String filepath = dir;
-		String url = null;
 		if(isPost){
 			filename = NAME_FORMAT.format(date) + "-" + name + ".markdown";
 			filepath = new SimpleDateFormat(dir).format(date);
@@ -86,31 +89,23 @@ public class Creator {
 			//If it's post, don't specify url, use site's 'permalink'
 			//url = buildPostUrl(date, name, filepath, permalinkStyle);
 		}else{
-			url = "/" + name + "/";
+			//url = "/" + name + "/";
 		}
 		File file = new File(site.getSource(), filepath + filename);
+		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
 		
-		List<String> lines = new ArrayList<String>();
-		lines.add(Source.TRIPLE_DASHED_LINE);
-		lines.add("layout: post");
-		lines.add("title: " + title);
-		lines.add("date: '" + DATE_FORMAT.format(date) + "'");
-		lines.add("comments: true");
-		lines.add("published: true");
-		lines.add("keywords: ");
-		lines.add("description: ");
-		if(url != null){
-			lines.add("url: " + url);
-		}
-		if(isPost){
-			lines.add("excerpt: ");
-			lines.add("categories: ");
-			lines.add("tags: ");
-		}
-		lines.add(Source.TRIPLE_DASHED_LINE);
-		lines.add("");
-
-		FileUtils.writeLines(file, "UTF-8", lines);
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("title", title);
+		map.put("name", name);
+		map.put("date", DATE_FORMAT.format(date) );
+		map.put("filename", filename);
+		map.put("filepath", filepath);
+		map.put("site", site);
+		
+		String template = getTemplate(site, isPost);
+		Renderer renderer = site.getRenderer();
+		renderer.render(template, map, writer);
+		
 		log.info("Write to file " + file);
 		return file;
 	}
@@ -138,4 +133,20 @@ public class Creator {
 		return permalinkStyle;
 	}
 	*/
+
+	private String getTemplate(Site site, boolean isPost) {
+		if(isPost){
+			String template = (String)site.getConfig().get("new_post_template");
+			if(StringUtils.isBlank(template)){
+				template = DEFAULT_NEW_POST_TEMPLATE;
+			}
+			return template;
+		}else{
+			String template = (String)site.getConfig().get("new_page_template");
+			if(StringUtils.isBlank(template)){
+				template = DEFAULT_NEW_PAGE_TEMPLATE;
+			}
+			return template;
+		}
+	}
 }

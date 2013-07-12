@@ -68,6 +68,10 @@ public class SourceParserImpl implements SourceParser {
 			stream = new FileInputStream(sourceEntry.getFile());
 			LineIterator iterator = IOUtils.lineIterator(stream, "UTF-8");
 
+			if(!iterator.hasNext()){
+				throw new RuntimeException("File not content: " + sourceEntry.getFile());
+			}
+			
 			String line = iterator.next();
 			if(!isFrontMatterStartOrEndLine(line)){
 				log.debug("Maybe a static file: " + sourceEntry.getFile());

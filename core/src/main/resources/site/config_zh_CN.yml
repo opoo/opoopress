@@ -68,8 +68,8 @@ email:
 # 如果发布到子目录如 ‘http://site.com/project’ 则设置 'root: /project'
 root: /
 
-# 暂不支持，根据 post 源文件的位置决定了固定链接的格式
-# permalink:
+# 固定连接支持的变量  :year, :month, :day, :hour, :minute, :second, :title 
+permalink: /article/:year/:month/:title/
 # permalink_label: "&infin;"
 # permalink_label_feed: "&#9875; 固定链接"
 
