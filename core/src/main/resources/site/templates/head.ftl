@@ -21,7 +21,7 @@
   <meta name="HandheldFriendly" content="True">
   <meta name="MobileOptimized" content="320">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="canonical" href="${ canonical }">
+  <!-- <link rel="canonical" href="${ canonical }"> -->
   <link href="${ root_url }/favicon.ico" rel="icon">
   <link href="${ root_url }/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="${ site.subscribe_rss }" rel="alternate" title="${site.title}" type="application/atom+xml">
