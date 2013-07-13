@@ -27,6 +27,8 @@ import org.opoo.press.importer.ImportException;
 import org.opoo.press.importer.WordPressImporter;
 
 /**
+ * Import posts and pages from the XML file that exported from WordPress.
+ * 
  * @author Alex Lin
  * @goal wordpress-import
  */

@@ -20,6 +20,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.tool.Cleaner;
 
 /**
+ * Clean site/blog templates cache and temp files.
+ * 
  * @author Alex Lin
  * @goal clean
  */

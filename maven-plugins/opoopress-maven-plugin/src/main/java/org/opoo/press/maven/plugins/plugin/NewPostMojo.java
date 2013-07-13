@@ -21,6 +21,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.tool.Creator;
 
 /**
+ * Create new post file.
+ * 
  * @author Alex Lin
  * @goal new-post
  */

@@ -42,6 +42,8 @@ import org.opoo.press.tool.PreviewMonitor;
 import org.opoo.press.tool.PreviewServer;
 
 /**
+ * Start a web server for preview, monitor the site for changes and generate whenever it does.
+ * 
  * @author Alex Lin
  * @goal preview
  */

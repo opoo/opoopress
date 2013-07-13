@@ -58,6 +58,8 @@ import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 /**
+ * Deploy site/blog to remote or local server.
+ * 
  * @author Alex Lin
  * @goal deploy
  */

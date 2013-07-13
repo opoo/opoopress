@@ -19,6 +19,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
+ * Generate static site/blog.
+ * 
  * @author Alex Lin
  * @goal generate
  */

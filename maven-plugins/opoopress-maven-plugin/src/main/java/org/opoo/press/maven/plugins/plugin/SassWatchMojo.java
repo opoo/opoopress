@@ -19,6 +19,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
+ * Watch the SASS for changes and compile whenever it does. Check <code>compass watch</code>
+ * on http://compass-style.org/help/tutorials/command-line/ for more details.
+ * 
  * @author Alex Lin
  * @goal sass-watch
  */

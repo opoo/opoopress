@@ -25,6 +25,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.tool.Installer;
 
 /**
+ * Install and initialize site/blog.
+ * 
  * @author Alex Lin
  * @goal install
  */
