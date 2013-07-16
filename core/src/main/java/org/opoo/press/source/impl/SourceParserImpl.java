@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opoo.press.source.NoFrontMatterException;
@@ -73,7 +74,7 @@ public class SourceParserImpl implements SourceParser {
 			}
 			
 			String line = iterator.next();
-			if(!isFrontMatterStartOrEndLine(line)){
+			if(!isFrontMatterStartLine(line, sourceEntry)){
 				log.debug("Maybe a static file: " + sourceEntry.getFile());
 				throw new NoFrontMatterException(sourceEntry);
 			}
@@ -82,7 +83,7 @@ public class SourceParserImpl implements SourceParser {
 			//process headers
 			while(iterator.hasNext()){
 				line = iterator.next();
-				if(isFrontMatterStartOrEndLine(line)){
+				if(isFrontMatterEndLine(line)){
 					hasFrontMatterEndLine = true;
 					currentList = contentLines;
 					continue;
@@ -119,7 +120,19 @@ public class SourceParserImpl implements SourceParser {
 		return new SimpleSource(sourceEntry, map, content);
 	}
 	
-	private static boolean isFrontMatterStartOrEndLine(String line){
+	private static boolean isFrontMatterStartLine(String line, SourceEntry sourceEntry){
+		if( Source.TRIPLE_DASHED_LINE.equals(line)){
+			return true;
+		}
+		if(line.length() == 4){
+			if(65279 == line.charAt(0) && Source.TRIPLE_DASHED_LINE.equals(line.substring(1))){
+				log.debug("UTF-8 with BOM file: " + sourceEntry.getFile());
+				return true; 
+			}
+		}
+		return false;
+	}
+	private static boolean isFrontMatterEndLine(String line){
 		return Source.TRIPLE_DASHED_LINE.equals(line);
 	}
 }

@@ -77,7 +77,13 @@ public class TxtmarkMarkdownConverter implements Converter, Initializable {
 	@Override
 	public boolean matches(Source src) {
 		String name = src.getSourceEntry().getName().toLowerCase();
-		return FilenameUtils.isExtension(name, new String[]{"markdown", "md"});
+		if(FilenameUtils.isExtension(name, new String[]{"markdown", "md"})){
+			return true;
+		}
+		if("post".equals(src.getMeta().get("layout")) && FilenameUtils.isExtension(name, "txt")){
+			return true;
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
