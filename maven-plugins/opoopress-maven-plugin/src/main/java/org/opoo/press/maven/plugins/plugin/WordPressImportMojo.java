@@ -34,36 +34,39 @@ import org.opoo.press.importer.WordPressImporter;
  */
 public class WordPressImportMojo extends AbstractPressMojo{
 	/**
-	 * 
+	 * The XML file that exported from WordPress.
 	 * @parameter expression="${file}"
 	 */
 	protected File file;
 	
 	/**
-	 * 
+	 * Set this to 'true' to import drafts.
 	 * @parameter expression="${import-drafts}" default-value="false"
 	 */
 	private boolean importDrafts = false;
 	
 	/**
-	 * 
+	 * Set this to 'true' to import author info.
 	 * @parameter expression="${import-author}" default-value="false"
 	 */
 	private boolean importAuthor = false;
 	
 	/**
+	 * The permalink style of WordPress.
+	 * Such as <code>/%year%/%monthnum%/%postname%/%post_id%/</code>.
 	 * 
 	 * @parameter expression="${permalink-style}"
 	 */
 	private String permalinkStyle;
 
 	/**
-	 * 
+	 * The directory that imported files to write.
 	 * @parameter expression="${import-dir}"
 	 */
 	private String importDir;
 	
 	/**
+	 * 
 	 * @parameter expression="${replace-entries}"
 	 */
 	private Map<String,String> replaceEntries;

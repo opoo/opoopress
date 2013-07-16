@@ -34,6 +34,7 @@ public class AbstractPressMojo extends AbstractMojo {
 	 protected Site site;
 	 
 	/**
+	 * Site directory.
 	 * 
 	 * @parameter expression="${site}" alias="blog" default-value="${basedir}/site"
 	 */
