@@ -99,4 +99,8 @@ public class TagImpl implements Tag {
 	public List<Post> getPosts() {
 		return posts;
 	}
+	
+	public int getPostSize(){
+		return posts.size();
+	}
 }

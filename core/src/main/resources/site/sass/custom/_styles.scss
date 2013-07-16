@@ -77,3 +77,38 @@ div.pagination span.pagebar{float:left;}
 ul.children1 {padding-left:1.5em;}
 ul.children2 {padding-left:1.8em;}
 ul.children3 {padding-left:2.1em;}
+
+#tags {
+	/* color: #888; */
+	padding: 6px 0px;
+}
+
+#tags li {
+	display: inline-block;
+	//background: #F7F7F7;
+	padding: 3px;
+	line-height: 100%;
+	@include border-radius(3px);
+	border: solid 1px #CCCCCC;
+	border-color: rgba(0, 0, 0, .2);
+	margin: 2px 0;
+}
+
+#tags li a {
+	text-decoration: none;
+}
+
+.right {
+	float:right;
+}
+
+.count{
+	//background: #bbb;
+	background-color: #bbb;
+	@include border-radius(3px);
+	color: #fff;
+	font-size: 90%;
+	font-weight: normal;
+	padding: 0.1px .8ex;
+	margin-left:0.5em;
+}
