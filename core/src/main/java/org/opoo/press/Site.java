@@ -74,4 +74,20 @@ public interface Site extends SiteBuilder, SiteHelper{
 	 * @return permalink
 	 */
 	String getPermalink();
+	
+	/**
+	 * Get value from configuration file or site variables.
+	 * @param name
+	 * @return value
+	 * @see #set(String, Object)
+	 */
+	Object get(String name);
+	
+	/**
+	 * Set a variable for site.
+	 * @param name
+	 * @param value
+	 * @see #get(String)
+	 */
+	void set(String name, Object value);
 }

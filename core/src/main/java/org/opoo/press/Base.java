@@ -110,4 +110,19 @@ public interface Base {
 	 * @see #getUpdated()
 	 */
 	String getUpdatedFormatted();
+	
+	/**
+	 * Get meta data.
+	 * @param name
+	 * @return
+	 */
+	Object get(String name);
+	
+	/**
+	 * Set meta data.
+	 * @param name
+	 * @param value
+	 * @see #get(String)
+	 */
+	void set(String name, Object value);
 }

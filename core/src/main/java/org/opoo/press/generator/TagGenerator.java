@@ -273,5 +273,12 @@ public class TagGenerator implements Generator {
 		public boolean isComments(){
 			return false;
 		}
+
+		/* (non-Javadoc)
+		 * @see org.opoo.press.Base#set(java.lang.String, java.lang.Object)
+		 */
+		@Override
+		public void set(String name, Object value) {
+		}
 	}
 }

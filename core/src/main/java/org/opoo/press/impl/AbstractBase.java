@@ -72,7 +72,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 		init();
 	}
 	
-	protected void set(String name, Object value){
+	public void set(String name, Object value){
 		MapUtils.put(data, name, value);
 	}
 	

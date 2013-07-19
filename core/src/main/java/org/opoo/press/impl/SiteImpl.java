@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -321,6 +322,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 * @param posts2
 	 */
 	private void setPostNextOrPrevious(List<Post> posts) {
+		/*
 		for(int i = 0 ; i < posts.size() ; i++){
 			Post post = posts.get(i);
 			if(i > 0){
@@ -329,6 +331,17 @@ public class SiteImpl implements Site, SiteBuilder{
 			if(i < posts.size() - 1){
 				post.setPrevious(posts.get(i + 1));
 			}
+		}*/
+		Iterator<Post> it = posts.iterator();
+		Post prev = null;
+		Post curr = null;
+		while(it.hasNext()){
+			curr = it.next();
+			if(prev != null){
+				prev.setPrevious(curr);
+				curr.setNext(prev);
+			}
+			prev = curr;
 		}
 	}
 
@@ -626,6 +639,11 @@ public class SiteImpl implements Site, SiteBuilder{
 
 	public Object get(String name){
 		return data.get(name);
+	}
+	
+	public void set(String name, Object value){
+		data.put(name, value);
+		//MapUtils.put(data, name, value);
 	}
 
 	/* (non-Javadoc)
