@@ -1,5 +1,4 @@
-About OpooPress
-=========
+# About OpooPress
 
 OpooPress Blogging Framework is a java based blog-ware static site generator. The site is [www.opoopress.com](http://www.opoopress.com/).
 
@@ -24,16 +23,16 @@ OpooPress also have these features:
 - Customisable templates ([FreeMarker](http://www.freemarker.org/))
 - Supports custom meta data that is exposed to templates, pages or posts
 
-### Post Format
+## Post Format
 - Markdown by [Txtmark](https://github.com/rjeschke/txtmark) - (\*.md, \*.markdown)
 - HTML - (\*.html)
 - Textile (*in progress*)
 
-### Migration
+## Migration
 - Octopress
 - WordPress
 
-### Deployment
+## Deployment
 - File
 - HTTP
 - FTP
@@ -41,7 +40,7 @@ OpooPress also have these features:
 - WebDAV
 - Github Pages (*in progress*)
 
-## Getting Started
+# Getting Started
 Here is a OpooPress site - [Opoo.org](http://opoo.org/), have a look first.
 
 The first package has be released. It's easy to set up and deploy, Just check out the [docs](http://www.opoopress.com/docs/).
@@ -49,10 +48,10 @@ The first package has be released. It's easy to set up and deploy, Just check ou
 <a class="download-button" href="http://www.opoopress.com/download/">Download OpooPress</a>
 
 
-### Source Code
+## Source Code
 You can access the source code at: [https://github.com/opoo/opoopress](https://github.com/opoo/opoopress)
 
-### Feedback / Contact
+## Feedback / Contact
 If you want to see new features in OpooPress, don't hesitate to offer suggestions, clone the repository on GitHub. If you find errors you can [post issues](https://github.com/opoo/opoopress/issues) or send me a pull request.
 
 Send a message to `opoo#users.sf.net` with any requests/feedback!
