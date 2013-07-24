@@ -26,7 +26,7 @@ OpooPress also have these features:
 ## Post Format
 - [Markdown](http://daringfireball.net/projects/markdown/) by [Txtmark](https://github.com/rjeschke/txtmark) - (\*.md, \*.markdown)
 - HTML - (\*.html)
-- [Textile]((http://textile.sitemonks.com/) by [Textile-j](https://textile-j.dev.java.net/) - (\*.textile)
+- [Textile](http://textile.sitemonks.com/) by [Textile-j](https://textile-j.dev.java.net/) - (\*.textile)
 
 ## Migration
 - Octopress
