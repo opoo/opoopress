@@ -16,10 +16,10 @@
 <#if description??>
   <meta name="description" content="${description}">
 </#if>
-
   <#if page.keywords??><meta name="keywords" content="${ page.keywords }"></#if>
   <meta name="HandheldFriendly" content="True">
   <meta name="MobileOptimized" content="320">
+  <meta name="OpooPressSiteRoot" content="${ root_url }">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- <link rel="canonical" href="${ canonical }"> -->
   <link href="${ root_url }/favicon.ico" rel="icon">
@@ -30,7 +30,7 @@
   <script src="${ root_url }/javascripts/respond.min.js"></script><![endif]-->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="${root_url}/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="${ root_url }/javascripts/octopress.js" type="text/javascript"></script>
+  <script src="${ root_url }/javascripts/opoopress.js" type="text/javascript"></script>
   <#include "custom/head.ftl">
   <#-- move to footer -->
   <#-- <#include "google_analytics.ftl"> -->

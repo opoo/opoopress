@@ -117,6 +117,9 @@ excerpt_separator: "<!--more-->"
 # Converts page and post titles to titlecase
 titlecase: true
 
+# Main navigation
+navs: {"Blog": "/", "Archices": "/archives/", "Sample Page": "/sample-page.html", "About": "/about/"}
+
 # list each of the sidebar modules you want to include, in the order you want them to appear.
 # To add custom asides, create files in 'site/templates/asides' or 'site/source/_templates/asides' 
 # and add them to the list like 'custom_aside_name.ftl'

@@ -1,21 +1,26 @@
 /**
- * Octopress.org
- * MIT License
+ * OpooPress by Alex Lin
+ * Licensed under the Apache License, Version 2.0
  */
-function getNav() {
-  var mainNav = $('ul.main-navigation, ul[role=main-navigation]').before('<fieldset class="mobile-nav">')
-  var mobileNav = $('fieldset.mobile-nav').append('<select>');
-  mobileNav.find('select').append('<option value="">Navigate&hellip;</option>');
-  var addOption = function(i, option) {
-    mobileNav.find('select').append('<option value="' + this.href + '">&raquo; ' + $(this).text() + '</option>');
-  }
-  mainNav.find('a').each(addOption);
-  $('ul.subscription a').each(addOption);
-  mobileNav.find('select').bind('change', function(event) {
-    if (event.target.value) { window.location.href = event.target.value; }
-  });
+function getSiteRoot(){
+	if(!window.__opoopressSiteRoot__){
+		window.__opoopressSiteRoot__ = "";
+		var meta =$("meta[name='OpooPressSiteRoot']");
+		if(meta){
+			var content = meta.attr('content');
+			if(content){
+				window.__opoopressSiteRoot__ = content;
+			}
+		}
+	}
+	return window.__opoopressSiteRoot__;
 }
 
+/**
+ * Octopress by Brandon Mathis
+ * Licensed under the MIT License
+ * http://octopress.org/
+ */
 function addSidebarToggler() {
   if(!$('body').hasClass('sidebar-footer')) {
     $('#content').append('<span class="toggle-sidebar"></span>');
@@ -74,8 +79,9 @@ function addCodeLineNumbers() {
 }
 
 function flashVideoFallback(){
-  var flashplayerlocation = "/assets/jwplayer/player.swf",
-      flashplayerskin = "/assets/jwplayer/glow/glow.xml";
+  var root = getSiteRoot();
+  var flashplayerlocation = root + "/assets/jwplayer/player.swf",
+      flashplayerskin = root + "/assets/jwplayer/glow/glow.xml";
   $('video').each(function(i, video){
     video = $(video);
     if (!Modernizr.video.h264 && swfobject.getFlashPlayerVersion() || window.location.hash.indexOf("flash-test") !== -1){
@@ -118,7 +124,6 @@ $('document').ready(function() {
   wrapFlashVideos();
   flashVideoFallback();
   addCodeLineNumbers();
-  getNav();
   addSidebarToggler();
 });
 

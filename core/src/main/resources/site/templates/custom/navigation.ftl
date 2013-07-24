@@ -1,6 +1,15 @@
+<fieldset class="mobile-nav">
+  <select onchange="if (this.value) { window.location.href = this.value;}">
+    <option value=""><@i18n.msg "Navigate"/>&hellip;</option>
+<#list site.navs?keys as navLabel>
+    <#assign navUrl = site.navs[navLabel]>
+    <option value="${ root_url }${navUrl}"<#if (page.url) == navUrl> selected="selected"</#if>>&raquo; ${navLabel}</option>
+    </#list>
+  </select>
+</fieldset>
+
 <ul class="main-navigation">
-  <li><a href="${ root_url }/">Blog</a></li>
-  <li><a href="${ root_url }/archives/">Archives</a></li>
-  <li><a href="${ root_url }/sample-page.html">Sample Page</a></li>
-  <li><a href="${ root_url }/about/">About</a></li>
+<#list site.navs?keys as navLabel>
+<li><a href="${ root_url }${site.navs[navLabel]}">${navLabel}</a></li>
+</#list>
 </ul>

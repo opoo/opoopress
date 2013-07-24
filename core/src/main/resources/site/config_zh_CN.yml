@@ -116,6 +116,9 @@ excerpt_separator: "<!--more-->"
 # 文章或者页面的标题是否使用 titlecase
 titlecase: true
 
+# 主导航菜单
+navs: {"文章": "/", "归档": "/archives/", "示例页面": "/sample-page.html", "关于": "/about/"}
+
 # 默认的侧边栏所包含的块。
 # 被设置的块应该位于  [模板路径]/asides 目录，例如 'site/templates/asides' 或者 'site/source/_templates/asides'.
 default_asides: [recent_posts.ftl, github.ftl, delicious.ftl, pinboard.ftl, googleplus.ftl, categories.ftl]

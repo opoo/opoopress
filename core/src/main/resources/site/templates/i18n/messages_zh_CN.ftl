@@ -12,6 +12,7 @@
 "Search" : "搜索",
 "Tags" : "标签",
 "Categories" : "分类",
-"Filed under" : "分类"
+"Filed under" : "分类",
+"Navigate" : "导航"
 }>
 <#macro msg name>${__m_s_g__[name]!name}</#macro>
