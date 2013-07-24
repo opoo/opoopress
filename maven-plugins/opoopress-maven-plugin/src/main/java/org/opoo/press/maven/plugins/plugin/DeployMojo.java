@@ -63,7 +63,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
  * @author Alex Lin
  * @goal deploy
  */
-public class DeployMojo extends AbstractGenerateMojo implements Contextualizable{
+public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 
    /**
     * Whether to run the "chmod" command on the remote site after the deploy.
@@ -93,19 +93,6 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
    private String chmodOptions;
 
    /**
-    * Set this to 'true' to skip deployment.
-    *
-    * @parameter expression="${op.deploy.skip}" default-value="false"
-    * @since 2.4
-    */
-   private boolean skipDeploy;
-   
-	/**
-	 * @parameter expression="${op.generate.skip}" default-value="true"
-	 */
-	protected boolean skipGenerate;
-
-   /**
     * @component
     */
    private WagonManager wagonManager;
@@ -121,32 +108,9 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
    
    private PlexusContainer container;
    
-	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.press.AbstractPressMojo#execute()
-	 */
-	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		if ( skipDeploy ){
-	        getLog().info( "op.deploy.skip = true: Skipping deployment" );
-	        return;
-	    }
-		
-		super.execute();
-		
-		createSite();
-		if(skipGenerate){
-			getLog().info( "op.generate.skip = true: Skipping generating" );
-		}else{
-			generate();
-		}
-		
-		File file = site.getDestination();
-		getLog().info("Destination [" + file + "]");
-		getLog().info("Site root [" + site.getRoot() + "]" );
-		
-		//deployTo(new Repository(id, appendSlash(url)), file);
-		deployTo(getDeployRepository(), file);
-	}
+   protected void deployTo(File dest) throws MojoExecutionException, MojoFailureException{
+	   deployTo(getDeployRepository(), dest);
+   }
 	
 	@SuppressWarnings("unchecked")
 	private Repository getDeployRepository() throws MojoExecutionException, MojoFailureException{
@@ -490,5 +454,4 @@ public class DeployMojo extends AbstractGenerateMojo implements Contextualizable
 			return promptPassword(message);
 		}
 	}
-
 }
