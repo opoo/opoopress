@@ -199,6 +199,7 @@ facebook_like: false
 # ------------------------ #
 converters:
   - org.opoo.press.converter.TxtmarkMarkdownConverter
+  - org.opoo.press.converter.TextilejConverter
 
 generators:
   - org.opoo.press.generator.PaginationGenerator
