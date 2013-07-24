@@ -6,7 +6,7 @@ Here are some main features:
 
 - **Simple** - No more databases, no more runtime language (such as php, java), a web server is sufficient
 - **Fast** - A very fast generate engine by Java, [generate 1000 posts in several seconds](http://opoo.org/why-i-develop-opoopress/)
-- **Static** - Markdown, FreeMarker, HTML & CSS & Images go in, completely static sites come out ready for deployment to anywhere
+- **Static** - Markdown/Textile, FreeMarker, HTML & CSS & Images go in, completely static sites come out ready for deployment to anywhere
 - **Blog-aware** - Permalinks, tree categories, tags, pages, posts, archives, RSS feed.
 
 OpooPress also have these features:
@@ -24,9 +24,9 @@ OpooPress also have these features:
 - Supports custom meta data that is exposed to templates, pages or posts
 
 ## Post Format
-- Markdown by [Txtmark](https://github.com/rjeschke/txtmark) - (\*.md, \*.markdown)
+- [Markdown](http://daringfireball.net/projects/markdown/) by [Txtmark](https://github.com/rjeschke/txtmark) - (\*.md, \*.markdown)
 - HTML - (\*.html)
-- Textile (*in progress*)
+- [Textile]((http://textile.sitemonks.com/) by [Textile-j](https://textile-j.dev.java.net/) - (\*.textile)
 
 ## Migration
 - Octopress
@@ -38,7 +38,7 @@ OpooPress also have these features:
 - FTP
 - SSH/SCP
 - WebDAV
-- Github Pages (*in progress*)
+- [Github Pages](http://www.opoopress.com/zh/docs/github-pages/)
 
 # Getting Started
 Here is a OpooPress site - [Opoo.org](http://opoo.org/), have a look first.
