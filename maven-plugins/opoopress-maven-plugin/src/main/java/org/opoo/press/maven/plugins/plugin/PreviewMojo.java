@@ -80,6 +80,18 @@ public class PreviewMojo extends AbstractGenerateMojo{
 	private File sassDir;
 	
 	/* (non-Javadoc)
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractGenerateMojo#generate()
+	 */
+	@Override
+	protected void generate() {
+		try{
+			super.generate();
+		}catch(Exception e){
+			getLog().error("Generate failed.", e);
+		}
+	}
+
+	/* (non-Javadoc)
 	 * @see org.opoo.press.maven.plugins.press.GenerateMojo#execute()
 	 */
 	@Override

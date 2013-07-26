@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Alex Lin.
+ * Copyright 2013 Alex Lin and Apache maven-site-plugin project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
-import java.io.Console;
 import java.io.File;
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.reflect.MethodUtils;
 import org.apache.maven.artifact.manager.WagonConfigurationException;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
@@ -39,8 +39,6 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.observers.Debug;
-import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
-import org.apache.maven.wagon.providers.ssh.jsch.ScpWagon;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusConstants;
@@ -56,140 +54,83 @@ import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.opoo.maven.plugins.logging.LogAware;
+import org.opoo.util.ChainingClassLoader;
 
 /**
  * Deploy site/blog to remote or local server.
  * 
  * @author Alex Lin
+ * @author <a href="mailto:michal@org.codehaus.org">Michal Maczka</a>
+ * 
  * @goal deploy
  */
 public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
-
-   /**
-    * Whether to run the "chmod" command on the remote site after the deploy.
-    * Defaults to "true".
-    *
-    * @parameter expression="${op.chmod}" default-value="true"
-    * @since 2.1
-    */
-   private boolean chmod;
-
-   /**
-    * The mode used by the "chmod" command. Only used if chmod = true.
-    * Defaults to "g+w,a+rX".
-    *
-    * @parameter expression="${op.chmod.mode}" default-value="g+w,a+rX"
-    * @since 2.1
-    */
-   private String chmodMode;
-
-   /**
-    * The options used by the "chmod" command. Only used if chmod = true.
-    * Defaults to "-Rf".
-    *
-    * @parameter expression="${op.chmod.options}" default-value="-Rf"
-    * @since 2.1
-    */
-   private String chmodOptions;
-
-   /**
-    * @component
-    */
-   private WagonManager wagonManager;
-   
-   /**
-    * The current user system settings for use in Maven.
-    *
-    * @parameter expression="${settings}"
-    * @required
-    * @readonly
-    */
-   private Settings settings;
-   
-   private PlexusContainer container;
-   
-   protected void deployTo(File dest) throws MojoExecutionException, MojoFailureException{
-	   deployTo(getDeployRepository(), dest);
-   }
-	
-	@SuppressWarnings("unchecked")
-	private Repository getDeployRepository() throws MojoExecutionException, MojoFailureException{
-		Map<String, Object> config = site.getConfig();
-		
-		Object server = config.get("deploy_server");
-		if(server == null){
-			throw new MojoFailureException("Deploy server not found in config.yml");
-		}
-		
-		String serverId = null;
-		Map<String,String> repo = null;
-		if(server instanceof Map){
-			repo = (Map<String, String>) server;
-		}else if(server instanceof String){
-			serverId = (String) server;
-			repo = (Map<String, String>) config.get(serverId);
-			if(repo == null){
-				throw new MojoFailureException("Deploy server not found: " + server);
-			}
-		}else{
-			throw new MojoFailureException("Deploy server not found in config.yml");
-		}
-		
-		String id = repo.get("id");
-		String url = repo.get("url");
-		if(id == null){
-			id = serverId;
-		}
-		if(id == null || url == null){
-			throw new MojoFailureException("Deploy server configuration must contains 'id' and 'url': " + server);
-		}
-		
-		return new Repository(id, appendSlash(url));
-	}
+	/**
+	 * Whether to run the "chmod" command on the remote site after the deploy.
+	 * Defaults to "true".
+	 * 
+	 * @parameter expression="${op.chmod}" default-value="true"
+	 * @since 2.1
+	 */
+	private boolean chmod;
 
 	/**
-	 * @param repository
-	 * @throws MojoExecutionException 
+	 * The mode used by the "chmod" command. Only used if chmod = true. Defaults
+	 * to "g+w,a+rX".
+	 * 
+	 * @parameter expression="${op.chmod.mode}" default-value="g+w,a+rX"
+	 * @since 2.1
 	 */
-	private void deployTo(Repository repository, File destination) throws MojoExecutionException {
-		if ( !destination.exists()) {
-            throw new MojoExecutionException( "The site does not exist, please run mvn op:generate first" );
-        }
-		
-		if ( getLog().isDebugEnabled()){
-            getLog().debug( "Deploying to '" + repository.getUrl() + "',\n    Using credentials from server id '" + repository.getId() + "'" );
-        }
-		
-		deploy( destination, repository );
-	}
+	private String chmodMode;
 
-	private void deploy(final File directory, final Repository repository)
+	/**
+	 * The options used by the "chmod" command. Only used if chmod = true.
+	 * Defaults to "-Rf".
+	 * 
+	 * @parameter expression="${op.chmod.options}" default-value="-Rf"
+	 * @since 2.1
+	 */
+	private String chmodOptions;
+
+	/**
+	 * @component
+	 */
+	private WagonManager wagonManager;
+   
+	/**
+	 * The current user system settings for use in Maven.
+	 * 
+	 * @parameter expression="${settings}"
+	 * @required
+	 * @readonly
+	 */
+	private Settings settings;
+   
+   	private PlexusContainer container;
+   
+	protected void deploy(final File directory, final Repository repository)
 			throws MojoExecutionException {
 		// TODO: work on moving this into the deployer like the other deploy
 		// methods
 		final Wagon wagon = getWagon(repository, wagonManager);
-
-		//Using System.console(), password will not display
-		if(System.console() != null && wagon instanceof ScpWagon){
-			((ScpWagon)wagon).setInteractiveUserInfo(new SystemConsoleInteractiveUserInfo());
-			getLog().debug("ScpWagon using SystemConsoleInteractiveUserInfo(Java 6+).");
-		}
 		
+		configureScpWagonIfRequired(wagon);
+
 		try {
 			configureWagon(wagon, repository.getId(), settings, container, getLog());
 		} catch (WagonConfigurationException e) {
-			throw new MojoExecutionException("Unable to configure Wagon: '"	+ repository.getProtocol() + "'", e);
+			throw new MojoExecutionException("Unable to configure Wagon: '" + repository.getProtocol() + "'", e);
 		}
 
 		String relativeDir = site.getRoot();
-		if("".equals(relativeDir)){
+		if ("".equals(relativeDir)) {
 			relativeDir = "./";
 		}
-		
+
 		try {
 			final ProxyInfo proxyInfo = getProxyInfo(repository, wagonManager);
-			
-			push(directory, repository, wagonManager, wagon, proxyInfo,	relativeDir, getLog());
+			push(directory, repository, wagonManager, wagon, proxyInfo, relativeDir, getLog());
 
 			if (chmod) {
 				chmod(wagon, repository, chmodOptions, chmodMode);
@@ -202,8 +143,58 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 			}
 		}
 	}
-	
-    private static Wagon getWagon( final Repository repository, final WagonManager manager )
+
+    /**
+	 * @param wagon
+	 */
+	private void configureScpWagonIfRequired(Wagon wagon) {
+		getLog().debug("configureScpWagonIfRequired: " + wagon.getClass().getName());
+		
+		if(System.console() == null){
+			getLog().debug("No System.console(), skip configure Wagon");
+			return;
+		}
+		
+		ClassLoader parent = Thread.currentThread().getContextClassLoader();
+		if (parent == null) {
+			parent = DeployMojo.class.getClassLoader();
+		}
+		List<ClassLoader> loaders = new ArrayList<ClassLoader>();
+		loaders.add(wagon.getClass().getClassLoader());
+		ChainingClassLoader loader = new ChainingClassLoader(parent, loaders);
+		
+		Class<?> scpWagonClass = null;
+		try {
+			scpWagonClass = ClassUtils.getClass(loader, "org.apache.maven.wagon.providers.ssh.jsch.ScpWagon");
+		} catch (ClassNotFoundException e) {
+			getLog().debug("Class 'org.apache.maven.wagon.providers.ssh.jsch.ScpWagon' not found, skip configure Wagon.");
+			return;
+		}
+
+		//is ScpWagon
+		if(scpWagonClass.isInstance(wagon)){
+			try {
+				Class<?> userInfoClass = ClassUtils.getClass(loader, "org.opoo.press.maven.plugins.plugin.ssh.SystemConsoleInteractiveUserInfo");
+				Object userInfo = userInfoClass.newInstance();
+				MethodUtils.invokeMethod(wagon, "setInteractiveUserInfo", userInfo);
+				getLog().debug("ScpWagon using SystemConsoleInteractiveUserInfo(Java 6+).");
+			} catch (ClassNotFoundException e) {
+				getLog().debug("Class 'org.opoo.press.maven.plugins.plugin.ssh.SystemConsoleInteractiveUserInfo' not found, skip configure Wagon.");
+			} catch (InstantiationException e) {
+				getLog().debug("Instantiate class exception", e);
+			} catch (IllegalAccessException e) {
+				getLog().debug(e.getMessage(), e);
+			} catch (NoSuchMethodException e) {
+				getLog().debug(e.getMessage(), e);
+			} catch (InvocationTargetException e) {
+				getLog().debug(e.getMessage(), e);
+			}
+		}else{
+			getLog().debug("Not a ScpWagon.");
+		}
+	}
+
+	private static Wagon getWagon( final Repository repository, final WagonManager manager )
         throws MojoExecutionException{
         final Wagon wagon;
 
@@ -287,33 +278,6 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 		}
 	}
 
-	
-//	/**
-//	 * @return
-//	 */
-//	protected abstract String getDeployRepositoryURL() throws MojoExecutionException;
-//
-//	/**
-//	 * @return
-//	 */
-//	protected abstract String getDeployRepositoryID() throws MojoExecutionException;
-
-	  /**
-     * Make sure the given url ends with a slash.
-     *
-     * @param url a String.
-     *
-     * @return if url already ends with '/' it is returned unchanged,
-     *      otherwise a '/' character is appended.
-     */
-	protected static String appendSlash(final String url) {
-		if (url.endsWith("/")) {
-			return url;
-		} else {
-			return url + "/";
-		}
-	}
-    
     /**
      * Configure the Wagon with the information from serverConfigurationMap ( which comes from settings.xml )
      *
@@ -328,6 +292,14 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
     private static void configureWagon( Wagon wagon, String repositoryId, Settings settings, PlexusContainer container, Log log )
         throws WagonConfigurationException{
         log.debug( " configureWagon " );
+        
+        //set log
+        if(wagon instanceof LogAware){
+			((LogAware)wagon).setLog(log);
+			log.debug("Set log for wagon: " + wagon.getClass().getName());
+        }else{
+			//not a LogAware instance, or LogAware class, wagon class loaded by different ClassLoaders.
+		}
 
         // MSITE-25: Make sure that the server settings are inserted
         for ( Object o : settings.getServers() ) {
@@ -406,52 +378,5 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 	@Override
 	public void contextualize(Context context) throws ContextException {
 		container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
-	}
-	
-	static class SystemConsoleInteractiveUserInfo implements InteractiveUserInfo {
-		private Console console = System.console();
-		/* (non-Javadoc)
-		 * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo#promptYesNo(java.lang.String)
-		 */
-		@Override
-		public boolean promptYesNo(String message) {
-			List<String> possibleValues = Arrays.asList(new String[] { "y", "n" });
-			message += " (y/n): ";
-			String line;
-
-			do {
-				line = new String(console.readLine(message));
-
-				if (line != null && !possibleValues.contains(line)) {
-					console.printf("Invalod selection");
-				}
-			} while (line == null || !possibleValues.contains(line));
-
-			return "y".equalsIgnoreCase(line);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo#showMessage(java.lang.String)
-		 */
-		@Override
-		public void showMessage(String message) {
-			console.printf("message");
-		}
-
-		/* (non-Javadoc)
-		 * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo#promptPassword(java.lang.String)
-		 */
-		@Override
-		public String promptPassword(String message) {
-			return new String(console.readPassword(message + ": "));
-		}
-
-		/* (non-Javadoc)
-		 * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo#promptPassphrase(java.lang.String)
-		 */
-		@Override
-		public String promptPassphrase(String message) {
-			return promptPassword(message);
-		}
 	}
 }
