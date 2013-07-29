@@ -30,6 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -91,11 +98,13 @@ public class GitHub implements LogAware{
 
 	private boolean force;
 
-	private boolean noJekyll;
+	private boolean noJekyll = true;
 
 	private boolean merge;
 
 	private boolean dryRun;
+	
+	private int numThreads = 1;
 
 	/**
 	 * @param branch the branch to set
@@ -196,6 +205,13 @@ public class GitHub implements LogAware{
 	}
 	
 	/**
+	 * @param numThreads the numThreads to set
+	 */
+	public void setNumThreads(int numThreads) {
+		this.numThreads = numThreads;
+	}
+
+	/**
 	 * @param log
 	 */
 	public GitHub(Log log) {
@@ -211,126 +227,52 @@ public class GitHub implements LogAware{
 
 	public void deploy(File outputDirectory, String destinationDirectory) throws GitHubException {
 		RepositoryId repository = getRepository(repositoryOwner, repositoryName);
-		if (dryRun)
+		if (dryRun){
 			log.info("Dry run mode, repository will not be modified");
-
-//		File outputDirectory = site.getDestination();
+		}
 		
-		// Find files to include
-		String baseDir = outputDirectory.getAbsolutePath();
-		String[] includePaths = StringUtils.removeEmpties(includes);
-		String[] excludePaths = StringUtils.removeEmpties(excludes);
-		if (log.isDebugEnabled())
-			log.debug(MessageFormat.format(
-					"Scanning {0} and including {1} and exluding {2}", baseDir,
-					Arrays.toString(includePaths),
-					Arrays.toString(excludePaths)));
-		String[] paths = PathUtils.getMatchingPaths(includePaths, excludePaths,
-				baseDir);
-
-		if (paths.length != 1)
-			log.info(MessageFormat.format("Creating {0} blobs", paths.length));
-		else
-			log.info("Creating 1 blob");
-		if (log.isDebugEnabled())
-			log.debug(MessageFormat.format("Scanned files to include: {0}",
-					Arrays.toString(paths)));
-
+		String[] paths = getPaths(outputDirectory);
+		String prefix = getPrefix(destinationDirectory);
+		
 		GitHubClient client = createClient(host, userName, password, oauth2Token);
 		DataService service = new DataService(client);
+		
+		boolean createNoJekyll = noJekyll;
+		
+		if(createNoJekyll){
+			for(String path: paths){
+				if (NO_JEKYLL_FILE.equals(path)){
+					createNoJekyll = false;
+					break;
+				}
+			}
+		}
 
 		// Write blobs and build tree entries
 		List<TreeEntry> entries = new ArrayList<TreeEntry>(paths.length);
-		String prefix = destinationDirectory;
-		//String prefix = site.getRoot();
-		if (prefix == null)
-			prefix = "";
-		if (prefix.length() > 0 && !prefix.endsWith("/"))
-			prefix += "/";
-
-		// Convert separator to forward slash '/'
-		if ('\\' == File.separatorChar)
-			for (int i = 0; i < paths.length; i++)
-				paths[i] = paths[i].replace('\\', '/');
-
-		boolean createNoJekyll = noJekyll;
-
-		for (String path : paths) {
-			TreeEntry entry = new TreeEntry();
-			entry.setPath(prefix + path);
-			// Only create a .nojekyll file if it doesn't already exist
-			if (createNoJekyll && NO_JEKYLL_FILE.equals(entry.getPath()))
-				createNoJekyll = false;
-			entry.setType(TYPE_BLOB);
-			entry.setMode(MODE_BLOB);
-			entry.setSha(createBlob(service, repository, outputDirectory, path));
-			entries.add(entry);
+		if(numThreads <= 1){
+			createEntries(entries, prefix, paths, service, repository, outputDirectory);
+		}else{
+			createEntriesInThreads(entries, prefix, paths, service, repository, outputDirectory, numThreads);
 		}
-
+		
 		if (createNoJekyll) {
-			TreeEntry entry = new TreeEntry();
-			entry.setPath(NO_JEKYLL_FILE);
-			entry.setType(TYPE_BLOB);
-			entry.setMode(MODE_BLOB);
-
-			if (log.isDebugEnabled())
-				log.debug("Creating empty .nojekyll blob at root of tree");
-			if (!dryRun)
-				try {
-					entry.setSha(service.createBlob(repository, new Blob()
-							.setEncoding(ENCODING_BASE64).setContent("")));
-				} catch (IOException e) {
-					throw new GitHubException(
-							"Error creating .nojekyll empty blob: "
-									+ e.getMessage(), e);
-				}
+			if (log.isDebugEnabled()){
+				log.debug("Creating empty '.nojekyll' blob at root of tree");
+			}
+			TreeEntry entry = createEntry("", NO_JEKYLL_FILE, service, repository, outputDirectory);
 			entries.add(entry);
 		}
 
-		Reference ref = null;
-		try {
-			ref = service.getReference(repository, branch);
-		} catch (RequestException e) {
-			if (404 != e.getStatus())
-				throw new GitHubException("Error getting reference: "
-						+ e.getMessage(), e);
-		} catch (IOException e) {
-			throw new GitHubException("Error getting reference: "
-					+ e.getMessage(), e);
+		Reference ref = getReference(service, repository);
+		
+		if(dryRun){
+			log.debug("Dry run mode, skip deploy.");
+			return;
 		}
-
-		if (ref != null && !TYPE_COMMIT.equals(ref.getObject().getType()))
-			throw new GitHubException(
-					MessageFormat
-							.format("Existing ref {0} points to a {1} ({2}) instead of a commmit",
-									ref.getRef(), ref.getObject().getType(),
-									ref.getObject().getSha()));
 
 		// Write tree
-		Tree tree;
-		try {
-			int size = entries.size();
-			if (size != 1)
-				log.info(MessageFormat.format(
-						"Creating tree with {0} blob entries", size));
-			else
-				log.info("Creating tree with 1 blob entry");
-			String baseTree = null;
-			if (merge && ref != null) {
-				Tree currentTree = service.getCommit(repository,
-						ref.getObject().getSha()).getTree();
-				if (currentTree != null)
-					baseTree = currentTree.getSha();
-				log.info(MessageFormat.format("Merging with tree {0}", baseTree));
-			}
-			if (!dryRun)
-				tree = service.createTree(repository, entries, baseTree);
-			else
-				tree = new Tree();
-		} catch (IOException e) {
-			throw new GitHubException("Error creating tree: "
-					+ e.getMessage(), e);
-		}
+		Tree tree = createTree(service, repository, ref, entries);
 
 		// Build commit
 		Commit commit = new Commit();
@@ -338,21 +280,16 @@ public class GitHub implements LogAware{
 		commit.setTree(tree);
 
 		// Set parent commit SHA-1 if reference exists
-		if (ref != null)
-			commit.setParents(Collections.singletonList(new Commit().setSha(ref
-					.getObject().getSha())));
+		if (ref != null){
+			commit.setParents(Collections.singletonList(new Commit().setSha(ref.getObject().getSha())));
+		}
 
 		Commit created;
 		try {
-			if (!dryRun)
-				created = service.createCommit(repository, commit);
-			else
-				created = new Commit();
-			log.info(MessageFormat.format("Creating commit with SHA-1: {0}",
-					created.getSha()));
+			created = service.createCommit(repository, commit);
+			log.info(MessageFormat.format("Creating commit with SHA-1: {0}", created.getSha()));
 		} catch (IOException e) {
-			throw new GitHubException("Error creating commit: "
-					+ e.getMessage(), e);
+			throw new GitHubException("Error creating commit: " + e.getMessage(), e);
 		}
 
 		TypedResource object = new TypedResource();
@@ -361,68 +298,147 @@ public class GitHub implements LogAware{
 			// Update existing reference
 			ref.setObject(object);
 			try {
-				log.info(MessageFormat.format(
-						"Updating reference {0} from {1} to {2}", branch,
-						commit.getParents().get(0).getSha(), created.getSha()));
-				if (!dryRun)
-					service.editReference(repository, ref, force);
+				log.info(String.format("Updating reference %s from %s to %s", branch, commit.getParents().get(0).getSha(), created.getSha()));
+				service.editReference(repository, ref, force);
 			} catch (IOException e) {
-				throw new GitHubException("Error editing reference: "
-						+ e.getMessage(), e);
+				throw new GitHubException("Error editing reference: " + e.getMessage(), e);
 			}
 		} else {
 			// Create new reference
 			ref = new Reference().setObject(object).setRef(branch);
 			try {
-				log.info(MessageFormat.format(
-						"Creating reference {0} starting at commit {1}",
-						branch, created.getSha()));
-				if (!dryRun)
-					service.createReference(repository, ref);
+				log.info(MessageFormat.format("Creating reference {0} starting at commit {1}", branch, created.getSha()));
+				service.createReference(repository, ref);
 			} catch (IOException e) {
-				throw new GitHubException("Error creating reference: "
-						+ e.getMessage(), e);
+				throw new GitHubException("Error creating reference: " + e.getMessage(), e);
 			}
 		}
 	}
-
 	
+	private List<TreeEntry> createEntries(List<TreeEntry> entries, final String prefix, final String[] paths, 
+			final DataService service, final RepositoryId repository, final File outputDirectory) throws GitHubException{
+		for (String path : paths) {
+			TreeEntry entry = createEntry(prefix, path, service, repository, outputDirectory);
+			entries.add(entry);
+		}
+		return entries;
+	}
+
+	private List<TreeEntry> createEntriesInThreads(List<TreeEntry> entries, final String prefix, final String[] paths, 
+			final DataService service, final RepositoryId repository, final File outputDirectory, int numThreads) throws GitHubException{
+		ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);//.newCachedThreadPool();  
+        CompletionService<TreeEntry> cs = new ExecutorCompletionService<TreeEntry>(threadPool);
+
+        for (final String path : paths) {
+			cs.submit(new Callable<TreeEntry>() {
+				@Override
+				public TreeEntry call() throws Exception {
+					return createEntry(prefix, path, service, repository, outputDirectory);
+				}
+			});
+		}
+		
+        try {
+			Future<TreeEntry> future = cs.take();
+			while(future != null){
+				entries.add(future.get());
+				future = cs.take();
+			}
+		} catch (InterruptedException e) {
+			throw new GitHubException("", e);
+		} catch (ExecutionException e) {
+			throw new GitHubException("", e);
+		}
+		return entries;
+	}
+
+	private Tree createTree(DataService service, RepositoryId repository, Reference ref, List<TreeEntry> entries) throws GitHubException {
+		try {
+			int size = entries.size();
+			log.info(String.format("Creating tree with %s blob entries", size));
+
+			String baseTree = null;
+			if (merge && ref != null) {
+				Tree currentTree = service.getCommit(repository, ref.getObject().getSha()).getTree();
+				if (currentTree != null){
+					baseTree = currentTree.getSha();
+				}
+				log.info(MessageFormat.format("Merging with tree {0}", baseTree));
+			}
+			
+			return service.createTree(repository, entries, baseTree);
+		} catch (IOException e) {
+			throw new GitHubException("Error creating tree: " + e.getMessage(), e);
+		}
+	}
+
+	private Reference getReference(DataService service, RepositoryId repository) throws GitHubException {
+		Reference ref = null;
+		try {
+			ref = service.getReference(repository, branch);
+		} catch (RequestException e) {
+			if (404 != e.getStatus()){			
+				throw new GitHubException("Error getting reference: " + e.getMessage(), e);
+			}
+		} catch (IOException e) {
+			throw new GitHubException("Error getting reference: " + e.getMessage(), e);
+		}
+
+		if (ref != null && !TYPE_COMMIT.equals(ref.getObject().getType())){
+			throw new GitHubException(MessageFormat.format("Existing ref {0} points to a {1} ({2}) instead of a commmit",
+					ref.getRef(), ref.getObject().getType(), ref.getObject().getSha()));
+		}
+		return ref;
+	}
+
+	private TreeEntry createEntry(String prefix, String path, DataService service, RepositoryId repository, File outputDirectory) throws GitHubException {
+		TreeEntry entry = new TreeEntry();
+		entry.setPath(prefix + path);
+		entry.setType(TYPE_BLOB);
+		entry.setMode(MODE_BLOB);
+		if(!dryRun){
+			entry.setSha(createBlob(service, repository, outputDirectory, path));
+			log.debug("  " + path + " -> " + entry.getSha());
+		}
+		return entry;
+	}
+
 	/**
-	 * Create blob
-	 *
-	 * @param service
-	 * @param repository
-	 * @param path
-	 * @return blob SHA-1
-	 * @throws MojoExecutionException
+	 * @param destinationDirectory
+	 * @return
 	 */
-	private String createBlob(DataService service, RepositoryId repository, File outputDirectory,	String path) throws GitHubException {
-		File file = new File(outputDirectory, path);
-		
-		byte[] bytes = null;
-		try {
-			bytes = FileUtils.readFileToByteArray(file);
-		} catch (IOException e) {
-			throw new GitHubException("Error reading file: " + e.getMessage(), e);
+	private String getPrefix(String destinationDirectory) {
+		String prefix = destinationDirectory;
+		//String prefix = site.getRoot();
+		if (prefix == null){
+			prefix = "";
 		}
-
-		Blob blob = new Blob().setEncoding(ENCODING_BASE64);
-		String encoded = EncodingUtils.toBase64(bytes);
-		blob.setContent(encoded);
-
-		if (log.isDebugEnabled()){
-			log.debug(MessageFormat.format("Creating blob from {0}", file.getAbsolutePath()));
+		if("./".equals(prefix)){
+			prefix = "";
 		}
-		
+		if (prefix.length() > 0 && !prefix.endsWith("/")){
+			prefix += "/";
+		}
+		return prefix;
+	}
+
+	private String createBlob(DataService service, RepositoryId repository, File outputDirectory, String path) throws GitHubException {
 		try {
-			if (!dryRun){
-				return service.createBlob(repository, blob);
+			Blob blob = new Blob().setEncoding(ENCODING_BASE64);
+			if(NO_JEKYLL_FILE.equals(path)){
+				blob.setContent("");
+				log.debug("Creating blob for " + NO_JEKYLL_FILE);
+			}else{
+				File file = new File(outputDirectory, path);
+				byte[] bytes = FileUtils.readFileToByteArray(file);
+				String encoded = EncodingUtils.toBase64(bytes);
+				blob.setContent(encoded);
+				log.debug("Creating blob from " +  file.getAbsolutePath());
 			}
-			else{
-				return null;
-			}
+			
+			return service.createBlob(repository, blob);
 		} catch (IOException e) {
-			throw new GitHubException("Error creating blob: " + e.getMessage(), e);
+			throw new GitHubException("Error creating blob from '" + path + "': " + e.getMessage(), e);
 		}
 	}
 
@@ -434,7 +450,7 @@ public class GitHub implements LogAware{
 			}
 			client = createClient(host);
 		} else{
-			client = createClient();
+			client = new GitHubClient();
 		}
 		
 		if(!StringUtils.isEmpty(userName) && !StringUtils.isEmpty(password)){
@@ -483,20 +499,8 @@ public class GitHub implements LogAware{
 			URL hostUrl = new URL(hostname);
 			return new GitHubClient(hostUrl.getHost(), hostUrl.getPort(), hostUrl.getProtocol());
 		} catch (MalformedURLException e) {
-			throw new GitHubException("Could not parse host URL "
-					+ hostname, e);
+			throw new GitHubException("Could not parse host URL " + hostname, e);
 		}
-	}
-
-	/**
-	 * Create client
-	 * <p>
-	 * Subclasses can override to do any custom client configuration
-	 *
-	 * @return non-null client
-	 */
-	private GitHubClient createClient() {
-		return new GitHubClient();
 	}
 
 	/**
@@ -510,11 +514,46 @@ public class GitHub implements LogAware{
 	 */
 	private RepositoryId getRepository(final String owner, final String name) throws GitHubException {
 		RepositoryId repository = RepositoryUtils.getRepository(null, owner, name);
-		if (repository == null)
+		if (repository == null){
 			throw new GitHubException("No GitHub repository (owner and name) configured");
-		if (log.isDebugEnabled())
+		}
+		if (log.isDebugEnabled()){
 			log.debug(MessageFormat.format("Using GitHub repository {0}", repository.generateId()));
+		}
 		return repository;
+	}
+	
+	private String[] getPaths(File outputDirectory){
+		// Find files to include
+		String baseDir = outputDirectory.getAbsolutePath();
+		String[] includePaths = StringUtils.removeEmpties(includes);
+		String[] excludePaths = StringUtils.removeEmpties(excludes);
+		if (log.isDebugEnabled()){
+			log.debug(MessageFormat.format("Scanning {0} and including {1} and exluding {2}", baseDir,
+					Arrays.toString(includePaths), Arrays.toString(excludePaths)));
+		}
+		
+		String[] paths = PathUtils.getMatchingPaths(includePaths, excludePaths,	baseDir);
+		
+		// Convert separator to forward slash '/'
+		if ('\\' == File.separatorChar){
+			for (int i = 0; i < paths.length; i++){
+				paths[i] = paths[i].replace('\\', '/');
+				//FilenameUtils.separatorsToUnix(paths[i]);
+			}
+		}
+
+		if (paths.length != 1){
+			log.info(MessageFormat.format("Creating {0} blobs", paths.length));
+		}else{
+			log.info("Creating 1 blob");
+		}
+		
+		if (log.isDebugEnabled()){
+			log.debug(MessageFormat.format("Scanned files to include: {0}", Arrays.toString(paths)));
+		}
+		
+		return paths;
 	}
 
 	@Override

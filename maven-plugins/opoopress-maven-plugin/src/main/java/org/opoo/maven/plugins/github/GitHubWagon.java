@@ -122,6 +122,7 @@ public class GitHubWagon extends StreamWagon implements LogAware{
 		String oauth2Token = repo.getParameter("oauth2Token");
 		String repoUsername = repo.getUsername();
 		String repoPassword = repo.getPassword();
+		String threads = System.getProperty("threads", "1");
 		
 		if(StringUtils.isNotBlank(repoUsername)){
 			log.info("Override userName: " + userName + " -> " + repoUsername);
@@ -142,6 +143,7 @@ public class GitHubWagon extends StreamWagon implements LogAware{
 		log.debug("merge: " + merge);
 		log.debug("noJekyll: " + noJekyll);
 		log.debug("oauth2Token: " + oauth2Token);
+		log.debug("numThreads: " + threads);
 		
 		GitHub github = new GitHub(log);
 		github.setUserName(userName);
@@ -172,6 +174,9 @@ public class GitHubWagon extends StreamWagon implements LogAware{
 		}
 		if(StringUtils.isNotBlank(oauth2Token)){
 			github.setOauth2Token(oauth2Token);
+		}
+		if(StringUtils.isNumeric(threads)){
+			github.setNumThreads(Integer.parseInt(threads));
 		}
 		
 		try {

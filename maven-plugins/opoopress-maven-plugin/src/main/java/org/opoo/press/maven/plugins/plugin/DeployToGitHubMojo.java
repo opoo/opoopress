@@ -143,7 +143,7 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 	 * True to always create a '.nojekyll' file at the root of the site if one
 	 * doesn't already exist.
 	 *
-	 * @parameter expression="${github.site.noJekyll}"
+	 * @parameter expression="${github.site.noJekyll}" default-value="true"
 	 */
 	private boolean noJekyll;
 
@@ -163,6 +163,12 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 	 * @parameter expression="${github.site.dryRun}"
 	 */
 	private boolean dryRun;
+	
+	/**
+	 *
+	 * @parameter expression="${github.site.numThreads}" default-value="1"
+	 */
+	private int numThreads = 1;
 	
 	private PlexusContainer container;
 
@@ -205,6 +211,7 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 		github.setRepositoryName(repositoryName);
 		github.setRepositoryOwner(repositoryOwner);
 		github.setUserName(username);
+		github.setNumThreads(numThreads);
 		
 		try {
 			github.deploy(dest, site.getRoot());
