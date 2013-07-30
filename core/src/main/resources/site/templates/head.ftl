@@ -25,6 +25,11 @@
   <link href="${ root_url }/favicon.ico" rel="icon">
   <link href="${ root_url }/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="${ site.subscribe_rss }" rel="alternate" title="${site.title}" type="application/atom+xml">
+  <script language="JavaScript">
+  <!--
+	window.OpooPress = {root:"${root_url}"};
+  //-->
+  </script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="${root_url}/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
   <!--[if (gt IE 8)|(gt IEMobile 7)|!(IE)]><!--><script src="${ root_url }/javascripts/opoopress.js"></script><!--<![endif]-->

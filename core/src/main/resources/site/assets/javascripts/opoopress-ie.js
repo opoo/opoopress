@@ -83,7 +83,7 @@ function addCodeLineNumbers() {
 }
 
 function flashVideoFallback(){
-  var root = (window.OpooPress && windows.OpooPress.root) ? windows.OpooPress.root : "";
+  var root = (window.OpooPress && window.OpooPress.root) ? window.OpooPress.root : "";
   var flashplayerlocation = root + "/assets/jwplayer/player.swf";
   var flashplayerskin = root + "/assets/jwplayer/glow/glow.xml";
  $('video').each(function(i, video){
