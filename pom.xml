@@ -59,7 +59,7 @@
 		<system>GitHub Issues</system>
 	</issueManagement>
     
-
+	<!--
   	<distributionManagement>	
         <repository>
             <id>local-file</id>
@@ -72,6 +72,21 @@
             <url>file:///${user.home}/maven.local/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+	-->
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus Snapshots</name>
+			<url>${sonatypeOssDistMgmtSnapshotsUrl}</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>Nexus Release Repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
     
  	<scm>
 		<connection>scm:git:git://github.com/opoo/opoopress.git</connection>
