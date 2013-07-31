@@ -36,7 +36,7 @@ public class ChainingClassLoader extends URLClassLoader {
 	private final ClassLoader parent;
 	private final Collection<ClassLoader> loaders;
 	private static final URL NULL_URL_ARRAY[] = new URL[0];
-	private static Map<String, Object> cacheLookupCache = new HashMap<String, Object>();
+	private static Map<String, Object> classLookupCache = new HashMap<String, Object>();
 
 	public ChainingClassLoader(ClassLoader parent, Collection<ClassLoader> loaders) {
 		super(NULL_URL_ARRAY, parent);
@@ -45,7 +45,7 @@ public class ChainingClassLoader extends URLClassLoader {
 	}
 
 	public Class<?> loadClass(String string) throws ClassNotFoundException {
-		Object cls = cacheLookupCache.get(string);
+		Object cls = classLookupCache.get(string);
 		if (cls != null) {
 			if (cls instanceof ClassNotFoundException) {
 				throw (ClassNotFoundException) cls;
@@ -72,10 +72,10 @@ public class ChainingClassLoader extends URLClassLoader {
 		}
 
 		if (clazz == null) {
-			cacheLookupCache.put(string, ex);
+			classLookupCache.put(string, ex);
 			throw ex;
 		} else {
-			cacheLookupCache.put(string, clazz);
+			classLookupCache.put(string, clazz);
 			return clazz;
 		}
 	}
@@ -157,7 +157,7 @@ public class ChainingClassLoader extends URLClassLoader {
 	}
 
 	public static void clearCache() {
-		cacheLookupCache.clear();
+		classLookupCache.clear();
 	}
 
 	public ClassLoader getWrappedClassLoader() {
