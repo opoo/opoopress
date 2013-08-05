@@ -58,7 +58,7 @@ import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceParser;
 import org.opoo.press.template.TitleCaseModel;
 import org.opoo.press.util.ClassUtils;
-import org.opoo.press.util.MapUtils;
+import org.opoo.util.MapUtils;
 
 import freemarker.template.TemplateModel;
 

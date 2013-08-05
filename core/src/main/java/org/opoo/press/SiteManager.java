@@ -16,18 +16,24 @@
 package org.opoo.press;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.Map;
-
 
 /**
  * @author Alex Lin
  *
  */
-public interface SiteManager {
+public interface SiteManager extends SiteService{
 
-	Site getSite(File siteDir);
+	Site install(File siteDir, Locale locale, boolean createSamplePost) throws Exception;
 	
-	Site getSite(File siteDir, Map<String,Object> extraOptions);
+	void clean(Site site) throws Exception;
 	
-	Site getSite(Map<String, Object> config);
+	File newPage(Site site, String title, String name) throws Exception;
+	
+	File newPost(Site site, String title, String name, boolean draft) throws Exception;
+	
+	void build(Site site);
+
+	void doImport(Site site, String importer, Map<String,Object> params) throws Exception;
 }

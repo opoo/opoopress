@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.util;
+package org.opoo.util;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -142,7 +142,7 @@ public abstract class ClassPathUtils {
 						if(jarEntry.isDirectory()){
 							tmp.mkdirs();
 							if(IS_DEBUG_ENABLED){
-								log.debug("创建目录：" + tmp);
+								log.debug("Create directory：" + tmp);
 							}
 						}else{
 							File parent = tmp.getParentFile();

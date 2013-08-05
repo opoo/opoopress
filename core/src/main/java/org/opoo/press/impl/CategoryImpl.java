@@ -21,8 +21,8 @@ import java.util.List;
 import org.opoo.press.Category;
 import org.opoo.press.Post;
 import org.opoo.press.Site;
-import org.opoo.press.util.MapUtils;
-import org.opoo.press.util.Utils;
+import org.opoo.util.MapUtils;
+import org.opoo.util.URLUtils;
 
 /**
  * @author Alex Lin
@@ -65,10 +65,10 @@ public class CategoryImpl implements Category{
 		}
 		
 		if(categoryTree && parent != null){
-			url = parent.getUrl() + Utils.encodeURL(nicename) + "/";
+			url = parent.getUrl() + URLUtils.encodeURL(nicename) + "/";
 		}else{
 			String categoryDir = (String)MapUtils.get(site.getConfig(), "category_dir", "");
-			url = categoryDir + "/" + Utils.encodeURL(nicename) + "/";
+			url = categoryDir + "/" + URLUtils.encodeURL(nicename) + "/";
 		}
 		
 		if(categoryTree && parent != null){

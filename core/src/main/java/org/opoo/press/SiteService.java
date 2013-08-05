@@ -13,31 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.util;
+package org.opoo.press;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.io.File;
+import java.util.Map;
 
 /**
  * @author Alex Lin
  *
  */
-public abstract class Utils {
+public interface SiteService {
 
-	public static String encodeURL(String url){
-		try {
-			return URLEncoder.encode(url, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	Site getSite(File siteDir);
 	
-	public static String decodeURL(String url){
-		try {
-			return URLDecoder.decode(url, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	Site getSite(File siteDir, Map<String,Object> extraOptions);
+	
+	Site getSite(Map<String, Object> config);
+	
 }

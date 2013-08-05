@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.opoo.press.Site;
-import org.opoo.press.util.MapUtils;
+import org.opoo.util.MapUtils;
 
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;

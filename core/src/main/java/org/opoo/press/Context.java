@@ -16,6 +16,7 @@
 package org.opoo.press;
 
 import org.opoo.press.source.SourceEntryLoader;
+import org.opoo.press.source.SourceManager;
 import org.opoo.press.source.SourceParser;
 import org.yaml.snakeyaml.Yaml;
 
@@ -33,6 +34,8 @@ public interface Context {
 	SourceParser getSourceParser();
 	
 	SiteManager getSiteManager();
+	
+	SourceManager getSourceManager();
 	
 	<T> T get(String name, Class<T> clazz);
 }

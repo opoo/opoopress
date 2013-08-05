@@ -31,8 +31,8 @@ import org.opoo.press.Site;
 import org.opoo.press.Tag;
 import org.opoo.press.impl.AbstractConvertible;
 import org.opoo.press.source.Source;
-import org.opoo.press.util.MapUtils;
-import org.opoo.press.util.Utils;
+import org.opoo.util.MapUtils;
+import org.opoo.util.URLUtils;
 
 /**
  * @author Alex Lin
@@ -265,7 +265,7 @@ public class TagGenerator implements Generator {
 		@Override
 		public File getOutputFile(File dest) {
 			String url = getUrl() + "index.html";
-			url = Utils.decodeURL(url);
+			url = URLUtils.decodeURL(url);
 			File target = new File(dest, url);
 			return target;
 		}

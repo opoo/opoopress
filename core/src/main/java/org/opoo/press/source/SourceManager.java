@@ -13,30 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.tool;
+package org.opoo.press.source;
 
 import java.io.File;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opoo.press.Site;
+import java.util.Map;
 
 /**
  * @author Alex Lin
  *
  */
-public class Cleaner {
-	private static final Log log = LogFactory.getLog(Cleaner.class);
-
-	public void clean(Site site) throws Exception{
-		File destination = site.getDestination();
-		File working  = site.getWorking();
-		
-		log.info("Cleaning destination directory " + destination);
-		FileUtils.deleteDirectory(destination);
-		
-		log.info("Cleaning working directory " + working);
-		FileUtils.deleteDirectory(working);
-	}
+public interface SourceManager {
+	
+	void saveSourceToFile(Source source);
+	
+	SourceEntry buildEntry(File sourceDir, String path);
+	
+	Source buildSource(File sourceDir, String path, Map<String,Object> meta, String content);
 }

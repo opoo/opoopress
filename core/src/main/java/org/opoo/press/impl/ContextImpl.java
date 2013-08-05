@@ -24,8 +24,10 @@ import org.opoo.press.SiteManager;
 import org.opoo.press.slug.ChineseToPinyinSlugHelper;
 import org.opoo.press.slug.DefaultSlugHelper;
 import org.opoo.press.source.SourceEntryLoader;
+import org.opoo.press.source.SourceManager;
 import org.opoo.press.source.SourceParser;
 import org.opoo.press.source.impl.SourceEntryLoaderImpl;
+import org.opoo.press.source.impl.SourceManagerImpl;
 import org.opoo.press.source.impl.SourceParserImpl;
 import org.yaml.snakeyaml.Yaml;
 
@@ -38,6 +40,7 @@ public class ContextImpl implements Context{
 	private SiteManagerImpl siteManager;
 	private SourceEntryLoaderImpl sourceEntryLoader;
 	private SourceParserImpl sourceParser;
+	private SourceManagerImpl sourceManager;
 	private Map<String, Object> beans = new HashMap<String,Object>();
 	
 	public void initialize() {
@@ -49,7 +52,11 @@ public class ContextImpl implements Context{
 			sourceParser = new SourceParserImpl();
 			sourceParser.setYaml(yaml);
 			
+			sourceManager = new SourceManagerImpl();
+			sourceManager.setYaml(yaml);
+			
 			siteManager = new SiteManagerImpl();
+			siteManager.setYaml(yaml);
 
 			set(DefaultSlugHelper.class.getName(), new DefaultSlugHelper());
 			set(ChineseToPinyinSlugHelper.class.getName(), new ChineseToPinyinSlugHelper());
@@ -85,6 +92,11 @@ public class ContextImpl implements Context{
 	@Override
 	public Yaml getYaml() {
 		return yaml;
+	}
+	
+	
+	public SourceManager getSourceManager(){
+		return sourceManager;
 	}
 
 	/* (non-Javadoc)

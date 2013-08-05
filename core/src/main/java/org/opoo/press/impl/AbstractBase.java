@@ -32,7 +32,7 @@ import org.opoo.press.Site;
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
-import org.opoo.press.util.MapUtils;
+import org.opoo.util.MapUtils;
 
 /**
  * @author Alex Lin

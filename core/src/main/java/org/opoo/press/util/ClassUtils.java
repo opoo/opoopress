@@ -32,7 +32,11 @@ public abstract class ClassUtils extends org.apache.commons.lang.ClassUtils {
 	 * @return new instance
 	 */
 	public static Object newInstance(String className, Site site){
-		Object instance = newInstance(className);
+		return newInstance(className, (ClassLoader) null, site);
+	}
+	
+	public static Object newInstance(String className, ClassLoader classLoader, Site site){
+		Object instance = newInstance(className, classLoader);
 		if(instance instanceof Initializable){
 			((Initializable) instance).initialize(site);
 		}
@@ -45,8 +49,14 @@ public abstract class ClassUtils extends org.apache.commons.lang.ClassUtils {
 	 * @return new instance
 	 */
 	public static Object newInstance(String className){
+		return newInstance(className, (ClassLoader)null);
+	}
+	
+	public static Object newInstance(String className, ClassLoader classLoader){
 		try {
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			if(classLoader == null){
+				classLoader = Thread.currentThread().getContextClassLoader();
+			}
 			Class<?> clazz = getClass(classLoader, className);
 			return clazz.newInstance();
 		} catch (ClassNotFoundException e) {

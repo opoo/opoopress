@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -87,31 +85,21 @@ public class WordPressImporter implements Importer {
 	 */
 	private static final SimpleDateFormat NAME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	
-	private Map<String,Object> props;
-	public WordPressImporter(Map<String,Object> props){
-		this.props = props;
+	public WordPressImporter(){
 	}
 	
 	
-	/* (non-Javadoc)
-	 * @see org.opoo.press.importer.Importer#doImport(org.opoo.press.Site, java.net.URI)
-	 */
 	@Override
-	public void doImport(Site site, URI uri) throws ImportException{
-		File file = null;
-		try {
-			String fileStr = uri.toURL().getFile();
-			file = new File(fileStr);
-		} catch (MalformedURLException e) {
-			throw new ImportException(e);
-		}
+	public void doImport(Site site, Map<String,Object> props) throws ImportException{
+		String fileStr = (String) props.get("file");
+		File file = new File(fileStr);
 		
 		if(!file.exists()){
-			throw new ImportException("File not found: " + uri);
+			throw new ImportException("File not found: " + file);
 		}
 		
 		try {
-			importFromtFile(site, file);
+			importFromtFile(site, file, props);
 		} catch (DocumentException e) {
 			throw new ImportException(e);
 		} catch (FileNotFoundException e) {
@@ -124,7 +112,7 @@ public class WordPressImporter implements Importer {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void importFromtFile(Site site, File file) throws DocumentException, ParseException, IOException {
+	private void importFromtFile(Site site, File file, Map<String,Object> props) throws DocumentException, ParseException, IOException {
 		FileInputStream fileInputStream = new FileInputStream(file);
 		InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
 		Reader reader = new BufferedReader(inputStreamReader);
@@ -139,7 +127,7 @@ public class WordPressImporter implements Importer {
 			for(Element e: list){
 				String postType = e.elementText("post_type");
 				if("post".equals(postType) || "page".equals(postType)){
-					importPostOrPage(site, postType, e);
+					importPostOrPage(site, postType, e, props);
 				}
 			}
 		}finally{
@@ -150,7 +138,7 @@ public class WordPressImporter implements Importer {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void importPostOrPage(Site site, String postType, Element e) throws ParseException, IOException {
+	private void importPostOrPage(Site site, String postType, Element e, Map<String,Object> props) throws ParseException, IOException {
 		boolean includeDrafts = "true".equals(props.get("include_drafts"));
 
 		String status = e.elementTextTrim("status");
@@ -172,7 +160,7 @@ public class WordPressImporter implements Importer {
 		if(postname.startsWith("%")){
 			postname = title;
 		}
-		String url = buildURL(parse, postname, postid, author);
+		String url = buildURL(parse, postname, postid, author, props);
 		
 		if(!includeDrafts && !published){
 			log.info(name + " is draft, skiping import. Set 'include_drafts' peroperty to enabled import drafts.");
@@ -344,9 +332,10 @@ public class WordPressImporter implements Importer {
 	 * @param postname
 	 * @param post_id
 	 * @param author
+	 * @param props
 	 * @return page/post url, return null if no 'permalink_style' defined.
 	 */
-	private String buildURL(Date date, String postname, String post_id, String author){
+	private String buildURL(Date date, String postname, String post_id, String author, Map<String,Object> props){
 		String permalinkStyle = (String) props.get("permalink_style");
 		if(StringUtils.isBlank(permalinkStyle)){
 			return null;
