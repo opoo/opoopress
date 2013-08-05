@@ -17,7 +17,9 @@ package org.opoo.press.maven.plugins.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.opoo.press.tool.Cleaner;
+import org.opoo.press.Application;
+import org.opoo.press.Site;
+import org.opoo.press.SiteManager;
 
 /**
  * Clean site/blog templates cache and temp files.
@@ -33,10 +35,11 @@ public class CleanMojo extends AbstractPressMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		super.execute();
-		
-		createSite();
+
+		SiteManager siteManager = Application.getContext().getSiteManager();
+		Site site = siteManager.getSite(siteDir);
 		try {
-			new Cleaner().clean(site);
+			siteManager.clean(site);
 		} catch (Exception e) {
 			throw new MojoFailureException(e.getMessage());
 		}

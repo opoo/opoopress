@@ -22,6 +22,7 @@ import java.util.Properties;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.repository.Repository;
+import org.opoo.press.Site;
 
 /**
  * 
@@ -54,11 +55,11 @@ public abstract class AbstractDeployMojo extends AbstractGenerateMojo{
 		
 		super.execute();
 		
-		createSite();
+		Site site = createSite();
 		if(skipGenerate){
 			getLog().info( "op.generate.skip = true: Skipping generating" );
 		}else{
-			generate();
+			generate(site);
 		}
 		
 		File destination = site.getDestination();
@@ -69,24 +70,24 @@ public abstract class AbstractDeployMojo extends AbstractGenerateMojo{
             throw new MojoExecutionException( "The site does not exist, please run mvn op:generate first" );
         }
 		
-		deploy(destination);
+		deploy(site, destination);
 	}
 	
-	protected void deploy(File destination) throws MojoExecutionException, MojoFailureException{
-		Repository repository = getRepository();
+	protected void deploy(Site site, File destination) throws MojoExecutionException, MojoFailureException{
+		Repository repository = getRepository(site);
 		if ( getLog().isDebugEnabled()){
             getLog().debug( "Deploying to '" + repository.getUrl() + "',\n    Using credentials from server id '" + repository.getId() + "'" );
         }
 		
-		deploy( destination, repository );
+		deploy(site, destination, repository );
 	}
 	
-	protected void deploy(File destination, Repository repository) throws MojoExecutionException, MojoFailureException{
+	protected void deploy(Site site, File destination, Repository repository) throws MojoExecutionException, MojoFailureException{
 		throw new UnsupportedOperationException("deploy(File, Repository)");
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Repository getRepository() throws MojoExecutionException, MojoFailureException{
+	private Repository getRepository(Site site) throws MojoExecutionException, MojoFailureException{
 		Map<String, Object> config = site.getConfig();
 		
 		Object server = config.get("deploy_server");

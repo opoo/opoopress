@@ -17,6 +17,7 @@ package org.opoo.press.maven.plugins.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.opoo.press.support.Compass;
 
 /**
  * Compile the SASS files into css. Check <code>compass compile</code> 
@@ -34,6 +35,6 @@ public class SassCompileMojo extends AbstractPressMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		super.execute();
 		
-		new Compass(siteDir, getLog()).compile();
+		new Compass(siteDir).compile();
 	}
 }

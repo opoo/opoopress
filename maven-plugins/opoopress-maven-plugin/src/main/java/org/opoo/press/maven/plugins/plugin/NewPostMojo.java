@@ -18,7 +18,7 @@ package org.opoo.press.maven.plugins.plugin;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.opoo.press.tool.Creator;
+import org.opoo.press.Site;
 
 /**
  * Create new post file.
@@ -58,12 +58,11 @@ public class NewPostMojo extends AbstractPressMojo {
 		if(StringUtils.isBlank(title)){
 			throw new MojoFailureException("'title' is required, use '-Dtitle=title'");
 		}
-		
-		createSite();
-		
-		Creator creator = new Creator();
+
+		Site site = createSite();
+
 		try {
-			creator.createNewPost(site, title, name, isDraft);
+			getSiteManager().newPost(site, title, name, isDraft);
 		} catch (Exception e) {
 			throw new MojoFailureException(e.getMessage());
 		}

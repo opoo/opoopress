@@ -55,6 +55,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.opoo.maven.plugins.logging.LogAware;
+import org.opoo.press.Site;
 import org.opoo.util.ChainingClassLoader;
 
 /**
@@ -109,7 +110,7 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
    
    	private PlexusContainer container;
    
-	protected void deploy(final File directory, final Repository repository)
+	protected void deploy(final Site site, final File directory, final Repository repository)
 			throws MojoExecutionException {
 		// TODO: work on moving this into the deployer like the other deploy
 		// methods

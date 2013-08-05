@@ -17,6 +17,7 @@ package org.opoo.press.maven.plugins.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.opoo.press.support.Compass;
 
 /**
  * Watch the SASS for changes and compile whenever it does. Check <code>compass watch</code>
@@ -34,6 +35,6 @@ public class SassWatchMojo extends AbstractPressMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		super.execute();
 		
-		new Compass(siteDir, getLog()).watch();
+		new Compass(siteDir).watch();
 	}
 }

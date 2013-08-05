@@ -22,7 +22,8 @@ import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.opoo.press.tool.Installer;
+import org.opoo.press.Application;
+import org.opoo.press.support.Compass;
 
 /**
  * Install and initialize site/blog.
@@ -31,8 +32,6 @@ import org.opoo.press.tool.Installer;
  * @goal install
  */
 public class InstallMojo extends AbstractPressMojo {
-	private Installer installer = new Installer();
-
 	/**
 	 * @parameter expression="${locale}"
 	 */
@@ -42,6 +41,11 @@ public class InstallMojo extends AbstractPressMojo {
 	 * @parameter expression="${op.sass.compile.skip}" default-value="false"
 	 */
 	protected boolean skipSassCompile = false;
+	
+	/**
+	 * @parameter expression="${op.sample.post}" default-value="true"
+	 */
+	protected boolean createSamplePost = true;
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.maven.plugins.press.AbstractPressMojo#execute()
@@ -57,7 +61,7 @@ public class InstallMojo extends AbstractPressMojo {
 		
 		getLog().info("Installing site.");
 		try {
-			installer.install(siteDir, loc);
+			Application.getContext().getSiteManager().install(siteDir, loc, createSamplePost);
 		} catch (Exception e) {
 			throw new MojoFailureException(e.getMessage());
 		}
@@ -73,8 +77,7 @@ public class InstallMojo extends AbstractPressMojo {
 			getLog().warn("config.rb not exists, skip compile sass.");
 		}else{
 			getLog().info("Compiling SASS/SCSS to css.");
-
-			new Compass(siteDir, getLog()).compile();
+			new Compass(siteDir).compile();
 		}
 	}
 }

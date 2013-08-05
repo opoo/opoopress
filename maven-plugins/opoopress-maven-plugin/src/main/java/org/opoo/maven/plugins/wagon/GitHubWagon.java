@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.maven.plugins.github;
+package org.opoo.maven.plugins.wagon;
 
 import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
@@ -29,7 +27,8 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
-import org.opoo.maven.plugins.logging.LogAware;
+import org.opoo.press.support.GitHub;
+import org.opoo.press.support.GitHubException;
 
 /**
  * <url>github://user@github.com/myuser/myproject/</url>
@@ -39,16 +38,7 @@ import org.opoo.maven.plugins.logging.LogAware;
  *                   instantiation-strategy="per-lookup"
  */
 @SuppressWarnings("unchecked")
-public class GitHubWagon extends StreamWagon implements LogAware{
-	private Log log = new SystemStreamLog();
-	
-	/**
-	 * @param log the log to set
-	 */
-	public void setLog(Log log) {
-		this.log = log;
-	}
-
+public class GitHubWagon extends StreamWagon{
 	/* (non-Javadoc)
 	 * @see org.apache.maven.wagon.AbstractWagon#supportsDirectoryCopy()
 	 */
@@ -64,7 +54,7 @@ public class GitHubWagon extends StreamWagon implements LogAware{
 	public void fillInputData(InputData inputData)
 			throws TransferFailedException, ResourceDoesNotExistException,
 			AuthorizationException {
-		log.debug("fillInputData");
+		fireSessionDebug("fillInputData");
 	}
 
 	/* (non-Javadoc)
@@ -73,7 +63,7 @@ public class GitHubWagon extends StreamWagon implements LogAware{
 	@Override
 	public void fillOutputData(OutputData outputData)
 			throws TransferFailedException {
-		log.debug("fillOutputData");
+		fireSessionDebug("fillOutputData");
 	}
 
 	/* (non-Javadoc)
@@ -81,7 +71,7 @@ public class GitHubWagon extends StreamWagon implements LogAware{
 	 */
 	@Override
 	public void closeConnection() throws ConnectionException {
-		log.debug("closeConnection");
+		fireSessionDebug("closeConnection");
 	}
 
 	/* (non-Javadoc)
@@ -90,7 +80,7 @@ public class GitHubWagon extends StreamWagon implements LogAware{
 	@Override
 	protected void openConnectionInternal() throws ConnectionException,
 			AuthenticationException {
-		log.debug("openConnectionInternal");
+		fireSessionDebug("openConnectionInternal");
 	}
 
 	/* (non-Javadoc)
@@ -125,27 +115,27 @@ public class GitHubWagon extends StreamWagon implements LogAware{
 		String threads = System.getProperty("threads", "1");
 		
 		if(StringUtils.isNotBlank(repoUsername)){
-			log.info("Override userName: " + userName + " -> " + repoUsername);
+			fireTransferDebug("Override userName: " + userName + " -> " + repoUsername);
 			userName = repoUsername;
 		}
 		if(StringUtils.isNotBlank(repoPassword)){
-			log.info("Override password by repository's.");
+			fireTransferDebug("Override password by repository's.");
 			password = repoPassword;
 		}
 		
-		log.debug("userName: " + userName);
-		log.debug("password: " + (password != null ? "***" : ""));
-		log.debug("message: " + message);
-		log.debug("branch: " + branch);
-		log.debug("dryRun: " + dryRun);
-		log.debug("force: " + force);
-		log.debug("host: " + host);
-		log.debug("merge: " + merge);
-		log.debug("noJekyll: " + noJekyll);
-		log.debug("oauth2Token: " + oauth2Token);
-		log.debug("numThreads: " + threads);
+		fireTransferDebug("userName: " + userName);
+		fireTransferDebug("password: " + (password != null ? "***" : ""));
+		fireTransferDebug("message: " + message);
+		fireTransferDebug("branch: " + branch);
+		fireTransferDebug("dryRun: " + dryRun);
+		fireTransferDebug("force: " + force);
+		fireTransferDebug("host: " + host);
+		fireTransferDebug("merge: " + merge);
+		fireTransferDebug("noJekyll: " + noJekyll);
+		fireTransferDebug("oauth2Token: " + oauth2Token);
+		fireTransferDebug("numThreads: " + threads);
 		
-		GitHub github = new GitHub(log);
+		GitHub github = new GitHub();
 		github.setUserName(userName);
 		github.setPassword(password);
 		github.setRepositoryName(repositoryName);

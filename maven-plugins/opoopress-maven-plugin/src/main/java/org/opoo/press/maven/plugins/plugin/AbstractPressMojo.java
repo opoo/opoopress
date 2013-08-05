@@ -24,6 +24,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.Application;
 import org.opoo.press.Site;
+import org.opoo.press.SiteManager;
 import org.opoo.press.impl.ContextImpl;
 
 /**
@@ -31,8 +32,6 @@ import org.opoo.press.impl.ContextImpl;
  *
  */
 public class AbstractPressMojo extends AbstractMojo {
-	 protected Site site;
-	 
 	/**
 	 * Site directory.
 	 * 
@@ -46,7 +45,6 @@ public class AbstractPressMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		getLog().info("The site directory is : " + siteDir.getAbsolutePath());
-		//getLog().info("The site output directory is : " + outputDirectory.getAbsolutePath());
 		checkDirectory();
 	}
 	
@@ -56,16 +54,24 @@ public class AbstractPressMojo extends AbstractMojo {
 		}
 	}
 
-	protected void createSite(){
-		createSite(false);
+	public SiteManager getSiteManager(){
+		new ContextImpl().initialize();
+		return Application.getContext().getSiteManager();
+	}
+
+	protected Site createSite(){
+		return createSite(false);
 	}
 	
-	protected void createSite(boolean showDrafts){
+	protected Site createSite(boolean showDrafts){
+		return getSiteManager().getSite(siteDir, buildExtraConfig(showDrafts));
+	}
+	
+	protected Map<String,Object> buildExtraConfig(boolean showDrafts){
 		Map<String,Object> config = new HashMap<String,Object>();
 		config.put("show_drafts", showDrafts);
 		config.put("debug", getLog().isDebugEnabled());
 		
-		new ContextImpl().initialize();
-		site = Application.getContext().getSiteManager().getSite(siteDir, config);
+		return config;
 	}
 }

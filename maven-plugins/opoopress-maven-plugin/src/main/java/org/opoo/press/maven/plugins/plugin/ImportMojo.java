@@ -15,31 +15,29 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.Site;
+import org.opoo.press.importer.ImportException;
 
 /**
- * Create new page file.
- * 
  * @author Alex Lin
- * @goal new-page
+ * @goal import
  */
-public class NewPageMojo extends AbstractPressMojo {
-    /**
-    *
-    * @parameter expression="${title}"
-    */
-    protected String title;
-    
-    /**
-    *
-    * @parameter expression="${name}"
-    */
-   protected String name;
-    
-	
+public class ImportMojo extends AbstractPressMojo{
+	/**
+	 * Importer name.
+	 * 
+	 * @parameter expression="${importer}"
+	 */
+	private String importerName;
+
 	/* (non-Javadoc)
 	 * @see org.opoo.press.maven.plugins.plugin.AbstractPressMojo#execute()
 	 */
@@ -47,14 +45,27 @@ public class NewPageMojo extends AbstractPressMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		super.execute();
 		
-		if(StringUtils.isBlank(title)){
-			throw new MojoFailureException("'title' is required, use '-Dtitle=title'");
+		if(StringUtils.isBlank(importerName)){
+			throw new MojoFailureException("importer name is required, e.g. -Dimporter=wordpress");
 		}
 		
-		Site site = createSite();
+		//Copy all system properties
+		Map<String,Object> props = new HashMap<String,Object>();
+		Properties properties = System.getProperties();
+		Enumeration<?> names = properties.propertyNames();
+		while(names.hasMoreElements()){
+			String name = (String) names.nextElement();
+			String value = properties.getProperty(name);
+			if(value != null){
+				props.put(name, value);
+			}
+		}
 		
 		try {
-			getSiteManager().newPage(site, title, name);
+			Site site = createSite();
+			getSiteManager().doImport(site, importerName, props);
+		} catch (ImportException e) {
+			throw new MojoFailureException(e.getMessage());
 		} catch (Exception e) {
 			throw new MojoFailureException(e.getMessage());
 		}

@@ -17,6 +17,7 @@ package org.opoo.press.maven.plugins.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.opoo.press.Site;
 
 /**
  * Generate static site/blog.
@@ -38,7 +39,7 @@ public class GenerateMojo extends AbstractGenerateMojo{
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		super.execute();
-		createSite(showDrafts);
-		generate();
+		Site site = createSite(showDrafts);
+		generate(site);
 	}
 }

@@ -30,8 +30,9 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
-import org.opoo.maven.plugins.github.GitHub;
-import org.opoo.maven.plugins.github.GitHubException;
+import org.opoo.press.Site;
+import org.opoo.press.support.GitHub;
+import org.opoo.press.support.GitHubException;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcherException;
 
@@ -176,7 +177,7 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 	 * @see org.opoo.press.maven.plugins.plugin.AbstractDeployMojo#deployTo(java.io.File)
 	 */
 	@Override
-	protected void deploy(File dest) throws MojoExecutionException, MojoFailureException {
+	protected void deploy(Site site, File dest) throws MojoExecutionException, MojoFailureException {
 		String username = this.userName;
 		String password = this.password;
 		String oauth2Token = this.oauth2Token;
@@ -196,7 +197,7 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 			password = decryptPasswordIfRequired(mavenServer.getPassword(), serverId);
 		}
 		
-		GitHub github = new GitHub(getLog());
+		GitHub github = new GitHub();
 		github.setBranch(branch);
 		github.setDryRun(dryRun);
 		github.setExcludes(excludes);

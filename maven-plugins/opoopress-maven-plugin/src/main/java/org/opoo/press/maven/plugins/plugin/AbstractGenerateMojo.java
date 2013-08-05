@@ -15,13 +15,15 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import org.opoo.press.Site;
+
 
 /**
  * @author Alex Lin
  */
 public abstract class AbstractGenerateMojo extends AbstractPressMojo{
 	
-	protected void generate(){
+	protected void generate(Site site){
 		long start = System.currentTimeMillis();
 		site.build();
 		long time = System.currentTimeMillis() - start;

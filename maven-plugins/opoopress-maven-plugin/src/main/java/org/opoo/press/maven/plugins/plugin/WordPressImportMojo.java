@@ -16,13 +16,13 @@
 package org.opoo.press.maven.plugins.plugin;
 
 import java.io.File;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.opoo.press.Site;
 import org.opoo.press.importer.ImportException;
 import org.opoo.press.importer.WordPressImporter;
 
@@ -77,8 +77,9 @@ public class WordPressImportMojo extends AbstractPressMojo{
 	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		Map<String,Object> props = new HashMap<String,Object>();
+		super.execute();
 		
+		Map<String,Object> props = new HashMap<String,Object>();
 		if(file == null || !file.exists() || !file.isFile()){
 			throw new MojoFailureException("the wordpress exported XML file is required, use '-Dfile=/path/to/file.xml'");
 		}
@@ -102,11 +103,12 @@ public class WordPressImportMojo extends AbstractPressMojo{
 			entries.putAll(replaceEntries);
 		}
 		props.put("content_replacements", entries);
+		props.put("file", file.getAbsoluteFile());
 
-		WordPressImporter importer = new WordPressImporter(props);
-		URI uri = file.toURI();
+		WordPressImporter importer = new WordPressImporter();
 		try {
-			importer.doImport(site, uri);
+			Site site = createSite();
+			importer.doImport(site, props);
 		} catch (ImportException e) {
 			throw new MojoFailureException(e.getMessage());
 		}
