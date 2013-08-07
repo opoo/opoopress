@@ -71,7 +71,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		
 		updateConfigFile(siteDir, locale);
 		
-		Site site = getSite(siteDir);
+		Site site = createSite(siteDir);
 		
 		if(createSamplePost){
 			log.info("Creating sample post.");
@@ -127,6 +127,11 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		FileOutputStream os = null;
 		OutputStreamWriter out = null;
 		try {
+			File dir = file.getParentFile();
+			if(!dir.exists()){
+				dir.mkdirs();
+			}
+			
 			os = new FileOutputStream(file);
 			out = new OutputStreamWriter(os, "UTF-8");
 			site.getRenderer().render(DEFAULT_SAMPLE_POST_TEMPLATE, map, out);
@@ -226,6 +231,11 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		FileOutputStream os = null;
 		OutputStreamWriter out = null;
 		try {
+			File dir = file.getParentFile();
+			if(!dir.exists()){
+				dir.mkdirs();
+			}
+			
 			os = new FileOutputStream(file);
 			out = new OutputStreamWriter(os, "UTF-8");
 			site.getRenderer().render(template, map, out);

@@ -16,21 +16,16 @@
 package org.opoo.press;
 
 import java.io.File;
-import java.util.Map;
 
 /**
  * @author Alex Lin
  *
  */
-public interface SiteService {
-
-	Site createSite(File siteDir);
+public interface CompassConfig {
 	
-	Site createSite(File siteDir, Map<String,Object> extraOptions);
+	File getConfigFile();
 	
-	SiteConfig createSiteConfig(File siteDir, Map<String,Object> extraOptions);
+	File getSassDirectory();
 	
-	Site createSite(SiteConfig siteConfig);
-	
-	CompassConfig createCompassConfig(File compassProjectPath);
+	File getCssDirectory();
 }

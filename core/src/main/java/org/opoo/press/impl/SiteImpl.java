@@ -17,6 +17,8 @@ package org.opoo.press.impl;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -28,10 +30,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Application;
@@ -44,6 +49,7 @@ import org.opoo.press.Post;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.SiteBuilder;
+import org.opoo.press.SiteConfig;
 import org.opoo.press.SlugHelper;
 import org.opoo.press.StaticFile;
 import org.opoo.press.Tag;
@@ -58,7 +64,6 @@ import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceParser;
 import org.opoo.press.template.TitleCaseModel;
 import org.opoo.press.util.ClassUtils;
-import org.opoo.util.MapUtils;
 
 import freemarker.template.TemplateModel;
 
@@ -69,14 +74,16 @@ import freemarker.template.TemplateModel;
 public class SiteImpl implements Site, SiteBuilder{
 	private static final Log log = LogFactory.getLog(SiteImpl.class);
 	private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
+	private static final String LAST_BUILD_FILE_SUFFIX = "_lastbuild.properties";
 	
-	private Map<String, Object> config;
+	private SiteConfigImpl config;
 	private Map<String, Object> data;
 	private File source;
 	private File dest;
 	private File templates;
 	private File assets;
 	private File working;
+	private File site;
 	
 	private String root;
 	
@@ -93,11 +100,11 @@ public class SiteImpl implements Site, SiteBuilder{
 	private List<Tag> tags;
 	
 	private Date time;
-	private boolean showDrafts;
+	private boolean showDrafts = false;
 	
 //	private transient List<Generator> generators;
 //	private transient SiteFilter siteFilter;
-	private transient Renderer renderer;
+	private Renderer renderer;
 //	private List<String> includes;
 //	private List<String> excludes;
 	private RegistryImpl registry;
@@ -106,23 +113,47 @@ public class SiteImpl implements Site, SiteBuilder{
 	private SlugHelper slugHelper;
 	private String permalink;
 	
-	SiteImpl(Map<String, Object> config) {
+	
+	private File lastBuildInfoFile;
+	
+	SiteImpl(SiteConfigImpl siteConfig) {
 		super();
-		this.config = config;
-		
-		this.root = (String)config.get("root");
-		
-		this.showDrafts = MapUtils.get(config, "show_drafts", false);
-		this.permalink = (String) config.get("permalink");
-		this.data = new HashMap<String,Object>(config);
-		
+		init(siteConfig);
 		reset();
 		setup();
 	}
 	
+	private void init(SiteConfigImpl siteConfig){
+		this.config = siteConfig;
+		
+		this.root = (String)config.get("root");
+		
+		//show drafts
+		showDrafts = config.get("show_drafts", false);
+		if(showDrafts){
+			log.info("+ Show drafts option set 'ON'");
+		}
+		
+		this.permalink = (String) config.get("permalink");
+		this.data = new HashMap<String,Object>(config);
+		
+		//debug option
+		boolean debug = config.get("debug", false);
+		if(debug){
+			for(Map.Entry<String, Object> en: config.entrySet()){
+				String name = en.getKey();
+				name = StringUtils.leftPad(name, 25);
+				log.info(name + ": " + en.getValue());
+			}
+		}
+	}
+	
 	private void setupDirs(){
-		File site = null;
+		//File site = null;
 		Object siteObject = config.get("site");
+		if(siteObject == null){
+			throw new IllegalArgumentException("Site directory not set.");
+		}
 		if(siteObject instanceof File){
 			site = (File) siteObject;
 		}else{
@@ -178,6 +209,8 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(dest.equals(source) || source.getAbsolutePath().startsWith(dest.getAbsolutePath())){
 			throw new IllegalArgumentException("Destination directory cannot be or contain the Source directory.");
 		}
+		
+		this.lastBuildInfoFile = new File(working, site.getName() + LAST_BUILD_FILE_SUFFIX);
 	}
 	
 	public void build(){
@@ -187,6 +220,8 @@ public class SiteImpl implements Site, SiteBuilder{
 		render();
 		cleanup();
 		write();
+		
+		saveLastBuildInfo();
 	}
 
 	void reset(){
@@ -605,7 +640,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 * @see org.opoo.press.Site#getConfig()
 	 */
 	@Override
-	public Map<String, Object> getConfig() {
+	public SiteConfig getConfig() {
 		return config;
 	}
 
@@ -830,5 +865,76 @@ public class SiteImpl implements Site, SiteBuilder{
 	@Override
 	public String getPermalink() {
 		return permalink;
+	}
+
+	/**
+	 * @return the site
+	 */
+	public File getSite() {
+		return site;
+	}
+	/**
+	 * @return the showDrafts
+	 */
+	public boolean showDrafts() {
+		return showDrafts;
+	}
+
+	private void saveLastBuildInfo(){
+		Properties props = new Properties();
+		props.setProperty("build_time", String.valueOf(System.currentTimeMillis()));
+		props.setProperty("show_drafts", String.valueOf(showDrafts));
+		
+		FileWriter writer = null;
+		try {
+			writer = new FileWriter(lastBuildInfoFile);
+			props.store(writer, "OpooPress last build information for site: " + site.getName());
+		} catch (IOException e) {
+			throw new RuntimeException("Write last build info exception", e);
+		} finally{
+			IOUtils.closeQuietly(writer);
+		}
+	}
+	
+	public BuildInfo getLastBuildInfo(){
+		if(lastBuildInfoFile == null || !lastBuildInfoFile.exists() 
+				|| !lastBuildInfoFile.isFile() || !lastBuildInfoFile.canRead()){
+			log.debug("No build info file.");
+			return null;
+		}
+		FileReader reader = null;
+		try {
+			reader = new FileReader(lastBuildInfoFile);
+			Properties props = new Properties();
+			props.load(reader);
+			
+			String val1 = props.getProperty("show_drafts");
+			String val2 = props.getProperty("build_time");
+			if(StringUtils.isBlank(val2) || StringUtils.isBlank(val1)){
+				log.debug("No show_drafts or build_time in properties file: " + lastBuildInfoFile);
+				return null;
+			}
+			
+			BuildInfoImpl info = new BuildInfoImpl();
+			info.buildTime = Long.parseLong(val2);
+			info.showDrafts = Boolean.parseBoolean(val1);
+			return info;
+		} catch (IOException e) {
+			throw new RuntimeException("Read last build info exception", e);
+		} finally{
+			IOUtils.closeQuietly(reader);
+		}
+	}
+	
+	static class BuildInfoImpl implements BuildInfo{
+		private long buildTime;
+		private boolean showDrafts;
+		
+		public long getBuildTime() {
+			return buildTime;
+		}
+		public boolean showDrafts() {
+			return showDrafts;
+		}
 	}
 }

@@ -31,7 +31,6 @@ import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.impl.AbstractConvertible;
 import org.opoo.press.source.Source;
-import org.opoo.util.MapUtils;
 import org.opoo.util.URLUtils;
 
 /**
@@ -54,7 +53,7 @@ public class CategoryGenerator implements Generator {
 	@Override
 	public void generate(Site site) {
 		List<Category> categories = site.getCategories();
-		String categoryTitlePrefix = (String) MapUtils.get(site.getConfig(), "category_title_prefix", "");
+		String categoryTitlePrefix = site.getConfig().get("category_title_prefix", "");
 		
 		for(Category category: categories){
 			List<Post> posts = category.getPosts();

@@ -19,7 +19,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
@@ -43,9 +42,11 @@ public interface Site extends SiteBuilder, SiteHelper{
 	
 	File getWorking();
 	
+	File getSite();
+	
 	String getRoot();
 	
-	Map<String,Object> getConfig();
+	SiteConfig getConfig();
 	
 	List<Post> getPosts();
 	
@@ -61,10 +62,13 @@ public interface Site extends SiteBuilder, SiteHelper{
 //	Map<String, String> getTagNames();
 	
 	List<Category> getCategories();
+	
 	List<Tag> getTags();
 	
 	Renderer getRenderer();
+	
 	Converter getConverter(Source source);
+	
 	Locale getLocale();
 	
 	Highlighter getHighlighter();
@@ -74,6 +78,8 @@ public interface Site extends SiteBuilder, SiteHelper{
 	 * @return permalink
 	 */
 	String getPermalink();
+	
+	boolean showDrafts();
 	
 	/**
 	 * Get value from configuration file or site variables.
@@ -90,4 +96,11 @@ public interface Site extends SiteBuilder, SiteHelper{
 	 * @see #get(String)
 	 */
 	void set(String name, Object value);
+	
+	BuildInfo getLastBuildInfo();
+
+	interface BuildInfo{
+		long getBuildTime();
+		boolean showDrafts();
+	}
 }

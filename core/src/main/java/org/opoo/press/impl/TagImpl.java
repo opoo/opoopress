@@ -21,7 +21,6 @@ import java.util.List;
 import org.opoo.press.Post;
 import org.opoo.press.Site;
 import org.opoo.press.Tag;
-import org.opoo.util.MapUtils;
 import org.opoo.util.URLUtils;
 
 /**
@@ -42,7 +41,7 @@ public class TagImpl implements Tag {
 		this.slug = slug;
 		this.name = name;
 		
-		String tagDir = (String) MapUtils.get(site.getConfig(), "tag_dir", "");
+		String tagDir = site.getConfig().get("tag_dir", "");
 		this.url = /*rootUrl + */ tagDir + "/" + URLUtils.encodeURL(slug) + "/";
 	}
 	/**

@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
+import org.opoo.press.SiteConfig;
 import org.opoo.press.source.SourceEntry;
 
 import freemarker.cache.ClassTemplateLoader;
@@ -87,7 +88,7 @@ public class RendererImpl implements Renderer {
 		//Add import i18n messages template.
 		configuration.addAutoImport("i18n", "i18n/messages.ftl");
 		
-		Map<String, Object> config = site.getConfig();
+		SiteConfig config = site.getConfig();
 		List<String> autoIncludeTemplates = (List<String>) config.get("auto_include_templates");
 		if(autoIncludeTemplates != null && !autoIncludeTemplates.isEmpty()){
 			for(String template: autoIncludeTemplates){

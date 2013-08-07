@@ -17,11 +17,10 @@ package org.opoo.press.template;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.opoo.press.Site;
-import org.opoo.util.MapUtils;
+import org.opoo.press.SiteConfig;
 
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;
@@ -61,8 +60,8 @@ public class TitleCaseModel implements TemplateMethodModel {
 	
 	private boolean titlecase;
 	public TitleCaseModel(Site site){
-		Map<String, Object> config = site.getConfig();
-		titlecase = MapUtils.get(config, "titlecase", false);
+		SiteConfig config = site.getConfig();
+		titlecase = config.get("titlecase", false);
 	}
 	
 	/* (non-Javadoc)

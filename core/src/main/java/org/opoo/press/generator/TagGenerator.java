@@ -31,7 +31,6 @@ import org.opoo.press.Site;
 import org.opoo.press.Tag;
 import org.opoo.press.impl.AbstractConvertible;
 import org.opoo.press.source.Source;
-import org.opoo.util.MapUtils;
 import org.opoo.util.URLUtils;
 
 /**
@@ -54,7 +53,7 @@ public class TagGenerator implements Generator {
 	@Override
 	public void generate(Site site) {
 		List<Tag> tags = site.getTags();
-		String tagTitlePrefix = (String) MapUtils.get(site.getConfig(), "tag_title_prefix", "");
+		String tagTitlePrefix = site.getConfig().get("tag_title_prefix", "");
 		
 		for(Tag tag : tags){
 			List<Post> posts = tag.getPosts();

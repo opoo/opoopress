@@ -39,7 +39,7 @@ public class PaginationGenerator implements Generator {
 		List<Page> pages = site.getPages();
 		List<Page> allNewPages = new ArrayList<Page>();
 		for(Page page: pages){
-			if(Pager.isPaginationEnabled(site.getConfig(), page)){
+			if(Pager.isPaginationEnabled(site.getConfig().toMap(), page)){
 				paginate(site, page, allNewPages);
 			}
 		}

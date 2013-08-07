@@ -22,15 +22,15 @@ import java.util.Map;
  * @author Alex Lin
  *
  */
-public interface SiteService {
+public interface SiteConfig {
 
-	Site createSite(File siteDir);
+	File getConfigFile();
 	
-	Site createSite(File siteDir, Map<String,Object> extraOptions);
+	Map<String,Object> getExtraConfig();
 	
-	SiteConfig createSiteConfig(File siteDir, Map<String,Object> extraOptions);
+	Map<String,Object> toMap();
 	
-	Site createSite(SiteConfig siteConfig);
+	Object get(String name);
 	
-	CompassConfig createCompassConfig(File compassProjectPath);
+	<T> T get(String name, T defaultValue);
 }

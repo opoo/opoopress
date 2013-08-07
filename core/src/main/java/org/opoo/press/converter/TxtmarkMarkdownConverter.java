@@ -16,7 +16,6 @@
 package org.opoo.press.converter;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
@@ -24,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opoo.press.Converter;
 import org.opoo.press.Initializable;
 import org.opoo.press.Site;
+import org.opoo.press.SiteConfig;
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
 import org.opoo.press.util.ClassUtils;
@@ -50,7 +50,7 @@ public class TxtmarkMarkdownConverter implements Converter, Initializable {
 	 */
 	@Override
 	public void initialize(Site site) {
-		Map<String, Object> map = site.getConfig();
+		SiteConfig map = site.getConfig();
 		String highlighterClassName = (String) map.get("highlighter");
 		if(highlighterClassName == null){
 			log.warn("This converter might be need a Highlighter.");

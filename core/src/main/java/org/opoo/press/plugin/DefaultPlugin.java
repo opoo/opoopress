@@ -16,7 +16,6 @@
 package org.opoo.press.plugin;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +24,7 @@ import org.opoo.press.Generator;
 import org.opoo.press.Plugin;
 import org.opoo.press.Registry;
 import org.opoo.press.Site;
+import org.opoo.press.SiteConfig;
 import org.opoo.press.SiteFilter;
 import org.opoo.press.util.ClassUtils;
 
@@ -46,7 +46,7 @@ public class DefaultPlugin implements Plugin {
 	@Override
 	public void initialize(Registry registry) {
 		Site site = registry.getSite();
-		Map<String, Object> config = site.getConfig();
+		SiteConfig config = site.getConfig();
 		List<String> converterNames = (List<String>) config.get("converters");
 		List<String> generatorNames = (List<String>) config.get("generators");
 		List<String> siteFilters = (List<String>) config.get("siteFilters");
