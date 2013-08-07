@@ -96,7 +96,7 @@
 
 	<modules>
         <module>core</module>
-        <!-- <module>exec</module> -->
+        <module>support</module>
 		<module>maven-plugins</module>
     </modules>
 
