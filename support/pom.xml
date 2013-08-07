@@ -25,7 +25,7 @@
   	<groupId>org.opoo.press</groupId>
 	<artifactId>opoopress-support</artifactId>
 	<packaging>jar</packaging>
-	<name>OpooPress Blogging Framework: support</name>
+	<name>OpooPress Blogging Framework: Support</name>
 	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
 	<url>http://press.opoo.org/</url>
 	<inceptionYear>2013</inceptionYear>

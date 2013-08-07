@@ -54,5 +54,4 @@ public class GitHubException extends Exception {
 	public GitHubException(Throwable cause) {
 		super(cause);
 	}
-
 }

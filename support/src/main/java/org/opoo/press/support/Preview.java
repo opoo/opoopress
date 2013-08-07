@@ -16,26 +16,23 @@
 package org.opoo.press.support;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.thread.QueuedThreadPool;
 import org.opoo.press.Application;
+import org.opoo.press.CompassConfig;
 import org.opoo.press.Site;
+import org.opoo.press.SiteConfig;
 import org.opoo.press.SiteManager;
 import org.opoo.press.impl.StaticFileImpl;
 import org.opoo.press.source.NoFrontMatterException;
@@ -53,14 +50,13 @@ public class Preview{
 	private final int port;
 	private final int interval;
 	private final File siteDir;
-	private final Map<String,Object> extraOptions;
+//	private final Map<String,Object> extraOptions;
 	private final SiteManager siteManager;
 	
 	private final boolean showDrafts;
-	private final File mainConfig;
-	private final File compassConfig;
-	
-	private File sassDirectory;
+	private final SiteConfig siteConfig;
+
+	private CompassConfig compassConfig;
 	private Site site;
 	private JettyServer server;
 	private DirectoryMonitor monitor;
@@ -69,7 +65,7 @@ public class Preview{
 	public Preview(SiteManager siteManager, File siteDir, Map<String, Object> extraOptions, int port, int interval) {
 		super();
 		this.siteDir = siteDir;
-		this.extraOptions = extraOptions;
+//		this.extraOptions = extraOptions;
 		this.port = port;
 		this.interval = interval;
 		this.siteManager = siteManager;
@@ -80,15 +76,31 @@ public class Preview{
 			showDrafts = MapUtils.get(extraOptions, "show_drafts", false);
 		}
 		
-		this.mainConfig = new File(siteDir, "config.yml");
-		this.compassConfig = new File(siteDir, "config.rb");
+		this.siteConfig = siteManager.createSiteConfig(siteDir, extraOptions);
+		this.compassConfig = siteManager.createCompassConfig(siteDir);
+	}
+	
+	public Preview(SiteManager siteManager, Site site, int port, int interval) {
+		this.siteDir = site.getSite();
+		this.port = port;
+		this.interval = interval;
+		this.siteManager = siteManager;
+		this.siteConfig = site.getConfig();
 		
-		this.sassDirectory = getSassDirectory();
+		Map<String, Object> extraOptions = this.siteConfig.getExtraConfig();
+		if(extraOptions == null){
+			showDrafts = false;
+		}else{
+			showDrafts = MapUtils.get(extraOptions, "show_drafts", false);
+		}
+		
+		this.compassConfig = siteManager.createCompassConfig(siteDir);
 	}
 	
 	public void start() throws Exception{
 		if(site == null){
-			site = siteManager.getSite(siteDir, extraOptions);
+			//site = siteManager.getSite(siteDir, extraOptions);
+			site = siteManager.createSite(siteConfig);
 		}
 		if(monitor == null){
 			monitor = new DirectoryMonitor(siteDir, interval, new L());
@@ -137,8 +149,8 @@ public class Preview{
 			return;
 		}
 		
-		if(file.equals(mainConfig)){
-			log.info("config.yml changed, recreate site.");
+		if(file.equals(siteConfig.getConfigFile())){
+			log.info("Site config file changed, recreate site.");
 			mainConfigChanged();
 			return;
 		}
@@ -146,7 +158,7 @@ public class Preview{
 		if(file.equals(compassConfig)){
 			log.info("SASS/SCSS config file changed, recompile...");
 			//read sass directory again
-			this.sassDirectory = getSassDirectory();
+			this.compassConfig = siteManager.createCompassConfig(siteDir);
 			compassCompile(siteDir);
 			return;
 		}
@@ -199,7 +211,8 @@ public class Preview{
 				//server.setStopAtShutdown(false);
 				server = null;//gc
 			}
-			site = siteManager.getSite(siteDir, extraOptions);
+//			site = siteManager.getSite(siteDir, extraOptions);
+			site = siteManager.createSite(siteConfig);
 			siteManager.build(site);
 			
 			server = new JettyServer(site, port);
@@ -213,35 +226,6 @@ public class Preview{
 		new Compass(siteDir).compile();
 	}
 
-	private File getSassDirectory(){
-		InputStream stream = null;
-		Properties props = new Properties();
-		
-		try {
-			stream = new FileInputStream(compassConfig);
-			props.load(stream);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}finally{
-			IOUtils.closeQuietly(stream);
-		}
-		
-		String dir = props.getProperty("sass_dir");
-		log.info("sass_dir: " + dir);
-		
-		if(dir == null){
-			dir = "sass";
-		}else{
-			dir = StringUtils.remove(dir, "\"");
-			dir = StringUtils.remove(dir, "'");
-		}
-		
-		File sass = new File(siteDir, dir);
-		if(!sass.exists() || !sass.isDirectory()){
-			throw new IllegalArgumentException("No valid sass directory definded in config.rb");
-		}
-		return sass;
-	}
 	static boolean directoryContains(File dir, File file){
 		try {
 			return FileUtils.directoryContains(dir, file);
@@ -304,7 +288,7 @@ public class Preview{
 	}
 	
 	private boolean isSassFile(File file) {
-		return directoryContains(sassDirectory, file);
+		return directoryContains(compassConfig.getSassDirectory(), file);
 	}
 	
 	private boolean isDraft(Map<String, Object> meta){

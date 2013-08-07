@@ -36,7 +36,7 @@ public class Compass {
 	public Compass(File site) {
 		File configFile = new File(site, "config.rb");
 		if (!site.exists() || !site.isDirectory() || !configFile.exists()) {
-			throw new IllegalArgumentException("Not a valid compass project path: "	+ path);
+			throw new IllegalArgumentException("Not a valid compass project path: "	+ site);
 		}
 		this.path = FilenameUtils.separatorsToUnix(site.getAbsolutePath());
 		this.config = FilenameUtils.separatorsToUnix(configFile.getAbsolutePath());
@@ -86,8 +86,7 @@ public class Compass {
 
 		buildBasicScript(script);
 		script.println("require 'compass/commands'");
-		script.println("command = Compass::Commands::WatchProject.new('" + path
-				+ "', {})");
+		script.println("command = Compass::Commands::WatchProject.new('" + path	+ "', {})");
 		script.println("command.perform");
 		script.flush();
 
