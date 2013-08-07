@@ -114,7 +114,7 @@ public interface Base {
 	/**
 	 * Get meta data.
 	 * @param name
-	 * @return
+	 * @return value
 	 */
 	Object get(String name);
 	
