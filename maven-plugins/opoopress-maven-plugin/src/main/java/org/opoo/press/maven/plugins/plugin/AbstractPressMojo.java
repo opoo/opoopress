@@ -16,62 +16,40 @@
 package org.opoo.press.maven.plugins.plugin;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.Application;
-import org.opoo.press.Site;
 import org.opoo.press.SiteManager;
 import org.opoo.press.impl.ContextImpl;
 
 /**
  * @author Alex Lin
- *
  */
-public class AbstractPressMojo extends AbstractMojo {
+public abstract class AbstractPressMojo extends AbstractMojo {
 	/**
 	 * Site directory.
 	 * 
 	 * @parameter expression="${site}" alias="blog" default-value="${basedir}/site"
+     * @required
+     * @readonly
 	 */
-	protected File siteDir;
+	private File siteDir;
 
 	/* (non-Javadoc)
 	 * @see org.apache.maven.plugin.Mojo#execute()
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public final void execute() throws MojoExecutionException, MojoFailureException {
 		getLog().info("The site directory is : " + siteDir.getAbsolutePath());
-		checkDirectory();
-	}
-	
-	private void checkDirectory() throws MojoExecutionException{
-		if(!siteDir.exists() || !siteDir.isDirectory()){
-			throw new MojoExecutionException("Site directory not exists or not valid, run 'mvn op:install -Dsite=" + siteDir.getName() + "' first.");
-		}
+		execute(getSiteManager(), siteDir);
 	}
 
-	public SiteManager getSiteManager(){
+	private SiteManager getSiteManager(){
 		new ContextImpl().initialize();
 		return Application.getContext().getSiteManager();
 	}
-
-	protected Site createSite(){
-		return createSite(false);
-	}
 	
-	protected Site createSite(boolean showDrafts){
-		return getSiteManager().getSite(siteDir, buildExtraConfig(showDrafts));
-	}
-	
-	protected Map<String,Object> buildExtraConfig(boolean showDrafts){
-		Map<String,Object> config = new HashMap<String,Object>();
-		config.put("show_drafts", showDrafts);
-		config.put("debug", getLog().isDebugEnabled());
-		
-		return config;
-	}
+	protected abstract void execute(SiteManager siteManager, File siteDir) throws MojoExecutionException, MojoFailureException;
 }

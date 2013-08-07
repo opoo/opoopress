@@ -15,8 +15,11 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import java.io.File;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.opoo.press.SiteManager;
 import org.opoo.press.support.Compass;
 
 /**
@@ -26,15 +29,14 @@ import org.opoo.press.support.Compass;
  * @author Alex Lin
  * @goal sass-watch
  */
-public class SassWatchMojo extends AbstractPressMojo {
+public class SassWatchMojo extends AbstractInstallMojo {
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.press.AbstractSassMojo#execute()
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractInstallMojo#afterInstall(org.opoo.press.SiteManager, java.io.File)
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		super.execute();
-		
+	protected void afterInstall(SiteManager siteManager, File siteDir)
+			throws MojoExecutionException, MojoFailureException {
 		new Compass(siteDir).watch();
 	}
 }

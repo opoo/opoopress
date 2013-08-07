@@ -15,10 +15,13 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import java.io.File;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.Site;
+import org.opoo.press.SiteManager;
 
 /**
  * Create new post file.
@@ -26,7 +29,7 @@ import org.opoo.press.Site;
  * @author Alex Lin
  * @goal new-post
  */
-public class NewPostMojo extends AbstractPressMojo {
+public class NewPostMojo extends AbstractInstallMojo {
 
 	/**
      * Set this to 'true' if new post is draft.
@@ -42,27 +45,26 @@ public class NewPostMojo extends AbstractPressMojo {
     protected String name;
     
     /**
-    *
-    * @parameter expression="${title}"
-    */
+     * @parameter expression="${title}"
+     * @required
+     * @readonly
+     */
     protected String title;
     
-	
-	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.plugin.AbstractPressMojo#execute()
+    /* (non-Javadoc)
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractInstallMojo#afterInstall(org.opoo.press.SiteManager, java.io.File)
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		super.execute();
-		
+	protected void afterInstall(SiteManager siteManager, File siteDir)
+			throws MojoExecutionException, MojoFailureException {
 		if(StringUtils.isBlank(title)){
 			throw new MojoFailureException("'title' is required, use '-Dtitle=title'");
 		}
 
-		Site site = createSite();
+		Site site = siteManager.createSite(siteDir);
 
 		try {
-			getSiteManager().newPost(site, title, name, isDraft);
+			siteManager.newPost(site, title, name, isDraft);
 		} catch (Exception e) {
 			throw new MojoFailureException(e.getMessage());
 		}

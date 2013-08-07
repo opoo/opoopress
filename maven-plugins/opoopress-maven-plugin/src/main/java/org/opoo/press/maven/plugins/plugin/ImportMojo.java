@@ -15,6 +15,7 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import java.io.File;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,26 +25,28 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.Site;
+import org.opoo.press.SiteManager;
 import org.opoo.press.importer.ImportException;
 
 /**
  * @author Alex Lin
  * @goal import
  */
-public class ImportMojo extends AbstractPressMojo{
+public class ImportMojo extends AbstractInstallMojo{
 	/**
 	 * Importer name.
 	 * 
 	 * @parameter expression="${importer}"
+	 * @required
 	 */
 	private String importerName;
-
+	
 	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.plugin.AbstractPressMojo#execute()
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractInstallMojo#afterInstall(org.opoo.press.SiteManager, java.io.File)
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		super.execute();
+	protected void afterInstall(SiteManager siteManager, File siteDir)
+			throws MojoExecutionException, MojoFailureException {
 		
 		if(StringUtils.isBlank(importerName)){
 			throw new MojoFailureException("importer name is required, e.g. -Dimporter=wordpress");
@@ -62,8 +65,8 @@ public class ImportMojo extends AbstractPressMojo{
 		}
 		
 		try {
-			Site site = createSite();
-			getSiteManager().doImport(site, importerName, props);
+			Site site = siteManager.createSite(siteDir);
+			siteManager.doImport(site, importerName, props);
 		} catch (ImportException e) {
 			throw new MojoFailureException(e.getMessage());
 		} catch (Exception e) {

@@ -15,11 +15,12 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
-import java.util.Map;
+import java.io.File;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.Site;
+import org.opoo.press.SiteManager;
 import org.opoo.press.support.Preview;
 
 /**
@@ -32,7 +33,7 @@ public class PreviewMojo extends AbstractGenerateMojo{
 	/**
      * Set this to 'true' to generate draft posts.
      *
-     * @parameter expression="${show-drafts}" default-value="false"
+     * @parameter expression="${op.show-drafts}" default-value="false"
      */
     protected boolean showDrafts;
 	
@@ -51,26 +52,32 @@ public class PreviewMojo extends AbstractGenerateMojo{
     private int port;
     
     /**
-	 * @parameter expression="${op.generate.skip}" default-value="true"
+     * Set this to 'true' to skip preview.
+     * 
+	 * @parameter expression="${op.preview.skip}" default-value="false"
 	 */
-	protected boolean skipGenerate;
+	protected boolean skipPreview;
 	
 	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.press.GenerateMojo#execute()
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractGenerateMojo#showDrafts()
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		super.execute();
-		
-		if(skipGenerate){
-			getLog().info( "op.generate.skip = true: Skipping generating" );
-		}else{
-			Site site = createSite(showDrafts);
-			generate(site);
+	protected boolean showDrafts() {
+		return showDrafts;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractGenerateMojo#afterGenerate(org.opoo.press.SiteManager, java.io.File, org.opoo.press.Site)
+	 */
+	@Override
+	protected void afterGenerate(SiteManager siteManager, File siteDir,
+			Site site) throws MojoExecutionException, MojoFailureException {
+		if(skipPreview){
+			getLog().info( "op.preview.skip = true: Skipping preview" );
+			return;
 		}
 		
-		Map<String, Object> extraConfig = buildExtraConfig(showDrafts);
-		Preview preview = new Preview(getSiteManager(), siteDir, extraConfig, port, interval);
+		Preview preview = new Preview(siteManager, site, port, interval);
 		try {
 			preview.start();
 		} catch (Exception e) {

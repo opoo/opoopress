@@ -15,15 +15,68 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
-import org.opoo.press.Site;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.opoo.press.Site;
+import org.opoo.press.SiteManager;
+import org.opoo.press.util.StaleUtils;
 
 /**
  * @author Alex Lin
  */
-public abstract class AbstractGenerateMojo extends AbstractPressMojo{
+public abstract class AbstractGenerateMojo extends AbstractSassCompileMojo{
+    /**
+     * Set this to 'true' to skip generate.
+     * 
+	 * @parameter expression="${op.generate.skip}" default-value="false"
+	 */
+	protected boolean skipGenerate;
 	
-	protected void generate(Site site){
+	/* (non-Javadoc)
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractSassCompileMojo#afterSassCompile(org.opoo.press.SiteManager, java.io.File)
+	 */
+	@Override
+	protected final void afterSassCompile(SiteManager siteManager, File siteDir)
+			throws MojoExecutionException, MojoFailureException {
+		Map<String,Object> config = new HashMap<String,Object>();
+		config.put("show_drafts", showDrafts());
+		config.put("debug", getLog().isDebugEnabled());
+		Site site = siteManager.createSite(siteDir, config);
+		
+		//System.out.println("Site extra: " + config);
+		//System.out.println("Site show drafts: " + site.showDrafts());
+		
+		if(skipGenerate){
+			getLog().info( "op.generate.skip = true: Skipping generate" );
+		}else if(skipGenerate(siteManager, siteDir, site)){
+			getLog().info("Skipping generate, all output files are up to date.");
+		}else{
+			generate(site);
+		}
+		
+		afterGenerate(siteManager, siteDir, site);
+	}
+
+	/**
+	 * @param siteManager
+	 * @param siteDir
+	 * @param site
+	 */
+	protected void afterGenerate(SiteManager siteManager, File siteDir, Site site) 
+		throws MojoExecutionException, MojoFailureException{
+	}
+
+	private boolean skipGenerate(SiteManager siteManager, File siteDir, Site site){
+		return !StaleUtils.isSourceStale(site);
+	}
+
+	protected abstract boolean showDrafts();
+	
+	private void generate(Site site){
 		long start = System.currentTimeMillis();
 		site.build();
 		long time = System.currentTimeMillis() - start;

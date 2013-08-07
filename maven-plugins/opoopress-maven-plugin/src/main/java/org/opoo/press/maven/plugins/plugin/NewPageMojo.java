@@ -15,10 +15,13 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import java.io.File;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.Site;
+import org.opoo.press.SiteManager;
 
 /**
  * Create new page file.
@@ -26,35 +29,33 @@ import org.opoo.press.Site;
  * @author Alex Lin
  * @goal new-page
  */
-public class NewPageMojo extends AbstractPressMojo {
+public class NewPageMojo extends AbstractInstallMojo {
+	
     /**
-    *
-    * @parameter expression="${title}"
-    */
+     * @parameter expression="${title}"
+     * @required
+     * @readonly
+     */
     protected String title;
     
     /**
-    *
-    * @parameter expression="${name}"
-    */
-   protected String name;
+     * @parameter expression="${name}"
+     */
+    protected String name;
     
-	
 	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.plugin.AbstractPressMojo#execute()
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractInstallMojo#afterInstall(org.opoo.press.SiteManager, java.io.File)
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		super.execute();
-		
+	protected void afterInstall(SiteManager siteManager, File siteDir)
+			throws MojoExecutionException, MojoFailureException {
 		if(StringUtils.isBlank(title)){
 			throw new MojoFailureException("'title' is required, use '-Dtitle=title'");
 		}
 		
-		Site site = createSite();
-		
+		Site site = siteManager.createSite(siteDir);
 		try {
-			getSiteManager().newPage(site, title, name);
+			siteManager.newPage(site, title, name);
 		} catch (Exception e) {
 			throw new MojoFailureException(e.getMessage());
 		}

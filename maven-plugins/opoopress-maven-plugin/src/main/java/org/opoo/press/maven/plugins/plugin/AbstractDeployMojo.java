@@ -23,44 +23,40 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.repository.Repository;
 import org.opoo.press.Site;
+import org.opoo.press.SiteConfig;
+import org.opoo.press.SiteManager;
 
 /**
  * 
  * @author Alex Lin
  */
 public abstract class AbstractDeployMojo extends AbstractGenerateMojo{
-
    /**
     * Set this to 'true' to skip deployment.
     *
     * @parameter expression="${op.deploy.skip}" default-value="false"
-    * @since 2.4
     */
-   private boolean skipDeploy;
-   
-	/**
-	 * @parameter expression="${op.generate.skip}" default-value="true"
-	 */
-	protected boolean skipGenerate;
-   
+	private boolean skipDeploy;
+	
 	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.press.AbstractPressMojo#execute()
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractGenerateMojo#showDrafts()
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	protected boolean showDrafts() {
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractGenerateMojo#afterGenerate(org.opoo.press.SiteManager, java.io.File, org.opoo.press.Site)
+	 */
+	@Override
+	protected void afterGenerate(SiteManager siteManager, File siteDir, Site site)
+			throws MojoExecutionException, MojoFailureException {
+		
 		if ( skipDeploy ){
 	        getLog().info( "op.deploy.skip = true: Skipping deployment" );
 	        return;
 	    }
-		
-		super.execute();
-		
-		Site site = createSite();
-		if(skipGenerate){
-			getLog().info( "op.generate.skip = true: Skipping generating" );
-		}else{
-			generate(site);
-		}
 		
 		File destination = site.getDestination();
 		getLog().info("Destination [" + destination + "]");
@@ -88,7 +84,7 @@ public abstract class AbstractDeployMojo extends AbstractGenerateMojo{
 	
 	@SuppressWarnings("unchecked")
 	private Repository getRepository(Site site) throws MojoExecutionException, MojoFailureException{
-		Map<String, Object> config = site.getConfig();
+		SiteConfig config = site.getConfig();
 		
 		Object server = config.get("deploy_server");
 		if(server == null){

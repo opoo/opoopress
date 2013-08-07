@@ -15,9 +15,10 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import java.io.File;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.opoo.press.Application;
 import org.opoo.press.Site;
 import org.opoo.press.SiteManager;
 
@@ -30,14 +31,17 @@ import org.opoo.press.SiteManager;
 public class CleanMojo extends AbstractPressMojo {
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.plugin.AbstractPressMojo#execute()
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractPressMojo#execute(org.opoo.press.SiteManager, java.io.File)
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		super.execute();
-
-		SiteManager siteManager = Application.getContext().getSiteManager();
-		Site site = siteManager.getSite(siteDir);
+	protected void execute(SiteManager siteManager, File siteDir)
+			throws MojoExecutionException, MojoFailureException {
+		if(siteDir == null || !siteDir.exists()){
+			getLog().info("Site not installed, skipping clean.");
+			return;
+		}
+		
+		Site site = siteManager.createSite(siteDir);
 		try {
 			siteManager.clean(site);
 		} catch (Exception e) {

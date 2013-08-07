@@ -15,69 +15,10 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
-import java.io.File;
-import java.util.Locale;
-
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.opoo.press.Application;
-import org.opoo.press.support.Compass;
 
 /**
- * Install and initialize site/blog.
- * 
  * @author Alex Lin
  * @goal install
  */
-public class InstallMojo extends AbstractPressMojo {
-	/**
-	 * @parameter expression="${locale}"
-	 */
-	protected String locale = Locale.getDefault().toString();
-	
-	/**
-	 * @parameter expression="${op.sass.compile.skip}" default-value="false"
-	 */
-	protected boolean skipSassCompile = false;
-	
-	/**
-	 * @parameter expression="${op.sample.post}" default-value="true"
-	 */
-	protected boolean createSamplePost = true;
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.press.AbstractPressMojo#execute()
-	 */
-	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		getLog().info("The site directory is : " + siteDir.getAbsolutePath());
-		
-		Locale loc = Locale.getDefault();
-		if(StringUtils.isNotEmpty(locale)){
-			loc = LocaleUtils.toLocale(locale);
-		}
-		
-		getLog().info("Installing site.");
-		try {
-			Application.getContext().getSiteManager().install(siteDir, loc, createSamplePost);
-		} catch (Exception e) {
-			throw new MojoFailureException(e.getMessage());
-		}
-
-		//if system property 'install.skip.sass.compile' is 'true', skip compile SASS/SCSS
-		if(skipSassCompile){
-			getLog().info("op.sass.compile.skip = true: Skip compile sass.");
-			return;
-		}
-
-		File config = new File(siteDir, "config.rb");
-		if(!config.exists()){
-			getLog().warn("config.rb not exists, skip compile sass.");
-		}else{
-			getLog().info("Compiling SASS/SCSS to css.");
-			new Compass(siteDir).compile();
-		}
-	}
+public class InstallMojo extends AbstractInstallMojo {
 }

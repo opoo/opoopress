@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.Site;
+import org.opoo.press.SiteManager;
 import org.opoo.press.importer.ImportException;
 import org.opoo.press.importer.WordPressImporter;
 
@@ -32,7 +33,7 @@ import org.opoo.press.importer.WordPressImporter;
  * @author Alex Lin
  * @goal wordpress-import
  */
-public class WordPressImportMojo extends AbstractPressMojo{
+public class WordPressImportMojo extends AbstractInstallMojo{
 	/**
 	 * The XML file that exported from WordPress.
 	 * @parameter expression="${file}"
@@ -71,13 +72,8 @@ public class WordPressImportMojo extends AbstractPressMojo{
 	 */
 	private Map<String,String> replaceEntries;
 
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.plugin.AbstractPressMojo#execute()
-	 */
-	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		super.execute();
+	protected void afterInstall(SiteManager siteManager, File siteDir)
+			throws MojoExecutionException, MojoFailureException {
 		
 		Map<String,Object> props = new HashMap<String,Object>();
 		if(file == null || !file.exists() || !file.isFile()){
@@ -107,7 +103,7 @@ public class WordPressImportMojo extends AbstractPressMojo{
 
 		WordPressImporter importer = new WordPressImporter();
 		try {
-			Site site = createSite();
+			Site site = siteManager.createSite(siteDir);
 			importer.doImport(site, props);
 		} catch (ImportException e) {
 			throw new MojoFailureException(e.getMessage());

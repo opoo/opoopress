@@ -15,9 +15,6 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.opoo.press.Site;
 
 /**
  * Generate static site/blog.
@@ -29,17 +26,15 @@ public class GenerateMojo extends AbstractGenerateMojo{
 	/**
      * Set this to 'true' to generate draft posts.
      *
-     * @parameter expression="${op.drafts.show}" default-value="false"
+     * @parameter expression="${op.show-drafts}" default-value="false"
      */
     protected boolean showDrafts;
     
 	/* (non-Javadoc)
-	 * @see org.opoo.press.maven.plugins.press.AbstractPressMojo#execute()
+	 * @see org.opoo.press.maven.plugins.plugin.AbstractGenerateMojo#showDrafts()
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		super.execute();
-		Site site = createSite(showDrafts);
-		generate(site);
+	protected boolean showDrafts() {
+		return showDrafts;
 	}
 }
