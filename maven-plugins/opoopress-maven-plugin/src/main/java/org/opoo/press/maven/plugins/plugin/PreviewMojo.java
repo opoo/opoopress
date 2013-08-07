@@ -40,7 +40,7 @@ public class PreviewMojo extends AbstractGenerateMojo{
 	 /**
      * The amount of time in seconds to wait between checks of the site directory.
      *
-     * @parameter expression="${interval}" default-value="5"
+     * @parameter expression="${interval}" default-value="10"
      */
 	private int interval;
 	
