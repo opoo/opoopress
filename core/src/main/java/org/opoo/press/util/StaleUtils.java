@@ -136,7 +136,7 @@ public class StaleUtils {
 		//assets
 		File assets = site.getAssets();
 		if(assets != null && assets.exists()){
-			newer = isNewer(templates, lastBuildTime, filter);
+			newer = isNewer(assets, lastBuildTime, filter);
 			if(newer){
 				log.info("Asset file has been changed after time '" + new Date(lastBuildTime) + "', regenerate site.");
 				return true;
