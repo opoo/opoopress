@@ -41,9 +41,7 @@ OpooPress also have these features:
 - [Github Pages](http://www.opoopress.com/zh/docs/github-pages/)
 
 # Getting Started
-Here is a OpooPress site - [Opoo.org](http://opoo.org/), have a look first.
-
-The first package has be released. It's easy to set up and deploy, Just check out the [docs](http://www.opoopress.com/docs/).
+[The first package has be released](http://opoo.org/opoopress-1.0.0-has-been-released/). It's easy to set up and deploy, Just check out the [docs](http://www.opoopress.com/docs/).
 
 <a class="download-button" href="http://www.opoopress.com/download/">Download OpooPress</a>
 
