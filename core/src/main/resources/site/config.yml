@@ -30,6 +30,7 @@
 #     +- work
 
 
+
 # 'site' set the root directory of your site or blog, default value is the parent directory of this file. 
 # The subdirectory of 'site' are:
 # 	source：        must exists, store all YAML front-matter header files.
@@ -50,10 +51,8 @@
 # ----------------------- #
 #      Main Configs       #
 # ----------------------- #
-
 # Default value is java.util.Locale.getDefault()
 # locale: en_US
-
 url: http://yourwebsite.com
 title: My OpooPress Blog
 subtitle: Just another OpooPress.com site.
@@ -75,10 +74,17 @@ email:
 # If publishing to a subdirectory as in http://site.com/project set 'root: /project'
 root: /
 
-# Permalink style supports variables :year, :month, :day, :hour, :minute, :second, :title
-permalink: /article/:year/:month/:title/
+# Permalink style supports variables：
+# 		The fron-matter headers of post, and ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${pathToFile}, ${fileName} 
+permalink: /article/${year}/${month}/${name}/
 # permalink_label: "&infin;"
 # permalink_label_feed: "&#9875; Permalink"
+
+# New post file full path (in source folder), supports variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}
+new_post: article/${year}-${month}-${day}-${name}.markdown
+
+# New page file full path (in source folder), supports variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}
+new_page: ${name}.markdown
 
 # category folder
 category_dir: /category
@@ -227,5 +233,5 @@ highlighter: "org.opoo.press.highlighter.SyntaxHighlighter"
 #   FreeMarker config     #
 # ----------------------- #
 
-# auto_import_templates:{"ns" : "template_name.ftl", "ns2" : "template2_name.ftl"}
+# auto_import_templates: {"ns" : "template_name.ftl", "ns2" : "template2_name.ftl"}
 # auto_include_templates: ["global_template1.ftl", "global_template2.ftl"]

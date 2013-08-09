@@ -1,6 +1,7 @@
 # ----------------------- #
 #   目录结构配置                             #
 # ----------------------- #
+
 # 默认（推荐）的目录结构如下
 #(.)
 # |
@@ -27,7 +28,6 @@
 #     +- sass-cache SASS编译时的临时缓存目录
 #     |
 #     +- work 工作目录
-#
 
 
 # 指定站点目录，默认是当前文件所在的目录。对于站点中的子目录，有以下要求（或规则）
@@ -74,10 +74,17 @@ email:
 # 如果发布到子目录如 ‘http://site.com/project’ 则设置 'root: /project'
 root: /
 
-# 固定链接支持的变量  :year, :month, :day, :hour, :minute, :second, :title 
-permalink: /article/:year/:month/:title/
+# 固定链接支持的变量 ：
+# 		post 的 front-matter 头部变量 ，以及 ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${pathToFile}, ${fileName} 
+permalink: /article/${year}/${month}/${name}/
 # permalink_label: "&infin;"
 # permalink_label_feed: "&#9875; 固定链接"
+
+# 新建文章的文件全路径（相对于 source 目录），支持变量 : {year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}
+new_post: article/${year}-${month}-${day}-${name}.markdown
+
+# 新建页面的文件全路径（相对于 source 目录），支持变量  : ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}
+new_page: ${name}.markdown
 
 # 分类所在的目录
 category_dir: /category
