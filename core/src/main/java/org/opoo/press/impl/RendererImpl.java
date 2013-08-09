@@ -244,8 +244,8 @@ public class RendererImpl implements Renderer {
 		Template template = null;
 		try {
 			template = new Template("CT" + (start++), new StringReader(templateContent), configuration, "UTF-8");
-		} catch (IOException e1) {
-			throw new RuntimeException(e1);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 		process(template, rootMap, out);
 	}
