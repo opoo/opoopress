@@ -43,7 +43,7 @@ OpooPress also have these features:
 # Getting Started
 [The first package has be released](http://opoo.org/opoopress-1.0.0-has-been-released/). It's easy to set up and deploy, Just check out the [docs](http://www.opoopress.com/docs/).
 
-<a class="download-button" href="http://www.opoopress.com/download/">Download OpooPress</a>
+<a class="download-button" href="http://www.opoopress.com/docs/installation/">Download and Install OpooPress</a>
 
 
 ## Source Code
