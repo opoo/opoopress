@@ -34,6 +34,7 @@ import org.opoo.press.Site;
 import org.opoo.press.SiteManager;
 import org.opoo.press.importer.Importer;
 import org.opoo.press.util.ClassUtils;
+import org.opoo.press.util.LinkUtils;
 import org.opoo.util.ClassPathUtils;
 
 /**
@@ -43,14 +44,17 @@ import org.opoo.util.ClassPathUtils;
 public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 	private static final Log log = LogFactory.getLog(SiteManagerImpl.class);
 	
-	public static final String DEFAULT_NEW_POST_TEMPLATE = "new_post.ftl";
-	public static final String DEFAULT_NEW_PAGE_TEMPLATE = "new_page.ftl";
-	public static final String DEFAULT_SAMPLE_POST_TEMPLATE = "sample-post.ftl";
+	public static final String NEW_POST_TEMPLATE = "new_post.ftl";
+	public static final String NEW_PAGE_TEMPLATE = "new_page.ftl";
+	public static final String DEFAULT_NEW_POST_FILE = "article/${year}-${month}-${day}-${name}.markdown";
+	public static final String DEFAULT_NEW_PAGE_FILE = "${name}.markdown";
+	public static final String NEW_POST_FILE_KEY = "new_post";
+	public static final String NEW_PAGE_FILE_KEY = "new_page";
+	
+	public static final String SAMPLE_POST_TEMPLATE = "sample-post.ftl";
+	public static final String SAMPLE_POST_NAME = "hello-world";
 	
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	private static final SimpleDateFormat NAME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-	private static final String DEFAULT_POST_DIR = "'article/'yyyy/MM/";
-	private static final String DEFAULT_PAGE_DIR = "";
 	
 	/* (non-Javadoc)
 	 * @see org.opoo.press.SiteManager#install(java.io.File, java.util.Locale, boolean)
@@ -97,50 +101,8 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		}
 	}
 	
-	protected String buildPostFileName(Site site, String name, Date date){
-		return NAME_FORMAT.format(date) + "-" + name + ".markdown";
-	}
-	
-	protected String buildPostFilePath(Site site, String name, Date date){
-		String newPostDir = (String)site.getConfig().get("new_post_dir");
-		if(newPostDir == null){
-			newPostDir = DEFAULT_POST_DIR;
-		}
-		return new SimpleDateFormat(newPostDir).format(date);
-	}
-	
-	protected File buildPostFile(Site site, String name, Date date){
-		String path = buildPostFilePath(site, name, date);
-		String filename = buildPostFileName(site, name, date);
-		return new File(site.getSource(), path + filename);
-	}
-
-	protected void createSamplePost(Site site, Locale locale) throws IOException{
-		Map<String,Object> map = new HashMap<String,Object>();
-		
-		Date date = new Date();
-		String dateString = DATE_FORMAT.format(date);
-		map.put("date", dateString);
-		
-		File file = buildPostFile(site, "hello-world", date);
-		
-		FileOutputStream os = null;
-		OutputStreamWriter out = null;
-		try {
-			File dir = file.getParentFile();
-			if(!dir.exists()){
-				dir.mkdirs();
-			}
-			
-			os = new FileOutputStream(file);
-			out = new OutputStreamWriter(os, "UTF-8");
-			site.getRenderer().render(DEFAULT_SAMPLE_POST_TEMPLATE, map, out);
-		} finally{
-			IOUtils.closeQuietly(out);
-			IOUtils.closeQuietly(os);
-		}
-		
-		log.info("Sample post created: " + file);
+	private void createSamplePost(Site site, Locale locale) throws IOException{
+		renderFile(site, "", SAMPLE_POST_NAME, getNewPostFileStyle(site), SAMPLE_POST_TEMPLATE, false);
 	}
 
 	/* (non-Javadoc)
@@ -167,23 +129,20 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 			throw new IllegalArgumentException("Title is required.");
 		}
 		
-		name = processName(site, title, name);
-		
-		String template = (String)site.getConfig().get("new_page_template");
-		if(StringUtils.isBlank(template)){
-			template = DEFAULT_NEW_PAGE_TEMPLATE;
+		String newPageFile = (String) site.getConfig().get(NEW_PAGE_FILE_KEY);
+		if(StringUtils.isBlank(newPageFile)){
+			newPageFile = DEFAULT_NEW_PAGE_FILE;
 		}
 		
-		String newPageDir = (String)site.getConfig().get("new_page_dir");
-		if(newPageDir == null){
-			newPageDir = DEFAULT_PAGE_DIR;
+		return renderFile(site, title, name, newPageFile, NEW_PAGE_TEMPLATE, false);
+	}
+	
+	private String getNewPostFileStyle(Site site){
+		String newPostFile = (String) site.getConfig().get(NEW_POST_FILE_KEY);
+		if(StringUtils.isBlank(newPostFile)){
+			newPostFile = DEFAULT_NEW_POST_FILE;
 		}
-		
-		Date date = new Date();
-		String filepath = newPageDir;
-		String filename = name + ".markdown";
-
-		return newFile(site, title, name, date, filepath, filename, template, false);
+		return newPostFile;
 	}
 
 	/* (non-Javadoc)
@@ -195,38 +154,25 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 			throw new IllegalArgumentException("Title is required.");
 		}
 		
-		name = processName(site, title, name);
-		
-		String template = (String)site.getConfig().get("new_post_template");
-		if(StringUtils.isBlank(template)){
-			template = DEFAULT_NEW_POST_TEMPLATE;
-		}
-		
-		Date date = new Date();
-		String filepath = buildPostFilePath(site, name, date);
-		String filename = buildPostFileName(site, name, date);
-
-		return newFile(site, title, name, date, filepath, filename, template, draft);
+		return renderFile(site, title, name, getNewPostFileStyle(site), NEW_POST_TEMPLATE, draft);
 	}
 	
-	private File newFile(Site site, String title, String name, Date date, 
-			String filePath, String fileName, String template, 
-			boolean draft) throws IOException{
-		log.info("title: " + title);
-		log.info("name: " + name);
+	private File renderFile(Site site, String title, String name, String newFileStyle, String newFileTemplate, boolean isDraft) throws IOException{
+		name = processName(site, title, name);
 		
+		Date date = new Date();
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("title", title);
 		map.put("name", name);
 		map.put("date", DATE_FORMAT.format(date) );
-		map.put("filename", fileName);
-		map.put("filepath", filePath);
-		map.put("site", site);
-		if(draft){
-			map.put("published", false);
-		}
+		LinkUtils.addDateParams(map, date);
 		
-		File file = new File(site.getSource(), filePath + fileName);
+		String filename = site.getRenderer().renderContent(newFileStyle, map);
+		File file = new File(site.getSource(), filename);
+		
+		map.put("site", site);
+		map.put("file", file);
+		map.put("published", !isDraft);
 		
 		FileOutputStream os = null;
 		OutputStreamWriter out = null;
@@ -238,7 +184,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 			
 			os = new FileOutputStream(file);
 			out = new OutputStreamWriter(os, "UTF-8");
-			site.getRenderer().render(template, map, out);
+			site.getRenderer().render(newFileTemplate, map, out);
 		} finally{
 			IOUtils.closeQuietly(out);
 			IOUtils.closeQuietly(os);
@@ -248,7 +194,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		return file;
 	}
 	
-	protected String processName(Site site, String title, String name) {
+	private String processName(Site site, String title, String name) {
 		if(name == null){
 			log.info("Using title as post name.");
 			name = title;
