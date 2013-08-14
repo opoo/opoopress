@@ -38,12 +38,22 @@ public class DefaultSlugHelper implements SlugHelper {
 		for(char c: chars){
 			toSlug(sb, c);
 		}
+		trimDot(sb);
 		return sb.toString();
 	}
 
 	protected void toSlug(StringBuffer result, char c) {
-		if((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '/'){
+		if((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '/' || c == '.'){
 			result.append(c);
+		}
+	}
+	
+	public static void trimDot(StringBuffer sb){
+		while(sb.charAt(0) == '.'){
+			sb.deleteCharAt(0);
+		}
+		while(sb.charAt(sb.length() - 1) == '.'){
+			sb.deleteCharAt(sb.length() - 1);
 		}
 	}
 }

@@ -50,7 +50,7 @@ public class ChineseToPinyinSlugHelper implements SlugHelper{
 		StringBuffer sb = new StringBuffer();
 		boolean previousIsChinese = false;
 		for(char c: chars){
-			if((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '/'){
+			if((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '/' || c == '.'){
 				if(previousIsChinese){
 					sb.append('-');
 				}
@@ -67,6 +67,7 @@ public class ChineseToPinyinSlugHelper implements SlugHelper{
 				}
 			}
 		}
+		DefaultSlugHelper.trimDot(sb);
 		return sb.toString();
 	}
 	
