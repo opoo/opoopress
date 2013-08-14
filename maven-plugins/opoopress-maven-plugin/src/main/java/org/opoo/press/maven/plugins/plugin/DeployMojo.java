@@ -127,6 +127,8 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 		String relativeDir = site.getRoot();
 		if ("".equals(relativeDir)) {
 			relativeDir = "./";
+		}else if(relativeDir.startsWith("/")){
+			relativeDir = relativeDir.substring(1);
 		}
 
 		try {
