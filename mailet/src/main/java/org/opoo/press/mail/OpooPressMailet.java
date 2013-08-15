@@ -30,11 +30,15 @@ import java.util.Properties;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -77,7 +81,6 @@ public class OpooPressMailet extends GenericMailet {
 	private SiteManager siteManager;
 	private SourceParser sourceParser;
 	
-	private String acceptableSenders;
 	private String execCommand;// = "mvn deploy";
 	private File site;
 	
@@ -87,11 +90,9 @@ public class OpooPressMailet extends GenericMailet {
 	@Override
 	public void init() throws MessagingException {
 		super.init();
-		acceptableSenders = getInitParameter("acceptableSenders", "");
 		execCommand = getInitParameter("command", execCommand);
 		String siteDir = getInitParameter("site");
 		
-		log.info("Acceptable Senders: " + acceptableSenders);
 		log.info("Site directory: " + siteDir);
 		log.info("Command: " + execCommand);
 		
@@ -122,7 +123,7 @@ public class OpooPressMailet extends GenericMailet {
 	private void error(PrintWriter out, String message, Throwable e){
 		log.error(message, e);
 		out.println(message);
-		out.println("---");
+		out.println("------");
 		e.printStackTrace(out);
 		out.println();
 		out.println();
@@ -131,52 +132,65 @@ public class OpooPressMailet extends GenericMailet {
 
 	@Override
 	public void service(Mail mail) throws MessagingException {
-		if(!matchSender(mail.getSender())){
-			return;
-		}
-		
 		StringWriter writer = new StringWriter();
 		PrintWriter out = new PrintWriter(writer);
 		
-		MimeMessage mm = mail.getMessage();
-		String subject = mm.getSubject();
-		Date date = mm.getSentDate();
-		String replySubject = "Re: " + subject;
-		
-		log.info("===============================");
-		log.info("Subject: " + subject);
-		log.info("Sent date: " + date);
-		log.info("Size: " + mm.getSize());
-		
+		String subject = "";
 		try{
-			checkAcceptable(mm);
-			String content = getContent(mm);
+			MimeMessage mm = mail.getMessage();
+			subject = MimeUtility.decodeText(mm.getSubject());
+			Date date = mm.getSentDate();
+			String content = getTextContent(mm);
+			if(content == null){
+				info(out, "Can not extract plain text content in mail, skip generate and deploy OpooPress site: " + site);
+				reply(mail, subject, writer.toString(), false);
+				return;
+			}
+			
+			log.info("===============================");
+			log.info("Subject: " + subject);
+			log.info("Sent date: " + date);
+			log.info("Size: " + mm.getSize());
 			if(log.isDebugEnabled()){
 				log.debug(content);
 			}
+			
 			writeToPostFile(out, subject, content, date);
 			executeCommand(out);
+			
+			out.flush();
+			reply(mail, subject, writer.toString(), true);
 		} catch (Exception e) {
 			error(out, e.getMessage(), e);
+			reply(mail, subject, writer.toString(), false);
+			return;
 		}
-
-		out.flush();
-		reply(mail, replySubject, writer.toString());
+	}
+	private void reply(Mail mail, String subject, String content, boolean published) throws MessagingException{
+		if(published){
+			content = "Post '" + subject + "' has been published.\n\n========================\n" + content;
+			subject = "[PUBLISHED] " + subject;
+		}else{
+			content = "Failed to publish post '" + subject + "'.\n\n========================\n" + content;
+			subject = "[FAILED] " + subject;
+		}
+		reply(mail, subject, content);
 	}
 	
 	private void reply(Mail mail, String subject, String content) throws MessagingException{
 		MailAddress recipient = mail.getRecipients().iterator().next();
+		MailAddress sender = mail.getSender();
 		
 		Properties props = System.getProperties();
 		Session session = Session.getDefaultInstance(props);
 		MimeMessage message = new MimeMessage(session);
-		
 		message.setFrom(recipient.toInternetAddress());
-		message.setRecipient(Message.RecipientType.TO, mail.getSender().toInternetAddress());
+		message.setRecipient(Message.RecipientType.TO, sender.toInternetAddress());
 		message.setSubject(subject);
 		message.setSentDate(new Date());
 		message.setText(content);
 		
+		log.info("Reply mail: " + subject + " -> " + sender);
 		getMailetContext().sendMail(message);
 	}
 	
@@ -184,8 +198,19 @@ public class OpooPressMailet extends GenericMailet {
 		if(sentDate == null){
 			sentDate = new Date();
 		}
-		String name = slugHelper.toSlug(subject);
+
+		String name = subject;
 		String ext = null;
+		String title = subject;
+		if(subject.indexOf('|') > 0){
+			String[] arr = StringUtils.split(subject, '|');
+			if(arr.length == 2){
+				title = arr[0];
+				name = arr[1];
+			}
+		}
+		
+		name = slugHelper.toSlug(name);
 		
 		if(PostImpl.FILENAME_PATTERN.matcher(name).matches()){
 			String dateString = name.substring(0, 10);
@@ -208,7 +233,7 @@ public class OpooPressMailet extends GenericMailet {
 		String filename = processPostFileName(siteObject, sentDate, name, ext);
 		File postFile = new File(siteObject.getSource(), filename);
 		
-		File tempFile = prepareTempFile(content, sentDate);
+		File tempFile = prepareTempFile(content, sentDate, title);
 		FileUtils.copyFile(tempFile, postFile);
 		FileUtils.deleteQuietly(tempFile);
 		
@@ -217,32 +242,87 @@ public class OpooPressMailet extends GenericMailet {
 		return postFile;
 	}
 
-	private boolean matchSender(MailAddress sender) throws MessagingException {
-		String email = sender.toString();
-		if(acceptableSenders.contains("|" + email + "|")){
-			log.info("Sender is acceptable: " + email);
-			return true;
-		}else{
-			log.warn("Sender is not acceptable: " + email);
-			return false;
+	private String getTextContent(Part part) throws MessagingException, IOException{
+		if(part.isMimeType("text/plain")){
+			return (String) part.getContent();
+		}else if(part.isMimeType("multipart/*")){ 
+			Multipart multipart = (Multipart) part.getContent();  
+            int count = multipart.getCount();  
+            for(int i = 0 ; i < count ; i++){  
+            	String textContent = getTextContent(multipart.getBodyPart(i));  
+            	if(textContent != null){
+            		return textContent;
+            	}
+            }  
 		}
-	}
-	
-	private void checkAcceptable(MimeMessage mm) throws MessagingException, IOException{
-		Object content = mm.getContent();
-		if(content instanceof String){
-			return;
-		}
-		String msg = "Only plain text content is acceptable, but the content type is: " + mm.getContentType();
-		log.warn(msg);
-		throw new MessagingException(msg);
-	}
-	
-	private String getContent(MimeMessage mm) throws MessagingException, IOException{
-		return (String) mm.getContent();
+		return null;
 	}
 
-	private void executeCommand(final PrintWriter out){
+	private static String processPostFileName(Site site, Date date, String name, String ext){
+		String newPostFileStyle = site.getConfig().get(SiteManagerImpl.NEW_POST_FILE_KEY, SiteManagerImpl.DEFAULT_NEW_POST_FILE);
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("name", name);
+		map.put("format", ext != null ? ext.substring(1) : "markdown");
+		LinkUtils.addDateParams(map, date);
+		String filename = site.getRenderer().renderContent(newPostFileStyle, map);
+	
+		if(ext != null && !filename.endsWith(ext)){
+			log.info("File name extension change: " + filename + " -> " + ext);
+			filename = FilenameUtils.removeExtension(filename) + ext;
+		}
+		
+		return filename;
+	}
+	
+	private File prepareTempFile(String content, Date date, String title) throws Exception{
+		File file = File.createTempFile("opoopress.mail.", ".post");
+		FileUtils.write(file, content, "UTF-8");
+		
+		SourceEntry sourceEntry = new SourceEntry(file);
+		List<String> metaLines = new ArrayList<String>();
+		boolean hasFrontMatter = true;
+		try {
+			Source source = sourceParser.parse(sourceEntry);
+			Map<String, Object> meta = source.getMeta();
+			if(!meta.containsKey("layout")){
+				metaLines.add("layout: post");
+			}
+			if(!meta.containsKey("date")){
+				metaLines.add("date: '" + DATE_FORMAT.format(date) + "'");
+			}
+			if(!meta.containsKey("title")){
+				metaLines.add("title: \"" + title + "\"");
+			}
+		} catch (NoFrontMatterException e) {
+			hasFrontMatter = false;
+			metaLines.add(Source.TRIPLE_DASHED_LINE);
+			metaLines.add("layout: post");
+			metaLines.add("date: '" + DATE_FORMAT.format(date) + "'");
+			metaLines.add("title: '" + title + "'");
+			metaLines.add(Source.TRIPLE_DASHED_LINE);
+		}
+		
+		if(!metaLines.isEmpty()){
+			addMetaLines(file, metaLines, hasFrontMatter);
+		}
+		return file;
+	}
+	
+	private void addMetaLines(File file, List<String> metaLines, boolean hasFrontMatter) throws IOException {
+		log.info("Adding front matter lines...");
+		List<String> lines = FileUtils.readLines(file, "UTF-8");
+		lines = new ArrayList<String>(lines);
+		
+		if(hasFrontMatter){
+			lines.addAll(1, metaLines);
+		}else{
+			lines.addAll(0, metaLines);
+		}
+		
+		FileUtils.writeLines(file, "UTF-8", lines);
+	}
+
+	private void executeCommand(final PrintWriter out) throws ExecuteException, IOException{
 		if(StringUtils.isBlank(execCommand)){
 			warn(out, "No command need execute.");
 			return;
@@ -252,10 +332,10 @@ public class OpooPressMailet extends GenericMailet {
         executor.setWorkingDirectory(site.getParentFile());
 
         CommandLine command = CommandLine.parse(execCommand);
+        
+        out.println("========================");
         info(out, String.format("Execute command: %s",  command.toString()));
-        
-        out.println("========================\n");
-        
+        out.println("========================");
         LogOutputStream outputStream = new LogOutputStream() {
             protected void processLine(String line, int level){
                 log.info(String.format("Command logged an out: %s", line));
@@ -284,52 +364,6 @@ public class OpooPressMailet extends GenericMailet {
 //            }
 //        })).start();
 	
-        try {
-			executor.execute(command);
-		} catch (Exception e) {
-			error(out, e.getMessage(), e);
-		}
-	}
-	
-	private static String processPostFileName(Site site, Date date, String name, String ext){
-		String newPostFileStyle = site.getConfig().get(SiteManagerImpl.NEW_POST_FILE_KEY, SiteManagerImpl.DEFAULT_NEW_POST_FILE);
-		Map<String,Object> map = new HashMap<String,Object>();
-		map.put("name", name);
-		map.put("format", ext != null ? ext.substring(1) : "markdown");
-		LinkUtils.addDateParams(map, date);
-		String filename = site.getRenderer().renderContent(newPostFileStyle, map);
-	
-		if(ext != null && !filename.endsWith(ext)){
-			log.info("File name extension change: " + filename + " -> " + ext);
-			filename = FilenameUtils.removeExtension(filename) + ext;
-		}
-		
-		return filename;
-	}
-	
-	private File prepareTempFile(String content, Date date) throws Exception{
-		File file = File.createTempFile("opoopress.mail.", ".post");
-		FileUtils.write(file, content, "UTF-8");
-		SourceEntry sourceEntry = new SourceEntry(file);
-		try {
-			Source source = sourceParser.parse(sourceEntry);
-			Object object = source.getMeta().get("date");
-			if(object == null){
-				addDateMeta(file, date);
-			}
-		} catch (NoFrontMatterException e) {
-			throw new Exception("Post format error.");
-		}
-		return file;
-	}
-	
-	
-	private static void addDateMeta(File file, Date date) throws IOException{
-		log.warn("Adding date...");
-		List<String> lines = FileUtils.readLines(file, "UTF-8");
-		lines = new ArrayList<String>(lines);
-		lines.add(1, "date: '" + DATE_FORMAT.format(date) + "'");
-		FileUtils.writeLines(file, "UTF-8", lines);
-		log.info("Append date meta to file");
+		executor.execute(command);
 	}
 }
