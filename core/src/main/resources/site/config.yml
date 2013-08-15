@@ -80,11 +80,13 @@ permalink: /article/${year}/${month}/${name}/
 # permalink_label: "&infin;"
 # permalink_label_feed: "&#9875; Permalink"
 
-# New post file full path (in source folder), supports variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}
-new_post: article/${year}-${month}-${day}-${name}.markdown
+# New post file full path (in source folder), supports variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
+# Default format is 'markdown'.
+new_post: article/${year}-${month}-${day}-${name}.${format}
 
-# New page file full path (in source folder), supports variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}
-new_page: ${name}.markdown
+# New page file full path (in source folder), supports variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
+# Default format is 'markdown'.
+new_page: ${name}.${format}
 
 # category folder
 category_dir: /category
