@@ -16,7 +16,7 @@
 <#if description??>
   <meta name="description" content="${description}">
 </#if>
-  <#if page.keywords??><meta name="keywords" content="${ page.keywords }"></#if>
+  <#if page.keywords??><meta name="keywords" content="${ page.keywords }"><#elseif site.keywords??><meta name="keywords" content="${ site.keywords }"></#if>
   <meta name="HandheldFriendly" content="True">
   <meta name="MobileOptimized" content="320">
   <meta name="OpooPressSiteRoot" content="${ root_url }">
