@@ -31,7 +31,11 @@ public interface SiteManager extends SiteService{
 	
 	File newPage(Site site, String title, String name) throws Exception;
 	
+	File newPage(Site site, String title, String name, String format) throws Exception;
+	
 	File newPost(Site site, String title, String name, boolean draft) throws Exception;
+	
+	File newPost(Site site, String title, String name, boolean draft, String format) throws Exception;
 	
 	void build(Site site);
 

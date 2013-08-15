@@ -43,6 +43,11 @@ public class NewPageMojo extends AbstractInstallMojo {
      */
     protected String name;
     
+    /**
+     * @parameter expression="${format}" default-value="markdown"
+     */
+    protected String format;
+    
 	/* (non-Javadoc)
 	 * @see org.opoo.press.maven.plugins.plugin.AbstractInstallMojo#afterInstall(org.opoo.press.SiteManager, java.io.File)
 	 */
@@ -55,7 +60,7 @@ public class NewPageMojo extends AbstractInstallMojo {
 		
 		Site site = siteManager.createSite(siteDir);
 		try {
-			siteManager.newPage(site, title, name);
+			siteManager.newPage(site, title, name, format);
 		} catch (Exception e) {
 			throw new MojoFailureException(e.getMessage());
 		}

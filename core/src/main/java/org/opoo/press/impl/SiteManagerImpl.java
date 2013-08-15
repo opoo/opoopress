@@ -102,7 +102,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 	}
 	
 	private void createSamplePost(Site site, Locale locale) throws IOException{
-		renderFile(site, "", SAMPLE_POST_NAME, getNewPostFileStyle(site), SAMPLE_POST_TEMPLATE, false);
+		renderFile(site, "", SAMPLE_POST_NAME, getNewPostFileStyle(site), SAMPLE_POST_TEMPLATE, false, "markdown");
 	}
 
 	/* (non-Javadoc)
@@ -125,6 +125,9 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 	 */
 	@Override
 	public File newPage(Site site, String title, String name) throws Exception {
+		return newPage(site, title, name, null);
+	}	
+	public File newPage(Site site, String title, String name, String format) throws Exception {
 		if(StringUtils.isBlank(title)){
 			throw new IllegalArgumentException("Title is required.");
 		}
@@ -134,7 +137,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 			newPageFile = DEFAULT_NEW_PAGE_FILE;
 		}
 		
-		return renderFile(site, title, name, newPageFile, NEW_PAGE_TEMPLATE, false);
+		return renderFile(site, title, name, newPageFile, NEW_PAGE_TEMPLATE, false, format);
 	}
 	
 	private String getNewPostFileStyle(Site site){
@@ -150,20 +153,29 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 	 */
 	@Override
 	public File newPost(Site site, String title, String name, boolean draft) throws Exception {
+		return newPost(site, title, name, draft, null);
+	}
+	
+	public File newPost(Site site, String title, String name, boolean draft, String format) throws Exception {
 		if(StringUtils.isBlank(title)){
 			throw new IllegalArgumentException("Title is required.");
 		}
 		
-		return renderFile(site, title, name, getNewPostFileStyle(site), NEW_POST_TEMPLATE, draft);
+		return renderFile(site, title, name, getNewPostFileStyle(site), NEW_POST_TEMPLATE, draft, format);
 	}
 	
-	private File renderFile(Site site, String title, String name, String newFileStyle, String newFileTemplate, boolean isDraft) throws IOException{
+	private File renderFile(Site site, String title, String name, String newFileStyle, String newFileTemplate, boolean isDraft, String format) throws IOException{
 		name = processName(site, title, name);
+		
+		if(format == null){
+			format = "markdown";
+		}
 		
 		Date date = new Date();
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("title", title);
 		map.put("name", name);
+		map.put("format", format);
 		map.put("date", DATE_FORMAT.format(date) );
 		LinkUtils.addDateParams(map, date);
 		
