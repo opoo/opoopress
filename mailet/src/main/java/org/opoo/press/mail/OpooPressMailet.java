@@ -28,12 +28,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
 import org.apache.commons.exec.CommandLine;
@@ -136,6 +141,7 @@ public class OpooPressMailet extends GenericMailet {
 		PrintWriter out = new PrintWriter(writer);
 		
 		String subject = "";
+		File file = null;
 		try{
 			MimeMessage mm = mail.getMessage();
 			subject = MimeUtility.decodeText(mm.getSubject());
@@ -143,7 +149,7 @@ public class OpooPressMailet extends GenericMailet {
 			String content = getTextContent(mm);
 			if(content == null){
 				info(out, "Can not extract plain text content in mail, skip generate and deploy OpooPress site: " + site);
-				reply(mail, subject, writer.toString(), false);
+				replyFailed(mail, subject, writer.toString(), null);
 				return;
 			}
 			
@@ -155,29 +161,31 @@ public class OpooPressMailet extends GenericMailet {
 				log.debug(content);
 			}
 			
-			writeToPostFile(out, subject, content, date);
+			file = writeToPostFile(out, subject, content, date);
 			executeCommand(out);
 			
 			out.flush();
-			reply(mail, subject, writer.toString(), true);
+			replyPublished(mail, subject, writer.toString(), file);
 		} catch (Exception e) {
 			error(out, e.getMessage(), e);
-			reply(mail, subject, writer.toString(), false);
+			replyFailed(mail, subject, writer.toString(), file);
 			return;
 		}
 	}
-	private void reply(Mail mail, String subject, String content, boolean published) throws MessagingException{
-		if(published){
-			content = "Post '" + subject + "' has been published.\n\n========================\n" + content;
-			subject = "[PUBLISHED] " + subject;
-		}else{
-			content = "Failed to publish post '" + subject + "'.\n\n========================\n" + content;
-			subject = "[FAILED] " + subject;
-		}
-		reply(mail, subject, content);
+	
+	private void replyFailed(Mail mail, String subject, String content, File file) throws MessagingException{
+		content = "Failed to publish post '" + subject + "'.\n\n========================\n" + content;
+		subject = "[FAILED] " + subject;
+		reply(mail, subject, content, file);
 	}
 	
-	private void reply(Mail mail, String subject, String content) throws MessagingException{
+	private void replyPublished(Mail mail, String subject, String content, File file) throws MessagingException{
+		content = "Post '" + subject + "' has been published.\n\n========================\n" + content;
+		subject = "[PUBLISHED] " + subject;
+		reply(mail, subject, content, file);
+	}
+	
+	private void reply(Mail mail, String subject, String content, File file) throws MessagingException{
 		MailAddress recipient = mail.getRecipients().iterator().next();
 		MailAddress sender = mail.getSender();
 		
@@ -188,12 +196,33 @@ public class OpooPressMailet extends GenericMailet {
 		message.setRecipient(Message.RecipientType.TO, sender.toInternetAddress());
 		message.setSubject(subject);
 		message.setSentDate(new Date());
-		message.setText(content);
+		//message.setText(content);
+		setReplyMailContent(message, content, file);
 		
 		log.info("Reply mail: " + subject + " -> " + sender);
 		getMailetContext().sendMail(message);
 	}
 	
+	private void setReplyMailContent(MimeMessage message, String content, File file) throws MessagingException {
+		if(file == null){
+			message.setText(content);
+		}else{
+			MimeMultipart mp = new MimeMultipart();
+			
+			MimeBodyPart bodyPart1 = new MimeBodyPart();
+			bodyPart1.setText(content);
+			mp.addBodyPart(bodyPart1);
+			
+			BodyPart bodyPart2 = new MimeBodyPart();
+			bodyPart2.setDataHandler(new DataHandler(new FileDataSource(file)));
+			bodyPart2.setFileName(file.getName());
+			mp.addBodyPart(bodyPart2);
+			
+			message.setContent(mp);
+			//message.saveChanges();
+		}
+	}
+
 	private File writeToPostFile(PrintWriter out, String subject, String content, Date sentDate) throws Exception {
 		if(sentDate == null){
 			sentDate = new Date();
