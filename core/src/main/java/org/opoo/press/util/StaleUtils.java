@@ -17,6 +17,7 @@ package org.opoo.press.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +33,8 @@ import org.opoo.press.SiteConfig;
  */
 public class StaleUtils {
 	private static final Log log = LogFactory.getLog(StaleUtils.class);
+	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+	
 	private static final String DEFAULT_CSS_FILE = "screen.css";
 
 	public static boolean isCompassStale(CompassConfig compassConfig){
@@ -97,7 +100,7 @@ public class StaleUtils {
 		//config file
 		if(configFile.lastModified() > lastBuildTime){
 			if(log.isInfoEnabled()){
-				log.info("Config file has been changed after time '" + new Date(lastBuildTime) + "', regenerate site.");
+				log.info("Config file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
 			}
 			return true;
 		}
@@ -121,7 +124,7 @@ public class StaleUtils {
 		File source = site.getSource();
 		boolean newer = isNewer(source, lastBuildTime, filter);
 		if(newer){
-			log.info("Source file has been changed after time '" + new Date(lastBuildTime) + "', regenerate site.");
+			log.info("Source file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
 			return true;
 		}
 		
@@ -129,7 +132,7 @@ public class StaleUtils {
 		File templates = site.getTemplates();
 		newer = isNewer(templates, lastBuildTime, filter);
 		if(newer){
-			log.info("Template file has been changed after time '" + new Date(lastBuildTime) + "', regenerate site.");
+			log.info("Template file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
 			return true;
 		}
 		
@@ -138,7 +141,7 @@ public class StaleUtils {
 		if(assets != null && assets.exists()){
 			newer = isNewer(assets, lastBuildTime, filter);
 			if(newer){
-				log.info("Asset file has been changed after time '" + new Date(lastBuildTime) + "', regenerate site.");
+				log.info("Asset file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
 				return true;
 			}
 		}
@@ -156,7 +159,7 @@ public class StaleUtils {
     		if(file.isFile()){
     			if(file.lastModified() > compareTime){
     				if(log.isInfoEnabled()){
-    					log.info(String.format("File '%s' is newer than '%s'", file, new Date(compareTime)));
+    					log.info(String.format("File '%s' is newer than '%s'", file, format(compareTime)));
     				}
     				return true;
     			}
@@ -167,5 +170,9 @@ public class StaleUtils {
     		}
     	}
     	return false;
+    }
+    
+    public static String format(long millis){
+    	return SDF.format(new Date(millis));
     }
 }
