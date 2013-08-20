@@ -49,6 +49,10 @@ OpooPress also have these features:
 ## Source Code
 You can access the source code at: [https://github.com/opoo/opoopress](https://github.com/opoo/opoopress)
 
+## Demo Sites
+- [OpooPress.com](http://www.opoopress.com/)
+- [Opoo.org](http://opoo.org/)
+
 ## Feedback / Contact
 If you want to see new features in OpooPress, don't hesitate to offer suggestions, clone the repository on GitHub. If you find errors you can [post issues](https://github.com/opoo/opoopress/issues) or send me a pull request.
 
