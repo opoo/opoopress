@@ -46,8 +46,8 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 	
 	public static final String NEW_POST_TEMPLATE = "new_post.ftl";
 	public static final String NEW_PAGE_TEMPLATE = "new_page.ftl";
-	public static final String DEFAULT_NEW_POST_FILE = "article/${year}-${month}-${day}-${name}.markdown";
-	public static final String DEFAULT_NEW_PAGE_FILE = "${name}.markdown";
+	public static final String DEFAULT_NEW_POST_FILE = "article/${year}-${month}-${day}-${name}.${format}";
+	public static final String DEFAULT_NEW_PAGE_FILE = "${name}.${format}";
 	public static final String NEW_POST_FILE_KEY = "new_post";
 	public static final String NEW_PAGE_FILE_KEY = "new_page";
 	
