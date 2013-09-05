@@ -9,6 +9,7 @@ maven-plugins/opoopress-maven-plugin/src/test
 DeployToGitHubMojo2.java
 support/src/test
 mailet/src/test
+changelog.txt
 
 #################
 ## Eclipse
