@@ -5,7 +5,7 @@
 # The default layout like below
 #(.)
 # |
-# +- site the default site/blog directory.
+# +- site (the default site/blog directory).
 # |   |
 # |   +- config.yml (The site configuration file)
 # |   |
