@@ -16,7 +16,7 @@
 package org.opoo.press.util;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -67,10 +67,10 @@ public class StaleUtils {
 		}
 		
 		File sass = compassConfig.getSassDirectory();
-		return isNewer(sass, lastModified, new FilenameFilter() {
+		return isNewer(sass, lastModified, new FileFilter() {
 			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".scss");
+			public boolean accept(File file) {
+				return file.isDirectory() || file.getName().endsWith(".scss");
 			}
 		});
 	}
@@ -105,9 +105,10 @@ public class StaleUtils {
 			return true;
 		}
 		
-		FilenameFilter filter = new FilenameFilter() {
+		FileFilter filter = new FileFilter() {
 			@Override
-			public boolean accept(File dir, String name) {
+			public boolean accept(File file) {
+				String name = file.getName();
 				char firstChar = name.charAt(0);
 				if(firstChar == '.' || firstChar == '#'){
 					return false;
@@ -149,7 +150,7 @@ public class StaleUtils {
 		return false;
 	}
 	
-    public static boolean isNewer(File dir, long compareTime, FilenameFilter filter){
+    public static boolean isNewer(File dir, long compareTime, FileFilter filter){
     	File[] listFiles = dir.listFiles(filter);
     	for(File file: listFiles){
     		if(file.isHidden()){
