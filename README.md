@@ -38,12 +38,12 @@ OpooPress also have these features:
 - FTP
 - SSH/SCP
 - WebDAV
-- [Github Pages](http://www.opoopress.com/zh/docs/github-pages/)
+- [Github Pages](http://www.opoopress.com/en/docs/github-pages/)
 
 # Getting Started
-[The first package has be released](http://opoo.org/opoopress-1.0.0-has-been-released/). It's easy to set up and deploy, Just check out the [docs](http://www.opoopress.com/docs/).
+[The first package has be released](http://www.opoopress.com/en/). It's easy to set up and deploy, Just check out the [docs](http://www.opoopress.com/en/docs/).
 
-<a class="download-button" href="http://www.opoopress.com/docs/installation/">Download and Install OpooPress</a>
+<a class="download-button" href="http://www.opoopress.com/en/docs/installation/">Download and Install OpooPress</a>
 
 
 ## Source Code
