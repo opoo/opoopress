@@ -18,8 +18,6 @@ package org.opoo.press.source.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,17 +81,11 @@ public class SourceManagerImpl implements SourceManager {
 		String[] arr = StringUtils.split(path, "/");
 		
 		SourceEntry entry = null;
-		int i = 0;
 		for(String s: arr){
-			System.out.println("[" + (i++) + "]: " + s);
 			sourceDir = new File(sourceDir, s);
 			entry = new SourceEntry(entry, sourceDir);
 		}
 		
-		System.out.println(entry.getPath());
-		System.out.println(entry.getName());
-		System.out.println(entry.getFile().getAbsolutePath());
-		System.out.println(entry.getParent().getFile().getAbsolutePath());
 		return entry;
 	}
 
@@ -104,19 +96,5 @@ public class SourceManagerImpl implements SourceManager {
 	public Source buildSource(File sourceDir, String path, Map<String, Object> meta, String content) {
 		SourceEntry entry = buildEntry(sourceDir, path);
 		return new SimpleSource(entry, meta, content);
-	}
-	
-	public static void main(String[] args){
-		SourceEntry entry = new SourceManagerImpl().buildEntry(new File("."), "article/2013/07/2013-07-31-hello-world.markdown");
-		System.out.println(entry);
-	
-		Yaml yaml = new Yaml();
-		Map<String,Object> map = new HashMap<String,Object>();
-		map.put("abcd", "aaaaaaaaaa");
-		map.put("published", true);
-		map.put("date", new Date());
-		map.put("tags", new String[]{"tag1", "Tag2"});
-		String string = yaml.dumpAsMap(map);
-		System.out.println("[" + string + "]");
 	}
 }
