@@ -51,8 +51,8 @@ import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.mailet.Mail;
 import org.apache.mailet.MailAddress;
 import org.apache.mailet.base.GenericMailet;
@@ -76,7 +76,7 @@ import org.opoo.press.util.LinkUtils;
  * @author Alex Lin
  */
 public class OpooPressMailet extends GenericMailet {
-	private static final Log log = LogFactory.getLog(OpooPressMailet.class);
+	private static final Logger log = LoggerFactory.getLogger(OpooPressMailet.class);
 	private static final SimpleDateFormat NAME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private static final String[] EXTS = {".html", ".markdown", ".md", ".textile"};

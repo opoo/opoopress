@@ -23,8 +23,8 @@ import java.util.Vector;
 import javax.mail.MessagingException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.mailet.Mail;
 import org.apache.mailet.MailAddress;
 import org.apache.mailet.base.GenericMatcher;
@@ -39,7 +39,7 @@ import org.apache.mailet.base.GenericMatcher;
  * @author Alex Lin
  */
 public class RecipientIsAndSenderIs extends GenericMatcher {
-	private static final Log log = LogFactory.getLog(RecipientIsAndSenderIs.class);
+	private static final Logger log = LoggerFactory.getLogger(RecipientIsAndSenderIs.class);
 	private Collection<MailAddress> recipients;
 	private Collection<MailAddress> senders;
 

@@ -19,12 +19,12 @@
 	<parent>
 		<groupId>org.opoo.press</groupId>
 		<artifactId>opoopress-parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.2-SNAPSHOT</version>
 	</parent>
   	<groupId>org.opoo.press</groupId>
 	<artifactId>opoopress-mailet</artifactId>
 	<packaging>jar</packaging>
-	<name>OpooPress Blogging Framework: Mailet</name>
+	<name>OpooPress Blogging Framework :: Mailet</name>
 	<description>Mailet for OpooPress - publish blog post by email.</description>
 	<url>http://press.opoo.org/</url>
 	<inceptionYear>2013</inceptionYear>
