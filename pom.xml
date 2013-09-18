@@ -25,7 +25,7 @@
 	<artifactId>opoopress-parent</artifactId>
 	<version>1.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>OpooPress Blogging Framework: Parent</name>
+	<name>OpooPress Blogging Framework :: Parent</name>
 	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
 	<url>http://press.opoo.org/</url>
 	<inceptionYear>2013</inceptionYear>
@@ -96,6 +96,7 @@
 	<modules>
         <module>core</module>
         <module>support</module>
+		<module>wagon-providers</module>
 		<module>maven-plugins</module>
     </modules>
 
@@ -140,6 +141,40 @@
 
 		</plugins>
 	</build>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>2.6</version>
+			</dependency>
+
+			<dependency> 
+			  <groupId>ch.qos.logback</groupId>
+			  <artifactId>logback-classic</artifactId>
+			  <version>1.0.13</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				 <version>1.7.5</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
   	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
