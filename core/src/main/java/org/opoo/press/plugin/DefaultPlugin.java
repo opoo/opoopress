@@ -17,8 +17,8 @@ package org.opoo.press.plugin;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.Converter;
 import org.opoo.press.Generator;
 import org.opoo.press.Plugin;
@@ -36,7 +36,7 @@ import org.opoo.press.util.ClassUtils;
  *
  */
 public class DefaultPlugin implements Plugin {
-	private static final Log log = LogFactory.getLog(DefaultPlugin.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultPlugin.class);
 	private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
 
 	/* (non-Javadoc)

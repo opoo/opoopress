@@ -24,8 +24,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
  *
  */
 public class ChainingClassLoader extends URLClassLoader {
-	private static final Log log = LogFactory.getLog(ChainingClassLoader.class);
+	private static final Logger log = LoggerFactory.getLogger(ChainingClassLoader.class);
 	
 	private final ClassLoader parent;
 	private final Collection<ClassLoader> loaders;

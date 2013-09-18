@@ -37,8 +37,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.Application;
 import org.opoo.press.Category;
 import org.opoo.press.Converter;
@@ -72,7 +72,7 @@ import freemarker.template.TemplateModel;
  *
  */
 public class SiteImpl implements Site, SiteBuilder{
-	private static final Log log = LogFactory.getLog(SiteImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(SiteImpl.class);
 	private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
 	private static final String LAST_BUILD_FILE_SUFFIX = "_lastbuild.properties";
 	

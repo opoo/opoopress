@@ -20,8 +20,8 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.Site;
 
 /**
@@ -29,7 +29,7 @@ import org.opoo.press.Site;
  *
  */
 public class FixUrlSiteFilter extends SiteFilterAdapter {
-	private static final Log log = LogFactory.getLog(FixUrlSiteFilter.class);
+	private static final Logger log = LoggerFactory.getLogger(FixUrlSiteFilter.class);
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.filter.SiteFilterAdapter#postWrite(org.opoo.press.Site)

@@ -18,8 +18,8 @@ package org.opoo.press.converter;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.Converter;
 import org.opoo.press.Initializable;
 import org.opoo.press.Site;
@@ -37,7 +37,7 @@ import com.github.rjeschke.txtmark.Processor;
  * @author Alex Lin
  */
 public class TxtmarkMarkdownConverter implements Converter, Initializable {
-	private static final Log log = LogFactory.getLog(TxtmarkMarkdownConverter.class);
+	private static final Logger log = LoggerFactory.getLogger(TxtmarkMarkdownConverter.class);
 	private Configuration config;
 	private Highlighter highlighter;
 

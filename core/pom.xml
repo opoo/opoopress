@@ -24,7 +24,7 @@
   	<groupId>org.opoo.press</groupId>
 	<artifactId>opoopress-core</artifactId>
 	<packaging>jar</packaging>
-	<name>OpooPress Blogging Framework: Core</name>
+	<name>OpooPress Blogging Framework :: Core</name>
 	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
 	<url>http://press.opoo.org/</url>
 	<inceptionYear>2013</inceptionYear>
@@ -48,7 +48,6 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
 		</dependency>
 		
 		<dependency>
@@ -69,22 +68,16 @@
 			<version>0.9</version>
 		</dependency>
 		
-		<dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-        
+		<!--
 		<dependency>
 		    <groupId>commons-logging</groupId>
 		    <artifactId>commons-logging</artifactId>
-		    <version>1.1.1</version>
 		</dependency>
+		-->
 		
 		<dependency>
 		    <groupId>commons-lang</groupId>
 		    <artifactId>commons-lang</artifactId>
-		    <version>2.6</version>
 		</dependency>
 		
 		<!-- for wordpress importer -->
@@ -106,6 +99,11 @@
 		    <groupId>net.java</groupId>
 		    <artifactId>textile-j</artifactId>
 		    <version>2.2</version>
+		</dependency>
+			
+		<dependency> 
+		  <groupId>ch.qos.logback</groupId>
+		  <artifactId>logback-classic</artifactId>
 		</dependency>
 	</dependencies>
 	

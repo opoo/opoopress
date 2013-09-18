@@ -23,8 +23,8 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.CompassConfig;
 
 /**
@@ -32,7 +32,7 @@ import org.opoo.press.CompassConfig;
  * 
  */
 public class CompassConfigImpl implements CompassConfig{
-	private static final Log log = LogFactory.getLog(CompassConfigImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(CompassConfigImpl.class);
 	private final File compassProjectPath;
 	private File configFile;
 	private File sassDir;

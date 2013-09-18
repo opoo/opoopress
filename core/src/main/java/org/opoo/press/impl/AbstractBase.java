@@ -23,8 +23,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.Base;
 import org.opoo.press.Converter;
 import org.opoo.press.Renderer;
@@ -39,7 +39,7 @@ import org.opoo.util.MapUtils;
  *
  */
 public abstract class AbstractBase extends AbstractConvertible implements Base{
-	protected Log log = LogFactory.getLog(getClass());
+	protected Logger log = LoggerFactory.getLogger(getClass());
 	
 	private static DateFormat f1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private static DateFormat f2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -67,7 +67,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 		this.data = new HashMap<String,Object>(source.getMeta()); 
 		String title = (String) data.get("title");
 		if(title != null){
-			log = LogFactory.getLog(getClass().getName() + "[" + title + "]");
+			log = LoggerFactory.getLogger(getClass().getName() + "[" + title + "]");
 		}
 		init();
 	}

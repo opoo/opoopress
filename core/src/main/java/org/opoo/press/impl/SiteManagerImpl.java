@@ -28,8 +28,8 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.Site;
 import org.opoo.press.SiteManager;
 import org.opoo.press.importer.Importer;
@@ -42,7 +42,7 @@ import org.opoo.util.ClassPathUtils;
  *
  */
 public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
-	private static final Log log = LogFactory.getLog(SiteManagerImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(SiteManagerImpl.class);
 	
 	public static final String NEW_POST_TEMPLATE = "new_post.ftl";
 	public static final String NEW_PAGE_TEMPLATE = "new_page.ftl";

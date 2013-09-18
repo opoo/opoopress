@@ -19,8 +19,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.Site;
 import org.opoo.press.StaticFile;
 import org.opoo.press.source.SourceEntry;
@@ -30,7 +30,7 @@ import org.opoo.press.source.SourceEntry;
  *
  */
 public class StaticFileImpl implements StaticFile {
-	private static final Log log = LogFactory.getLog(StaticFileImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(StaticFileImpl.class);
 	
 	private Site site;
 	private SourceEntry sourceEntry;

@@ -20,8 +20,8 @@ import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.CompassConfig;
 import org.opoo.press.Site;
 import org.opoo.press.Site.BuildInfo;
@@ -32,7 +32,7 @@ import org.opoo.press.SiteConfig;
  *
  */
 public class StaleUtils {
-	private static final Log log = LogFactory.getLog(StaleUtils.class);
+	private static final Logger log = LoggerFactory.getLogger(StaleUtils.class);
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 	
 	private static final String DEFAULT_CSS_FILE = "screen.css";

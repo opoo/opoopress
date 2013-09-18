@@ -25,8 +25,8 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.source.NoFrontMatterException;
 import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
@@ -38,7 +38,7 @@ import org.yaml.snakeyaml.Yaml;
  *
  */
 public class SourceParserImpl implements SourceParser {
-	private static final Log log = LogFactory.getLog(SourceParserImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(SourceParserImpl.class);
 	private Yaml yaml = new Yaml();
 	
 	/**

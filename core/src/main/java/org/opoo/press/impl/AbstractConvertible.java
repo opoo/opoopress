@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.Convertible;
 import org.opoo.press.Renderer;
 import org.opoo.press.source.Source;
@@ -32,7 +32,7 @@ import org.opoo.press.source.Source;
  *
  */
 public abstract class AbstractConvertible implements Convertible {
-	protected final Log log = LogFactory.getLog(getClass());
+	protected final Logger log = LoggerFactory.getLogger(getClass());
 	
 	public abstract String getUrl();
 

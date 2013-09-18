@@ -23,8 +23,8 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opoo.press.SiteConfig;
 import org.opoo.util.MapUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -34,7 +34,7 @@ import org.yaml.snakeyaml.Yaml;
  *
  */
 public class SiteConfigImpl extends LinkedHashMap<String, Object> implements SiteConfig{
-	private static final Log log = LogFactory.getLog(SiteConfigImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(SiteConfigImpl.class);
 	
 	private static final long serialVersionUID = 6443434786872527839L;
 	private final Object lock = new Object();

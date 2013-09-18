@@ -24,8 +24,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Alex Lin
@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class ClassPathUtils {
 	
-	private static final Log log = LogFactory.getLog(ClassPathUtils.class);
+	private static final Logger log = LoggerFactory.getLogger(ClassPathUtils.class);
 	private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
 	
 	/** Pseudo URL prefix for loading from the class path: "classpath:" */
@@ -142,7 +142,7 @@ public abstract class ClassPathUtils {
 						if(jarEntry.isDirectory()){
 							tmp.mkdirs();
 							if(IS_DEBUG_ENABLED){
-								log.debug("Create directory：" + tmp);
+								log.debug("Create directory: " + tmp);
 							}
 						}else{
 							File parent = tmp.getParentFile();
