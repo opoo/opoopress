@@ -17,8 +17,8 @@ package org.opoo.press.maven.wagon.git;
 
 import java.io.File;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils.StringStreamConsumer;
@@ -31,7 +31,7 @@ import org.codehaus.plexus.util.cli.Commandline;
  */
 public class Git {
 	
-	private static final Log log = /*new SimpleLog("Git");*/LogFactory.getLog(Git.class);
+	private static final Logger log = /*new SimpleLog("Git");*/LoggerFactory.getLogger(Git.class);
 	private final File workingDirectory;
 	private final String remote;
 	private final String branch;
