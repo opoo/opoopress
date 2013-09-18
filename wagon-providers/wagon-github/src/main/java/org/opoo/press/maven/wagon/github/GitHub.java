@@ -39,8 +39,8 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.eclipse.egit.github.core.Blob;
 import org.eclipse.egit.github.core.Commit;
@@ -60,7 +60,7 @@ import org.eclipse.egit.github.core.util.EncodingUtils;
  * @author Kevin Sawicki (kevin@github.com)
  */
 public class GitHub{
-	private static final Log log = LogFactory.getLog(GitHub.class);
+	private static final Logger log = LoggerFactory.getLogger(GitHub.class);
 
 	/**
 	 * BRANCH_DEFAULT

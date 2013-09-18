@@ -37,9 +37,9 @@
 			<scope>test</scope>
 		</dependency>
 		
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
+		<dependency> 
+		  <groupId>ch.qos.logback</groupId>
+		  <artifactId>logback-classic</artifactId>
 		</dependency>
 		
 		<dependency>
