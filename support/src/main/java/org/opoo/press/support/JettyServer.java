@@ -15,8 +15,8 @@
  */
 package org.opoo.press.support;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.NCSARequestLog;
@@ -37,7 +37,7 @@ import org.opoo.press.Site;
  */
 public class JettyServer extends Server{
 	private static final int MAX_IDLE_TIME = 30000;
-	private static final Log log = LogFactory.getLog(JettyServer.class);
+	private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
 	
 	JettyServer(Site site, int port) {
 		super();

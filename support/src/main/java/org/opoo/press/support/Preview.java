@@ -26,8 +26,8 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.mortbay.thread.QueuedThreadPool;
 import org.opoo.press.Application;
 import org.opoo.press.CompassConfig;
@@ -45,7 +45,7 @@ import org.opoo.util.MapUtils;
  *
  */
 public class Preview{
-	private static final Log log = LogFactory.getLog(Preview.class);
+	private static final Logger log = LoggerFactory.getLogger(Preview.class);
 	
 	private final int port;
 	private final int interval;

@@ -20,15 +20,15 @@ import java.io.File;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Alex Lin
  *
  */
 public class DirectoryMonitor {
-	private static final Log log = LogFactory.getLog(DirectoryMonitor.class);
+	private static final Logger log = LoggerFactory.getLogger(DirectoryMonitor.class);
 	private final FileAlterationMonitor monitor;
 	private final File siteDir;
 	
