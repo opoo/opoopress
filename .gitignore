@@ -10,6 +10,8 @@ DeployToGitHubMojo2.java
 support/src/test
 mailet/src/test
 changelog.txt
+wagon-providers/wagon-git/src/test
+wagon-providers/wagon-github/src/test
 
 #################
 ## Eclipse
