@@ -24,7 +24,7 @@
   	<groupId>org.opoo.press.maven.plugins</groupId>
 	<artifactId>opoopress-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<name>OpooPress Blogging Framework: opoopress-maven-plugin</name>
+	<name>OpooPress Blogging Framework :: opoopress-maven-plugin</name>
 	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
 	<url>http://press.opoo.org/</url>
 	<inceptionYear>2013</inceptionYear>
@@ -55,6 +55,25 @@
 			<artifactId>maven-core</artifactId>
 			<version>${maven.version}</version>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+			      <groupId>org.slf4j</groupId>
+			      <artifactId>slf4j-jdk14</artifactId>
+			    </exclusion>
+			    <exclusion>
+			      <groupId>org.slf4j</groupId>
+			      <artifactId>jcl-over-slf4j</artifactId>
+			    </exclusion>
+			    <exclusion>
+			    	<groupId>org.slf4j</groupId>
+			    	<artifactId>slf4j-nop</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		
 	    <!-- Wagon -->
@@ -76,21 +95,19 @@
 			<scope>provided</scope>
 		</dependency>
 		
+		<!--
 		<dependency>
 			<groupId>org.apache.maven.wagon</groupId>
 			<artifactId>wagon-ftp</artifactId>
 			<version>2.4</version>
 			<scope>provided</scope>
 		</dependency>
-        
-		<!-- 
+		-->			
 		<dependency>
 			<groupId>org.eclipse.mylyn.github</groupId>
 			<artifactId>org.eclipse.egit.github.core</artifactId>
 			<version>2.1.3</version>
 		</dependency>
-		-->
-		
 		<!-- 
 		<dependency>
 			<groupId>com.github.github</groupId>
@@ -98,7 +115,6 @@
 			<version>0.6</version>
 		</dependency>
 		-->
-		
 		<!-- 
 		<dependency>
 	        <groupId>org.twdata.maven</groupId>
@@ -106,10 +122,26 @@
 	        <version>1.5</version>
 	    </dependency>
 	    -->
+		<!--
+		<dependency>
+		    <groupId>org.eclipse.jgit</groupId>
+		    <artifactId>org.eclipse.jgit</artifactId>
+		    <version>3.0.0.201306101825-r</version>
+		</dependency>
+		-->
+		<!-- replace version 1.1 -->
+		<!-- 
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+		 	<artifactId>plexus-utils</artifactId>
+  			<version>1.5.15</version>
+		</dependency>
+		-->
 	</dependencies>
 
   	<build>
 		<plugins>
+		    <!-- 
 		    <plugin>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-maven-plugin</artifactId>
@@ -123,6 +155,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			-->
 			
 		 	<plugin>
 		 	    <groupId>org.apache.maven.plugins</groupId>
@@ -141,7 +174,6 @@
 
 				<!-- To allow Javadoc Tool to generate annotation for Mojo fields -->
 				<!-- <show>private</show> -->
-
 				<tagletArtifacts>
 					<tagletArtifact>
 						<groupId>org.apache.maven.plugin-tools</groupId>

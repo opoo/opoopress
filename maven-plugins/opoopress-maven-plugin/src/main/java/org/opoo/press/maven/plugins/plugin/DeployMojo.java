@@ -17,6 +17,7 @@ package org.opoo.press.maven.plugins.plugin;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +55,6 @@ import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.opoo.maven.plugins.logging.LogAware;
 import org.opoo.press.Site;
 import org.opoo.util.ChainingClassLoader;
 
@@ -116,8 +116,6 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 		// methods
 		final Wagon wagon = getWagon(repository, wagonManager);
 		
-		configureScpWagonIfRequired(wagon);
-
 		try {
 			configureWagon(wagon, repository.getId(), settings, container, getLog());
 		} catch (WagonConfigurationException e) {
@@ -147,14 +145,11 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 		}
 	}
 
-    /**
-	 * @param wagon
-	 */
-	private void configureScpWagonIfRequired(Wagon wagon) {
-		getLog().debug("configureScpWagonIfRequired: " + wagon.getClass().getName());
+	private static void configureScpWagonIfRequired(Wagon wagon, Log log) {
+		log.debug("configureScpWagonIfRequired: " + wagon.getClass().getName());
 		
 		if(System.console() == null){
-			getLog().debug("No System.console(), skip configure Wagon");
+			log.debug("No System.console(), skip configure Wagon");
 			return;
 		}
 		
@@ -170,7 +165,7 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 		try {
 			scpWagonClass = ClassUtils.getClass(loader, "org.apache.maven.wagon.providers.ssh.jsch.ScpWagon");
 		} catch (ClassNotFoundException e) {
-			getLog().debug("Class 'org.apache.maven.wagon.providers.ssh.jsch.ScpWagon' not found, skip configure Wagon.");
+			log.debug("Class 'org.apache.maven.wagon.providers.ssh.jsch.ScpWagon' not found, skip configure Wagon.");
 			return;
 		}
 
@@ -180,20 +175,20 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
 				Class<?> userInfoClass = ClassUtils.getClass(loader, "org.opoo.press.maven.plugins.plugin.ssh.SystemConsoleInteractiveUserInfo");
 				Object userInfo = userInfoClass.newInstance();
 				MethodUtils.invokeMethod(wagon, "setInteractiveUserInfo", userInfo);
-				getLog().debug("ScpWagon using SystemConsoleInteractiveUserInfo(Java 6+).");
+				log.debug("ScpWagon using SystemConsoleInteractiveUserInfo(Java 6+).");
 			} catch (ClassNotFoundException e) {
-				getLog().debug("Class 'org.opoo.press.maven.plugins.plugin.ssh.SystemConsoleInteractiveUserInfo' not found, skip configure Wagon.");
+				log.debug("Class 'org.opoo.press.maven.plugins.plugin.ssh.SystemConsoleInteractiveUserInfo' not found, skip configure Wagon.");
 			} catch (InstantiationException e) {
-				getLog().debug("Instantiate class exception", e);
+				log.debug("Instantiate class exception", e);
 			} catch (IllegalAccessException e) {
-				getLog().debug(e.getMessage(), e);
+				log.debug(e.getMessage(), e);
 			} catch (NoSuchMethodException e) {
-				getLog().debug(e.getMessage(), e);
+				log.debug(e.getMessage(), e);
 			} catch (InvocationTargetException e) {
-				getLog().debug(e.getMessage(), e);
+				log.debug(e.getMessage(), e);
 			}
 		}else{
-			getLog().debug("Not a ScpWagon.");
+			log.debug("Not a ScpWagon.");
 		}
 	}
 
@@ -296,13 +291,10 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
         throws WagonConfigurationException{
         log.debug( " configureWagon " );
         
-        //set log
-        if(wagon instanceof LogAware){
-			((LogAware)wagon).setLog(log);
-			log.debug("Set log for wagon: " + wagon.getClass().getName());
-        }else{
-			//not a LogAware instance, or LogAware class, wagon class loaded by different ClassLoaders.
-		}
+        //config log
+        configureLog(wagon, log);
+        
+        configureScpWagonIfRequired(wagon, log);
 
         // MSITE-25: Make sure that the server settings are inserted
         for ( Object o : settings.getServers() ) {
@@ -338,6 +330,20 @@ public class DeployMojo extends AbstractDeployMojo implements Contextualizable{
     }
     
     
+	/**
+	 * @param wagon
+	 * @param log
+	 */
+	private static void configureLog(Wagon wagon, Log log) {
+		try {
+			Method method = wagon.getClass().getMethod("setLog", Log.class);
+			method.invoke(wagon, log);
+			log.info("Set log for wagon: " + wagon);
+		} catch (Exception e) {
+			log.debug("Wagon does not supports setLog() method.");
+		}
+	}
+
 	public static ProxyInfo getProxyInfo(Repository repository, WagonManager wagonManager) {
 		ProxyInfo proxyInfo = wagonManager.getProxy(repository.getProtocol());
 

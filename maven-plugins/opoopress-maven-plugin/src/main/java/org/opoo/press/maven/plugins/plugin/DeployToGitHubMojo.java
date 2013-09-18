@@ -15,40 +15,68 @@
  */
 package org.opoo.press.maven.plugins.plugin;
 
+import static java.lang.Integer.MAX_VALUE;
+import static org.eclipse.egit.github.core.Blob.ENCODING_BASE64;
+import static org.eclipse.egit.github.core.TreeEntry.MODE_BLOB;
+import static org.eclipse.egit.github.core.TreeEntry.TYPE_BLOB;
+import static org.eclipse.egit.github.core.TypedResource.TYPE_COMMIT;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
-import org.codehaus.plexus.PlexusConstants;
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.context.Context;
-import org.codehaus.plexus.context.ContextException;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
+import org.codehaus.plexus.util.DirectoryScanner;
+import org.eclipse.egit.github.core.Blob;
+import org.eclipse.egit.github.core.Commit;
+import org.eclipse.egit.github.core.Reference;
+import org.eclipse.egit.github.core.RepositoryId;
+import org.eclipse.egit.github.core.Tree;
+import org.eclipse.egit.github.core.TreeEntry;
+import org.eclipse.egit.github.core.TypedResource;
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.client.RequestException;
+import org.eclipse.egit.github.core.service.DataService;
+import org.eclipse.egit.github.core.util.EncodingUtils;
 import org.opoo.press.Site;
-import org.opoo.press.support.GitHub;
-import org.opoo.press.support.GitHubException;
-import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
-import org.sonatype.plexus.components.sec.dispatcher.SecDispatcherException;
 
 /**
  * @author Alex Lin
  * @goal deploy-to-github
  * @deprecated
  */
-public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextualizable{
+public class DeployToGitHubMojo extends AbstractDeployMojo{
+	/**
+	 * BRANCH_DEFAULT
+	 */
+	public static final String BRANCH_DEFAULT = "refs/heads/gh-pages";
+
+	/**
+	 * NO_JEKYLL_FILE
+	 */
+	public static final String NO_JEKYLL_FILE = ".nojekyll";
 
 	/**
 	 * Branch to update
 	 *
 	 * @parameter expression="${github.site.branch}" default-value="refs/heads/gh-pages"
 	 */
-	private String branch = GitHub.BRANCH_DEFAULT;
+	private String branch = BRANCH_DEFAULT;
 
 	/**
 	 * Commit message
@@ -127,6 +155,21 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 	private String[] excludes;
 
 	/**
+	 * Project being built
+	 *
+	 * @parameter expression="${project}
+	 * @required
+	 */
+	private MavenProject project;
+
+	/**
+	 * Session
+	 *
+	 * @parameter expression="${session}
+	 */
+	private MavenSession session;
+
+	/**
 	 * Settings
 	 *
 	 * @parameter expression="${settings}
@@ -144,7 +187,7 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 	 * True to always create a '.nojekyll' file at the root of the site if one
 	 * doesn't already exist.
 	 *
-	 * @parameter expression="${github.site.noJekyll}" default-value="true"
+	 * @parameter expression="${github.site.noJekyll}"
 	 */
 	private boolean noJekyll;
 
@@ -164,102 +207,526 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 	 * @parameter expression="${github.site.dryRun}"
 	 */
 	private boolean dryRun;
-	
+
 	/**
+	 * Create blob
 	 *
-	 * @parameter expression="${github.site.numThreads}" default-value="1"
+	 * @param service
+	 * @param repository
+	 * @param path
+	 * @return blob SHA-1
+	 * @throws MojoExecutionException
 	 */
-	private int numThreads = 1;
-	
-	private PlexusContainer container;
+	protected String createBlob(DataService service, RepositoryId repository, File outputDirectory,
+			String path) throws MojoExecutionException {
+		File file = new File(outputDirectory, path);
+		final long length = file.length();
+		final int size = length > MAX_VALUE ? MAX_VALUE : (int) length;
+		ByteArrayOutputStream output = new ByteArrayOutputStream(size);
+		FileInputStream stream = null;
+		try {
+			stream = new FileInputStream(file);
+			final byte[] buffer = new byte[8192];
+			int read;
+			while ((read = stream.read(buffer)) != -1)
+				output.write(buffer, 0, read);
+		} catch (IOException e) {
+			throw new MojoExecutionException("Error reading file: "
+					+ getExceptionMessage(e), e);
+		} finally {
+			if (stream != null)
+				try {
+					stream.close();
+				} catch (IOException e) {
+					debug("Exception closing stream", e);
+				}
+		}
+
+		Blob blob = new Blob().setEncoding(ENCODING_BASE64);
+		String encoded = EncodingUtils.toBase64(output.toByteArray());
+		blob.setContent(encoded);
+
+		try {
+			if (isDebug())
+				debug(MessageFormat.format("Creating blob from {0}",
+						file.getAbsolutePath()));
+			if (!dryRun)
+				return service.createBlob(repository, blob);
+			else
+				return null;
+		} catch (IOException e) {
+			throw new MojoExecutionException("Error creating blob: "
+					+ getExceptionMessage(e), e);
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.maven.plugins.plugin.AbstractDeployMojo#deployTo(java.io.File)
 	 */
 	@Override
-	protected void deploy(Site site, File dest) throws MojoExecutionException, MojoFailureException {
-		String username = this.userName;
-		String password = this.password;
-		String oauth2Token = this.oauth2Token;
-		String serverId = this.server;
+	protected void deploy(Site site, File dest) throws MojoExecutionException,
+			MojoFailureException {
 		
-		if(StringUtils.isNotBlank(serverId) && (StringUtils.isBlank(username) || StringUtils.isBlank(password))){
-			Server mavenServer = getServer(settings, server);
-			if (mavenServer == null){
-				throw new MojoExecutionException(MessageFormat.format("Server ''{0}'' not found in settings", server));
-			}
-			
-			if (getLog().isDebugEnabled()){
-				getLog().debug(MessageFormat.format("Using ''{0}'' server credentials", serverId));
-			}
-			
-			username = mavenServer.getUsername();
-			password = decryptPasswordIfRequired(mavenServer.getPassword(), serverId);
+		RepositoryId repository = getRepository(project, repositoryOwner, repositoryName);
+
+		if (dryRun)
+			info("Dry run mode, repository will not be modified");
+
+		File outputDirectory = dest;
+		
+		// Find files to include
+		String baseDir = outputDirectory.getAbsolutePath();
+		String[] includePaths = removeEmpties(includes);
+		String[] excludePaths = removeEmpties(excludes);
+		if (isDebug())
+			debug(MessageFormat.format(
+					"Scanning {0} and including {1} and exluding {2}", baseDir,
+					Arrays.toString(includePaths),
+					Arrays.toString(excludePaths)));
+		String[] paths = getMatchingPaths(includePaths, excludePaths,
+				baseDir);
+
+		if (paths.length != 1)
+			info(MessageFormat.format("Creating {0} blobs", paths.length));
+		else
+			info("Creating 1 blob");
+		if (isDebug())
+			debug(MessageFormat.format("Scanned files to include: {0}",
+					Arrays.toString(paths)));
+
+		DataService service = new DataService(createClient(host, userName,
+				password, oauth2Token, server, settings, session));
+
+		// Write blobs and build tree entries
+		List<TreeEntry> entries = new ArrayList<TreeEntry>(paths.length);
+		//String prefix = path;
+		String prefix = site.getRoot();
+		if (prefix == null)
+			prefix = "";
+		if (prefix.length() > 0 && !prefix.endsWith("/"))
+			prefix += "/";
+
+		// Convert separator to forward slash '/'
+		if ('\\' == File.separatorChar)
+			for (int i = 0; i < paths.length; i++)
+				paths[i] = paths[i].replace('\\', '/');
+
+		boolean createNoJekyll = noJekyll;
+
+		for (String path : paths) {
+			TreeEntry entry = new TreeEntry();
+			entry.setPath(prefix + path);
+			// Only create a .nojekyll file if it doesn't already exist
+			if (createNoJekyll && NO_JEKYLL_FILE.equals(entry.getPath()))
+				createNoJekyll = false;
+			entry.setType(TYPE_BLOB);
+			entry.setMode(MODE_BLOB);
+			entry.setSha(createBlob(service, repository, outputDirectory, path));
+			entries.add(entry);
 		}
-		
-		GitHub github = new GitHub();
-		github.setBranch(branch);
-		github.setDryRun(dryRun);
-		github.setExcludes(excludes);
-		github.setForce(force);
-		github.setHost(host);
-		github.setIncludes(includes);
-		github.setMerge(merge);
-		github.setMessage(message);
-		github.setNoJekyll(noJekyll);
-		github.setOauth2Token(oauth2Token);
-		github.setPassword(password);
-		github.setRepositoryName(repositoryName);
-		github.setRepositoryOwner(repositoryOwner);
-		github.setUserName(username);
-		github.setNumThreads(numThreads);
-		
+
+		if (createNoJekyll) {
+			TreeEntry entry = new TreeEntry();
+			entry.setPath(NO_JEKYLL_FILE);
+			entry.setType(TYPE_BLOB);
+			entry.setMode(MODE_BLOB);
+
+			if (isDebug())
+				debug("Creating empty .nojekyll blob at root of tree");
+			if (!dryRun)
+				try {
+					entry.setSha(service.createBlob(repository, new Blob()
+							.setEncoding(ENCODING_BASE64).setContent("")));
+				} catch (IOException e) {
+					throw new MojoExecutionException(
+							"Error creating .nojekyll empty blob: "
+									+ getExceptionMessage(e), e);
+				}
+			entries.add(entry);
+		}
+
+		Reference ref = null;
 		try {
-			github.deploy(dest, site.getRoot());
-		} catch (GitHubException e) {
-			throw new MojoExecutionException(e.getMessage(), e);
+			ref = service.getReference(repository, branch);
+		} catch (RequestException e) {
+			if (404 != e.getStatus())
+				throw new MojoExecutionException("Error getting reference: "
+						+ getExceptionMessage(e), e);
+		} catch (IOException e) {
+			throw new MojoExecutionException("Error getting reference: "
+					+ getExceptionMessage(e), e);
+		}
+
+		if (ref != null && !TYPE_COMMIT.equals(ref.getObject().getType()))
+			throw new MojoExecutionException(
+					MessageFormat
+							.format("Existing ref {0} points to a {1} ({2}) instead of a commmit",
+									ref.getRef(), ref.getObject().getType(),
+									ref.getObject().getSha()));
+
+		// Write tree
+		Tree tree;
+		try {
+			int size = entries.size();
+			if (size != 1)
+				info(MessageFormat.format(
+						"Creating tree with {0} blob entries", size));
+			else
+				info("Creating tree with 1 blob entry");
+			String baseTree = null;
+			if (merge && ref != null) {
+				Tree currentTree = service.getCommit(repository,
+						ref.getObject().getSha()).getTree();
+				if (currentTree != null)
+					baseTree = currentTree.getSha();
+				info(MessageFormat.format("Merging with tree {0}", baseTree));
+			}
+			if (!dryRun)
+				tree = service.createTree(repository, entries, baseTree);
+			else
+				tree = new Tree();
+		} catch (IOException e) {
+			throw new MojoExecutionException("Error creating tree: "
+					+ getExceptionMessage(e), e);
+		}
+
+		// Build commit
+		Commit commit = new Commit();
+		commit.setMessage(message);
+		commit.setTree(tree);
+
+		// Set parent commit SHA-1 if reference exists
+		if (ref != null)
+			commit.setParents(Collections.singletonList(new Commit().setSha(ref
+					.getObject().getSha())));
+
+		Commit created;
+		try {
+			if (!dryRun)
+				created = service.createCommit(repository, commit);
+			else
+				created = new Commit();
+			info(MessageFormat.format("Creating commit with SHA-1: {0}",
+					created.getSha()));
+		} catch (IOException e) {
+			throw new MojoExecutionException("Error creating commit: "
+					+ getExceptionMessage(e), e);
+		}
+
+		TypedResource object = new TypedResource();
+		object.setType(TYPE_COMMIT).setSha(created.getSha());
+		if (ref != null) {
+			// Update existing reference
+			ref.setObject(object);
+			try {
+				info(MessageFormat.format(
+						"Updating reference {0} from {1} to {2}", branch,
+						commit.getParents().get(0).getSha(), created.getSha()));
+				if (!dryRun)
+					service.editReference(repository, ref, force);
+			} catch (IOException e) {
+				throw new MojoExecutionException("Error editing reference: "
+						+ getExceptionMessage(e), e);
+			}
+		} else {
+			// Create new reference
+			ref = new Reference().setObject(object).setRef(branch);
+			try {
+				info(MessageFormat.format(
+						"Creating reference {0} starting at commit {1}",
+						branch, created.getSha()));
+				if (!dryRun)
+					service.createReference(repository, ref);
+			} catch (IOException e) {
+				throw new MojoExecutionException("Error creating reference: "
+						+ getExceptionMessage(e), e);
+			}
 		}
 	}
 
-	private String decryptPasswordIfRequired(String serverPassword, String serverId) {
-		if(StringUtils.isBlank(serverPassword)){
-			return serverPassword;
-		}
+	/**
+	 * Get formatted exception message for {@link IOException}
+	 *
+	 * @param e
+	 * @return message
+	 */
+	public static String getExceptionMessage(IOException e) {
+		return e.getMessage();
+	}
 
-		SecDispatcher sd = null;
-		try{
-            sd = (SecDispatcher) container.lookup( SecDispatcher.ROLE, "maven" );
-        }catch (Exception e){
-            getLog().warn( "Security features are disabled. Cannot find plexus component " + SecDispatcher.ROLE + ":maven" );
-        }
+	/**
+	 * Is debug logging enabled?
+	 *
+	 * @return true if enabled, false otherwise
+	 */
+	protected boolean isDebug() {
+		final Log log = getLog();
+		return log != null ? log.isDebugEnabled() : false;
+	}
+
+	/**
+	 * Is info logging enabled?
+	 *
+	 * @return true if enabled, false otherwise
+	 */
+	protected boolean isInfo() {
+		final Log log = getLog();
+		return log != null ? log.isInfoEnabled() : false;
+	}
+
+	/**
+	 * Logger given message at debug level
+	 *
+	 * @param message
+	 */
+	protected void debug(String message) {
+		final Log log = getLog();
+		if (log != null)
+			log.debug(message);
+	}
+
+	/**
+	 * Logger given message and throwable at debug level
+	 *
+	 * @param message
+	 * @param throwable
+	 */
+	protected void debug(String message, Throwable throwable) {
+		final Log log = getLog();
+		if (log != null)
+			log.debug(message, throwable);
+	}
+
+	/**
+	 * Logger given message at info level
+	 *
+	 * @param message
+	 */
+	protected void info(String message) {
+		final Log log = getLog();
+		if (log != null)
+			log.info(message);
+	}
+
+	/**
+	 * Logger given message and throwable at info level
+	 *
+	 * @param message
+	 * @param throwable
+	 */
+	protected void info(String message, Throwable throwable) {
+		final Log log = getLog();
+		if (log != null)
+			log.info(message, throwable);
+	}
+
+	/**
+	 * Create client
+	 *
+	 * @param host
+	 * @param userName
+	 * @param password
+	 * @param oauth2Token
+	 * @param serverId
+	 * @param settings
+	 * @param session
+	 * @return client
+	 * @throws MojoExecutionException
+	 */
+	protected GitHubClient createClient(String host, String userName,
+			String password, String oauth2Token, String serverId,
+			Settings settings, MavenSession session)
+			throws MojoExecutionException {
+		GitHubClient client;
+		if (!StringUtils.isEmpty(host)) {
+			if (isDebug())
+				debug("Using custom host: " + host);
+			client = createClient(host);
+		} else
+			client = createClient();
+
+		if (configureUsernamePassword(client, userName, password)
+				|| configureOAuth2Token(client, oauth2Token)
+				|| configureServerCredentials(client, serverId, settings,
+						session))
+			return client;
+		else
+			throw new MojoExecutionException(
+					"No authentication credentials configured");
+	}
+
+	/**
+	 * Create client
+	 * <p>
+	 * Subclasses can override to do any custom client configuration
+	 *
+	 * @param hostname
+	 * @return non-null client
+	 * @throws MojoExecutionException
+	 */
+	protected GitHubClient createClient(String hostname)
+			throws MojoExecutionException {
+		if (!hostname.contains("://"))
+			return new GitHubClient(hostname);
+		try {
+			URL hostUrl = new URL(hostname);
+			return new GitHubClient(hostUrl.getHost(), hostUrl.getPort(),
+					hostUrl.getProtocol());
+		} catch (MalformedURLException e) {
+			throw new MojoExecutionException("Could not parse host URL "
+					+ hostname, e);
+		}
+	}
+
+	/**
+	 * Create client
+	 * <p>
+	 * Subclasses can override to do any custom client configuration
+	 *
+	 * @return non-null client
+	 */
+	protected GitHubClient createClient() {
+		return new GitHubClient();
+	}
+
+	/**
+	 * Configure credentials from configured username/password combination
+	 *
+	 * @param client
+	 * @param userName
+	 * @param password
+	 * @return true if configured, false otherwise
+	 */
+	protected boolean configureUsernamePassword(final GitHubClient client,
+			final String userName, String password) {
+		if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password))
+			return false;
+
+		//
+		if(!StringUtils.isEmpty(userName) && StringUtils.isEmpty(password) && System.console() != null){
+			password = new String(System.console().readPassword("Input password for " + userName + ": "));
+		}
 		
-		 if ( sd != null ) {
-             try    {
-            	 serverPassword = sd.decrypt( serverPassword );
-             } catch ( SecDispatcherException e ){
-            	 reportSecurityConfigurationError( "password for server '" + serverId + "'", e );
-             }
-         }
-		return serverPassword;
+		if (isDebug())
+			debug("Using basic authentication with username: " + userName);
+		client.setCredentials(userName, password);
+		return true;
 	}
-	
-	private void reportSecurityConfigurationError( String affectedConfiguration, SecDispatcherException e ) {
-        Throwable cause = e;
-        String msg = "Not decrypting " + affectedConfiguration + " due to exception in security handler.";
 
-        // Drop to the actual cause, it wraps multiple times
-        while ( cause.getCause() != null ){
-            cause = cause.getCause();
-        }
+	/**
+	 * Configure credentials from configured OAuth2 token
+	 *
+	 * @param client
+	 * @param oauth2Token
+	 * @return true if configured, false otherwise
+	 */
+	protected boolean configureOAuth2Token(final GitHubClient client,
+			final String oauth2Token) {
+		if (StringUtils.isEmpty(oauth2Token))
+			return false;
 
-        // common cause is missing settings-security.xml
-        if ( cause instanceof FileNotFoundException ){
-            msg += "\nEnsure that you have configured your master password file (and relocation if appropriate)\nSee the installation instructions for details.";
-        }
+		if (isDebug())
+			debug("Using OAuth2 access token authentication");
+		client.setOAuth2Token(oauth2Token);
+		return true;
+	}
 
-        getLog().warn( msg + "\nCause: " + cause.getMessage() );
-        getLog().debug( "Full trace follows", e );
-    }
+	/**
+	 * Configure client with credentials from given server id
+	 *
+	 * @param client
+	 * @param serverId
+	 * @param settings
+	 * @param session
+	 * @return true if configured, false otherwise
+	 * @throws MojoExecutionException
+	 */
+	protected boolean configureServerCredentials(final GitHubClient client,
+			final String serverId, final Settings settings,
+			final MavenSession session) throws MojoExecutionException {
+		if (StringUtils.isEmpty(serverId))
+			return false;
+
+		String serverUsername = null;
+		String serverPassword = null;
+
+//		if (session != null) {
+//			RepositorySystemSession systemSession = session
+//					.getRepositorySession();
+//			if (systemSession != null) {
+//				Authentication authInfo = systemSession
+//						.getAuthenticationSelector().getAuthentication(
+//								new RemoteRepository().setId(serverId));
+//				if (authInfo != null) {
+//					serverUsername = authInfo.getUsername();
+//					serverPassword = authInfo.getPassword();
+//				}
+//			}
+//		}
+
+		if (StringUtils.isEmpty(serverPassword)) {
+			Server server = getServer(settings, serverId);
+			if (server == null)
+				throw new MojoExecutionException(MessageFormat.format(
+						"Server ''{0}'' not found in settings", serverId));
+
+			if (isDebug())
+				debug(MessageFormat.format("Using ''{0}'' server credentials", serverId));
+
+			serverUsername = server.getUsername();
+			serverPassword = server.getPassword();
+		}
+		
+		if(!StringUtils.isEmpty(serverUsername) && StringUtils.isEmpty(serverPassword) && System.console() != null){
+			serverPassword = new String(System.console().readPassword("Input password for " + serverUsername + ": "));
+		}
+
+		if (!StringUtils.isEmpty(serverUsername) && !StringUtils.isEmpty(serverPassword)) {
+			if (isDebug())
+				debug("Using basic authentication with username: "
+						+ serverUsername);
+			client.setCredentials(serverUsername, serverPassword);
+			return true;
+		}
+
+		// A server password without a username is assumed to be an OAuth2 token
+		if (!StringUtils.isEmpty(serverPassword)) {
+			if (isDebug())
+				debug("Using OAuth2 access token authentication");
+			client.setOAuth2Token(serverPassword);
+			return true;
+		}
+
+		if (isDebug())
+			debug(MessageFormat.format(
+					"Server ''{0}'' is missing username/password credentials",
+					serverId));
+		return false;
+	}
+
+	/**
+	 * Get repository and throw a {@link MojoExecutionException} on failures
+	 *
+	 * @param project
+	 * @param owner
+	 * @param name
+	 * @return non-null repository id
+	 * @throws MojoExecutionException
+	 */
+	protected RepositoryId getRepository(final MavenProject project,
+			final String owner, final String name)
+			throws MojoExecutionException {
+		RepositoryId repository = null;
+		if(StringUtils.isNotBlank(name) && StringUtils.isNotBlank(owner)){
+			repository = RepositoryId.create(owner, name);
+		}else{
+			throw new MojoExecutionException("No GitHub repository (owner and name) configured");
+		}
+		if (isDebug())
+			debug(MessageFormat.format("Using GitHub repository {0}",
+					repository.generateId()));
+		return repository;
+	}
 
 	/**
 	 * Get server with given id
@@ -269,28 +736,60 @@ public class DeployToGitHubMojo extends AbstractDeployMojo implements Contextual
 	 *            must be non-null and non-empty
 	 * @return server or null if none matching
 	 */
-	private Server getServer(Settings settings, String serverId) {
-		if (settings == null){
+	protected Server getServer(final Settings settings, final String serverId) {
+		if (settings == null)
 			return null;
-		}
 		List<Server> servers = settings.getServers();
-		if (servers == null || servers.isEmpty()){
+		if (servers == null || servers.isEmpty())
 			return null;
-		}
 
-		for (Server server : servers){
-			if (serverId.equals(server.getId())){
+		for (Server server : servers)
+			if (serverId.equals(server.getId()))
 				return server;
-			}
-		}
 		return null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable#contextualize(org.codehaus.plexus.context.Context)
+	
+	/**
+	 * Create an array with only the non-null and non-empty values
+	 *
+	 * @param values
+	 * @return non-null but possibly empty array of non-null/non-empty strings
 	 */
-	@Override
-	public void contextualize(Context context) throws ContextException {
-		container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
+	public static String[] removeEmpties(final String... values) {
+		if (values == null || values.length == 0){
+			return new String[0];
+		}
+		List<String> validValues = new ArrayList<String>();
+		for (String value : values){
+			if (value != null && value.length() > 0){
+				validValues.add(value);
+			}
+		}
+		return validValues.toArray(new String[validValues.size()]);
+	}
+	
+
+	/**
+	 * Get matching paths found in given base directory
+	 *
+	 * @param includes
+	 * @param excludes
+	 * @param baseDir
+	 * @return non-null but possibly empty array of string paths relative to the
+	 *         base directory
+	 */
+	public static String[] getMatchingPaths(final String[] includes,
+			final String[] excludes, final String baseDir) {
+		DirectoryScanner scanner = new DirectoryScanner();
+		scanner.setBasedir(baseDir);
+		if (includes != null && includes.length > 0){
+			scanner.setIncludes(includes);
+		}
+		if (excludes != null && excludes.length > 0){
+			scanner.setExcludes(excludes);
+		}
+		scanner.scan();
+		return scanner.getIncludedFiles();
 	}
 }

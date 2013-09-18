@@ -24,7 +24,7 @@
   	<groupId>org.opoo.press.maven.plugins</groupId>
 	<artifactId>opoopress-maven-plugins</artifactId>
 	<packaging>pom</packaging>
-	<name>OpooPress Blogging Framework: Maven Plugins</name>
+	<name>OpooPress Blogging Framework :: Maven Plugins</name>
 	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
 	<url>http://press.opoo.org/</url>
 	<inceptionYear>2013</inceptionYear>
