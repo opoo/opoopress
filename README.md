@@ -1,6 +1,6 @@
 # About OpooPress
 
-OpooPress Blogging Framework is a java based blog-ware static site generator. The site is [www.opoopress.com](http://www.opoopress.com/).
+OpooPress Blogging Framework is a java based static blog generator, it's also a static site generator. The site is [www.opoopress.com](http://www.opoopress.com/).
 
 Here are some main features:
 
