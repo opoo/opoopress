@@ -20,25 +20,39 @@ import java.util.Collections;
 import java.util.List;
 
 import org.opoo.press.Category;
+import org.opoo.press.Initializable;
 import org.opoo.press.Post;
 import org.opoo.press.RelatedPostsFinder;
 import org.opoo.press.Site;
 import org.opoo.press.Tag;
 
 /**
+ * Simple algorithm for finding related posts.
+ * It is not recommended to use this finder, just for demo.
+ * 
+ * @see CosineSimilarityRelatedPostsFinder
  * @author Alex Lin
  * @since 1.0.2
  */
-public class SimpleRelatedPostsFinder implements RelatedPostsFinder {
+public class SimpleRelatedPostsFinder implements RelatedPostsFinder, Initializable {
 	private int size = 5;
 	
 	public SimpleRelatedPostsFinder(Site site){
+		initialize(site);
+	}
+	
+	public SimpleRelatedPostsFinder(){
+		
+	}
+	
+	@Override
+	public void initialize(Site site) {
 		Number num = (Number) site.getConfig().get("related_posts");
 		if(num != null){
 			this.size = num.intValue();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.opoo.press.RelatedPostsFinder#findRelatedPosts(org.opoo.press.Post)
 	 */
