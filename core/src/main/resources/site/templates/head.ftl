@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
 <!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="<#if (site.locale)??>${site.locale}<#else>en</#if>"><!--<![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="<#if (site.locale)??>${site.locale.language}<#else>en</#if>"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
   <title><#if (page.title)??>${page.title} - </#if>${site.title}</title>
@@ -14,7 +14,9 @@
   <meta name="MobileOptimized" content="320">
   <meta name="OpooPressSiteRoot" content="${ root_url }">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- <link rel="canonical" href="${ canonical }"> -->
+  <meta name="Generator" content="OpooPress-${site.class.package.specificationVersion}"/>
+  <meta name="Generated" content="${site.time?datetime}"/>
+  <link rel="canonical" href="${root_url}${page.url}">
   <link href="${ root_url }/favicon.ico" rel="icon">
   <link href="${ root_url }/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="${ site.subscribe_rss }" rel="alternate" title="${site.title}" type="application/atom+xml">
