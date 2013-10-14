@@ -41,7 +41,7 @@ public class SiteConfigImpl extends LinkedHashMap<String, Object> implements Sit
 	private final Map<String,Object> extraConfig;
 	private final File configFile;
 	private final File siteDir;
-	private boolean loaded = false;
+	private boolean loaded = false;//AtomicBoolean ?
 	private Yaml yaml;
 
 	public SiteConfigImpl(File siteDir, Map<String,Object> extraConfig){
@@ -82,9 +82,9 @@ public class SiteConfigImpl extends LinkedHashMap<String, Object> implements Sit
 			putAll(extraConfig);
 		}
 		put("site", siteDir);
-		loaded = true;
 		
 		fixRoot();
+		loaded = true;
 	}
 	
 	private void fixRoot(){
@@ -162,5 +162,14 @@ public class SiteConfigImpl extends LinkedHashMap<String, Object> implements Sit
 	@Override
 	public Map<String, Object> toMap() {
 		return this;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.SiteConfig#reload()
+	 */
+	@Override
+	public void reload() {
+		super.clear();
+		loaded = false;
 	}
 }

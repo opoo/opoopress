@@ -33,4 +33,9 @@ public interface SiteConfig {
 	Object get(String name);
 	
 	<T> T get(String name, T defaultValue);
+	
+	/**
+	 * @since 1.0.2
+	 */
+	void reload();
 }
