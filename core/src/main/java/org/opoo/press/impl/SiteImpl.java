@@ -46,6 +46,7 @@ import org.opoo.press.Generator;
 import org.opoo.press.Page;
 import org.opoo.press.Plugin;
 import org.opoo.press.Post;
+import org.opoo.press.RelatedPostsFinder;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.SiteBuilder;
@@ -112,7 +113,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	private Highlighter highlighter;
 	private SlugHelper slugHelper;
 	private String permalink;
-	
+	private RelatedPostsFinder relatedPostsFinder;
 	
 	private File lastBuildInfoFile;
 	
@@ -331,6 +332,18 @@ public class SiteImpl implements Site, SiteBuilder{
 		
 		//Construct RendererImpl after initializing all plugins
 		this.renderer = new RendererImpl(this, registry.getTemplateLoaders());
+		
+		//RelatedPostsFinder 
+		String relatedPostsFinderClassName = (String) config.get("relatedPostsFinder");
+		if(relatedPostsFinderClassName != null){
+			relatedPostsFinder = (RelatedPostsFinder) ClassUtils.newInstance(relatedPostsFinderClassName, this);
+			log.debug("Set relatedPostsFinder: {}", relatedPostsFinderClassName);
+		}else{
+			//Use CosineSililarity
+			relatedPostsFinder = new CosineSimilarityRelatedPostsFinder();
+			((CosineSimilarityRelatedPostsFinder) relatedPostsFinder).initialize(this);
+			log.debug("Set relatedPostsFinder: {}", CosineSimilarityRelatedPostsFinder.class.getName());
+		}
 	}
 
 
@@ -731,6 +744,10 @@ public class SiteImpl implements Site, SiteBuilder{
 	@Override
 	public Highlighter getHighlighter() {
 		return highlighter;
+	}
+	
+	public RelatedPostsFinder getRelatedPostsFinder(){
+		return relatedPostsFinder;
 	}
 
 	/* (non-Javadoc)

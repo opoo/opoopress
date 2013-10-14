@@ -74,6 +74,13 @@ public interface Site extends SiteBuilder, SiteHelper{
 	Highlighter getHighlighter();
 	
 	/**
+	 * Could configured in <code>config.yml</code> by variable 'relatedPostsFinder'.
+	 * @since 1.0.2
+	 * @return RelatedPostsFinder
+	 */
+	RelatedPostsFinder getRelatedPostsFinder();
+	
+	/**
 	 * The site permalink style for all posts.
 	 * @return permalink
 	 */
