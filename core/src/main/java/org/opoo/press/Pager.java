@@ -16,10 +16,6 @@
 package org.opoo.press;
 
 import java.util.List;
-import java.util.Map;
-
-import org.opoo.press.source.Source;
-
 
 /**
  * @author Alex Lin
@@ -41,7 +37,7 @@ public class Pager{
 	 * @param pageSize
 	 * @param pagePosts
 	 */
-	public Pager(int pageNumber, int totalPages, int totalPosts,	int pageSize, List<Post> pagePosts) {
+	public Pager(int pageNumber, int totalPages, int totalPosts, int pageSize, List<Post> pagePosts) {
 		this.pageNumber = pageNumber;
 		this.totalPages = totalPages;
 		this.totalPosts = totalPosts;
@@ -110,18 +106,5 @@ public class Pager{
 	 */
 	public int getPageSize() {
 		return pageSize;
-	}
-
-	public static boolean isPaginationEnabled(Map<String, Object> config, Page page) {
-		Source source = page.getSource();
-		String name = source.getSourceEntry().getName();
-		boolean containsKey = config.containsKey("paginate");
-		String content = page.getContent();
-		return containsKey && "index.html".equals(name) && content.contains("paginator.");
-	}
-	
-	public static int calculateTotalPages(int totalPosts, int pageSize){
-		int totalPages = (int) Math.ceil((double) totalPosts / (double) pageSize);
-		return totalPages;
 	}
 }
