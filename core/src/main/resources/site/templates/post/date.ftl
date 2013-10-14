@@ -27,7 +27,7 @@
 <#-- assign was_updated = (updated)?? -->
 
 <#if date??>
-<#assign time ="<time datetime=\"" + date?string("yyyy-MM-dd'T'HH:mm:ssZ") + "\" pubdate">
+<#assign time ="<time datetime=\"" + date?datetime?iso_local + "\" pubdate">
 	<#if updated??>
 		<#assign time = time + " data-updated=\"true\"">
 	</#if>
@@ -35,6 +35,6 @@
 </#if>
 
 <#if updated_date??>
-<#assign updated ="<time datetime=\"" + updated_date?string("yyyy-MM-dd'T'HH:mm:ssZ") + "\" class=\"updated\">Updated " + updated_formatted + "</time>">
+<#assign updated ="<time datetime=\"" + updated_date?datetime?iso_local + "\" class=\"updated\">Updated " + updated_formatted + "</time>">
 <#assign was_updated = true>
 </#if>
