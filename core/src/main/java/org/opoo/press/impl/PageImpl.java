@@ -63,11 +63,17 @@ public class PageImpl extends AbstractBase implements Page{
 			if(pager != null){
 				pageNumber = pager.getPageNumber();
 			}
+			
+			String ext = this.getOutputFileExtension();
 			if(pageNumber > 1){
-				// index page or archive page. eg: "/page/2/index.html" = > "/page/2/"
-				url = path + "/page/" + pageNumber + "/"; 
+				if("index".equals(baseName) && ".html".equals(ext)){
+					// index page or archive page. eg: "/page/2/index.html" = > "/page/2/"
+					url = path + "/page/" + pageNumber + "/"; 
+				}else{
+					//eg:/category/page.html => /category/page-p3.html
+					url = path + "/" + baseName + "-p" + pageNumber + ext;
+				}
 			}else{
-				String ext = this.getOutputFileExtension();
 				if("index".equals(baseName) && ".html".equals(ext)){
 					// "index.html" page url will be remove filename. 
 					//eg: "/index.html" => "/" or "/about/index.html" => "/about/"
