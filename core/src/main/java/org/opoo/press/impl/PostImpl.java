@@ -16,7 +16,6 @@
 package org.opoo.press.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -273,60 +272,11 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		
 		//Related posts
 		//Map<String, Object> site = (Map<String, Object>) rootMap.get("site");
-		//site.put("related_posts", "");
-		set("related_posts", findRelatedPost());
-	}
-	
-	private List<Post> findRelatedPost(){
-		Number num = (Number) getSite().getConfig().get("related_posts");
-		if(num == null){
-			num = 5;
-		}
-		int n = num.intValue();
-		if(n == 0){
-			return null;
-		}
+		//set("related_posts", findRelatedPost());
 		
-		if(categories.isEmpty() || tags.isEmpty()){
-			return null;
-		}
-		
-		List<Post> allRelatedPosts = new ArrayList<Post>();
-		
-		for(Category category: categories){
-			mergeRelatedPosts(allRelatedPosts, category.getPosts());
-		}
-		
-		for(Tag tag: tags){
-			mergeRelatedPosts(allRelatedPosts, tag.getPosts());
-		}
-		
-		if(allRelatedPosts.isEmpty()){
-			return Collections.emptyList();
-		}
-		Collections.sort(allRelatedPosts);
-		Collections.reverse(allRelatedPosts);
-		
-		if(n > allRelatedPosts.size()){
-			n =  allRelatedPosts.size();
-		}
-		return allRelatedPosts.subList(0, n);
-	}
-
-	/**
-	 * @param allRelatedPosts
-	 * @param posts
-	 */
-	private void mergeRelatedPosts(List<Post> allRelatedPosts, List<Post> posts) {
-		for(Post post: posts){
-			if(post.equals(this)){
-				continue;
-			}
-			if(allRelatedPosts.contains(post)){
-				continue;
-			}
-			allRelatedPosts.add(post);
-		}
+		//since 1.0.2
+		List<Post> relatedPosts = getSite().getRelatedPostsFinder().findRelatedPosts(this);
+		set("related_posts", relatedPosts);
 	}
 
 	private void renderExcerpt(Map<String,Object> rootMap){
