@@ -263,6 +263,19 @@ public class RendererImpl implements Renderer {
 
 	@Override
 	public boolean isValidLayout(String layout) {
-		return (layout != null) && !"nil".equals(layout);
+		if(layout == null){
+			return false;
+		}
+		if("nil".equalsIgnoreCase(layout)){
+			return false;
+		}
+		if("null".equalsIgnoreCase(layout)){
+			return false;
+		}
+		if("none".equalsIgnoreCase(layout)){
+			return false;
+		}
+//		return (layout != null) && !"nil".equals(layout);
+		return true;
 	}
 }
