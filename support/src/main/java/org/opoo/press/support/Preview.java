@@ -52,9 +52,11 @@ public class Preview{
 	private final File siteDir;
 //	private final Map<String,Object> extraOptions;
 	private final SiteManager siteManager;
-	
-	private final boolean showDrafts;
 	private final SiteConfig siteConfig;
+	
+	private boolean showDrafts;
+	private boolean skipSassCompile;
+	private boolean skipGenerate;
 
 	private CompassConfig compassConfig;
 	private Site site;
@@ -70,14 +72,15 @@ public class Preview{
 		this.interval = interval;
 		this.siteManager = siteManager;
 		
-		if(extraOptions == null){
-			showDrafts = false;
-		}else{
-			showDrafts = MapUtils.get(extraOptions, "show_drafts", false);
-		}
+		initOptions(extraOptions);
 		
 		this.siteConfig = siteManager.createSiteConfig(siteDir, extraOptions);
-		this.compassConfig = siteManager.createCompassConfig(siteDir);
+		
+		if(skipSassCompile){
+			this.compassConfig = null;
+		}else{
+			this.compassConfig = siteManager.createCompassConfig(siteDir);
+		}
 	}
 	
 	public Preview(SiteManager siteManager, Site site, int port, int interval) {
@@ -88,13 +91,25 @@ public class Preview{
 		this.siteConfig = site.getConfig();
 		
 		Map<String, Object> extraOptions = this.siteConfig.getExtraConfig();
+		initOptions(extraOptions);
+		
+		if(skipSassCompile){
+			this.compassConfig = null;
+		}else{
+			this.compassConfig = siteManager.createCompassConfig(siteDir);
+		}
+	}
+	
+	private void initOptions(Map<String, Object> extraOptions){
 		if(extraOptions == null){
 			showDrafts = false;
+			skipGenerate = false;
+			skipSassCompile = false;
 		}else{
 			showDrafts = MapUtils.get(extraOptions, "show_drafts", false);
+			skipGenerate = MapUtils.get(extraOptions, "op.generate.skip", false);
+			skipSassCompile = MapUtils.get(extraOptions, "op.sass.compile.skip", false);
 		}
-		
-		this.compassConfig = siteManager.createCompassConfig(siteDir);
 	}
 	
 	public void start() throws Exception{
@@ -102,14 +117,21 @@ public class Preview{
 			//site = siteManager.getSite(siteDir, extraOptions);
 			site = siteManager.createSite(siteConfig);
 		}
-		if(monitor == null){
-			monitor = new DirectoryMonitor(siteDir, interval, new L());
-			monitor.start();
+		
+		if(skipGenerate && skipSassCompile){
+			log.warn("'op.generate.skip = true' and 'op.sass.compile.skip = true', no directory monitor will be started.");
+		}else{
+			if(monitor == null){
+				monitor = new DirectoryMonitor(siteDir, interval, new L());
+				monitor.start();
+			}
 		}
+		
 		if(server == null){
 			server = new JettyServer(site, port);
 			server.start();
 		}
+		
 		if(threadPool == null){
 			threadPool = new QueuedThreadPool();
 			Runtime.getRuntime().addShutdownHook(new Thread(){
@@ -144,64 +166,70 @@ public class Preview{
 	 * @param file
 	 */
 	private void handleFileChange(File file) {
+		if(skipGenerate && skipSassCompile){
+			log.warn("'op.generate.skip = true' and 'op.sass.compile.skip = true', skipping handle file changed events.");
+			return;
+		}
+		
 		if(!file.isFile()){
 			log.debug("'" + file + "' changed.");
 			return;
 		}
 		
-		if(file.equals(siteConfig.getConfigFile())){
-			log.info("Site config file changed, recreate site.");
-			mainConfigChanged();
-			return;
-		}
-		
-		if(file.equals(compassConfig)){
-			log.info("SASS/SCSS config file changed, recompile...");
-			//read sass directory again
-			this.compassConfig = siteManager.createCompassConfig(siteDir);
-			compassCompile(siteDir);
-			return;
-		}
-		
-		if(isSassFile(file)){
-			log.info("SASS/SCSS file '" + file + "' changed, recompile...");
-			compassCompile(siteDir);
-			return;
-		}
-		
-		if(isTemplateFile(file)){
-			log.info("Template file '" + file + "' changed, regenerate site.");
-			siteManager.build(site);
-			return;
-		}
-		
-		if(isAssetFile(file)){
-			log.info("Copy static file: " + file);
-			copyStaticFile(site.getAssets(), file);
-			return;
-		}
-		
-		if(isSourceFile(file)){
-			SourceEntry sourceEntry = loadSourceEntry(site.getSource(), file);
-			try {
-				Source source = Application.getContext().getSourceParser().parse(sourceEntry);
-				if(! showDrafts && isDraft(source.getMeta())){			
-					log.info("showDrafts = false: Draft post file '" + file + "' changed, skip regenerate.");
-					return;
-				}
-				
-				log.info("Source file '" + file + "' changed, regenerate site.");
+		if(!skipGenerate){
+			if(file.equals(siteConfig.getConfigFile())){
+				log.info("Site config file changed, recreate site.");
+				mainConfigChanged();
+				return;
+			}
+			if(isTemplateFile(file)){
+				log.info("Template file '" + file + "' changed, regenerate site.");
 				siteManager.build(site);
 				return;
-			} catch (NoFrontMatterException e) {
-				log.debug("Copy static file: " + file);
-				// static file
-				copyStaticFile(sourceEntry);
+			}
+			if(isAssetFile(file)){
+				log.info("Copy static file: " + file);
+				copyStaticFile(site.getAssets(), file);
 				return;
+			}
+			if(isSourceFile(file)){
+				SourceEntry sourceEntry = loadSourceEntry(site.getSource(), file);
+				try {
+					Source source = Application.getContext().getSourceParser().parse(sourceEntry);
+					if(! showDrafts && isDraft(source.getMeta())){			
+						log.info("showDrafts = false: Draft post file '" + file + "' changed, skip regenerate.");
+						return;
+					}
+					
+					log.info("Source file '" + file + "' changed, regenerate site.");
+					siteManager.build(site);
+					return;
+				} catch (NoFrontMatterException e) {
+					log.debug("Copy static file: " + file);
+					// static file
+					copyStaticFile(sourceEntry);
+					return;
+				}
 			}
 		}
 		
-		log.warn("Unkown file changed, skip procress: " + file);
+		if(!skipSassCompile){
+			if(file.equals(compassConfig.getConfigFile())){
+				log.info("SASS/SCSS config file changed, recompile...");
+				//read sass directory again
+				this.compassConfig = siteManager.createCompassConfig(siteDir);
+				compassCompile(siteDir);
+				return;
+			}
+			
+			if(isSassFile(file)){
+				log.info("SASS/SCSS file '" + file + "' changed, recompile...");
+				compassCompile(siteDir);
+				return;
+			}
+		}
+
+		log.warn("Unkown file changed or 'op.sass.compile.skip=true' or 'op.generate.skip=true', skipping handle file change: " + file);
 	}
 
 	private void mainConfigChanged() {
@@ -212,6 +240,7 @@ public class Preview{
 				server = null;//gc
 			}
 //			site = siteManager.getSite(siteDir, extraOptions);
+			siteConfig.reload();
 			site = siteManager.createSite(siteConfig);
 			siteManager.build(site);
 			
