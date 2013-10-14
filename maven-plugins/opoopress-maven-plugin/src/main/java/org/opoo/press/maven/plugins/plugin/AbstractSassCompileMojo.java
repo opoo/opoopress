@@ -47,6 +47,7 @@ public class AbstractSassCompileMojo extends AbstractInstallMojo{
 		}else if(!new File(siteDir, "config.rb").exists()){
 			//skipping compile if config.rb not exists
 			getLog().warn("Compass/sass config file not exists, skipping sass compile");
+			skipSassCompile = true;
 		}else if(skipSassCompile(siteManager, siteDir)){
 			getLog().info("Skipping sass compile, css file is up to date.");
 		}else{

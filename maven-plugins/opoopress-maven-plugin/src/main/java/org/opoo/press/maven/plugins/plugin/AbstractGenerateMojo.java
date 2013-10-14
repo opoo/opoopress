@@ -45,6 +45,9 @@ public abstract class AbstractGenerateMojo extends AbstractSassCompileMojo{
 		Map<String,Object> config = new HashMap<String,Object>();
 		config.put("show_drafts", showDrafts());
 		config.put("debug", getLog().isDebugEnabled());
+		config.put("op.generate.skip", skipGenerate);
+		config.put("op.install.skip", skipInstall);
+		config.put("op.sass.compile.skip", skipSassCompile);
 		Site site = siteManager.createSite(siteDir, config);
 		
 		//System.out.println("Site extra: " + config);
