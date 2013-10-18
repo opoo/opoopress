@@ -1,40 +1,20 @@
-<#if (page.date)??>
-	<#assign date = page.date>
-<#elseif (post.date)??>
-	<#assign date = post.date>
-</#if>
+<#assign _page = page>
+<#if post??><#assign _page = post></#if>
 
-<#if (page.date_formatted)??>
-	<#assign date_formatted = page.date_formatted>
-<#elseif (post.date_formatted)??>
-	<#assign date_formatted = post.date_formatted>
-</#if>
-
-<#-- assign has_date = (date)?? -->
-
-<#if (page.updated)??>
-	<#assign updated_date = page.updated>
-<#elseif (post.updated)??>
-	<#assign updated_date = post.updated>
-</#if>
-
-<#if (page.updated_formatted)??>
-	<#assign updated_formatted = page.updated_formatted>
-<#elseif (post.updated_formatted)??>
-	<#assign updated_formatted = post.updated_formatted>
-</#if>
-
-<#-- assign was_updated = (updated)?? -->
+<#if _page.date??><#assign date = _page.date></#if>
+<#if _page.date_formatted??><#assign date_formatted = _page.date_formatted></#if>
+<#if _page.updated??><#assign updated_date = _page.updated></#if>
+<#if _page.updated_formatted??><#assign updated_formatted = _page.updated_formatted></#if>
 
 <#if date??>
-<#assign time ="<time datetime=\"" + date?datetime?iso_local + "\" pubdate">
-	<#if updated??>
-		<#assign time = time + " data-updated=\"true\"">
-	</#if>
-<#assign time = time + ">" + date_formatted + "</time>">
+    <#assign time ="<time datetime=\"" + date?datetime?iso_local + "\" pubdate">
+    <#if updated_date??>
+        <#assign time = time + " data-updated=\"true\"">
+    </#if>
+    <#assign time = time + ">" + date_formatted + "</time>">
 </#if>
 
 <#if updated_date??>
-<#assign updated ="<time datetime=\"" + updated_date?datetime?iso_local + "\" class=\"updated\">Updated " + updated_formatted + "</time>">
-<#assign was_updated = true>
+    <#assign updated ="<time datetime=\"" + updated_date?datetime?iso_local + "\" class=\"updated\">Updated " + updated_formatted + "</time>">
+    <#assign was_updated = true>
 </#if>

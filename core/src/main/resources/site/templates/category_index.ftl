@@ -1,5 +1,4 @@
 <#include "_page.ftl">
-
 <@pageLayout>
 <div id="blog-archives" class="category">
 <#assign year = "0000">

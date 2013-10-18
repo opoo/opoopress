@@ -1,4 +1,4 @@
-<#if (site.google_plus_one)!false == true>
+<#if (showGooglePlusOne)!false == true>
   <script type="text/javascript">
     (function() {
       var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
