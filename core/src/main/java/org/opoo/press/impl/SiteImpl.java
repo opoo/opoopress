@@ -85,6 +85,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	private File assets;
 	private File working;
 	private File site;
+	private List<File> sources;
 	
 	private String root;
 	
@@ -169,6 +170,21 @@ public class SiteImpl implements Site, SiteBuilder{
 		source = new File(site, "source");
 		if(!source.exists() || !source.isDirectory() || !source.canRead()){
 			throw new IllegalArgumentException("Source directory not exists or not a directory.");
+		}
+		
+		@SuppressWarnings("unchecked")
+		List<String> sourceDirs = (List<String>) config.get("sources");
+		if(sourceDirs != null && !sourceDirs.isEmpty()){
+			sources = new ArrayList<File>();
+			for(String src: sourceDirs){
+				File file = new File(site, src);
+				if(file.exists() && file.isDirectory() && file.canRead()){
+					sources.add(file);
+					log.debug("Find extra source directory: {}", file);
+				}else{
+					log.warn("Ignored bad extra source directory: {}", file);
+				}
+			}
 		}
 		
 		templates = new File(site, "templates");
@@ -351,7 +367,17 @@ public class SiteImpl implements Site, SiteBuilder{
 		log.info("Reading sources ...");
 		SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
 		SourceParser parser = Application.getContext().getSourceParser();
-		List<SourceEntry> list = loader.loadSourceEntries(source, buildFilter());
+		FileFilter fileFilter = buildFilter();
+		List<SourceEntry> list = loader.loadSourceEntries(source, fileFilter);
+		if(sources != null && !sources.isEmpty()){
+			for(File src: sources){
+				List<SourceEntry> tempList = loader.loadSourceEntries(src, fileFilter);
+				if(tempList != null && !tempList.isEmpty()){
+					list.addAll(tempList);
+				}
+			}
+		}
+		
 		for(SourceEntry en: list){
 			read(en, parser);
 		}
@@ -512,6 +538,11 @@ public class SiteImpl implements Site, SiteBuilder{
 		
 //		String rootUrl = (String)config.get("root");
 		map.put("root_url", getRoot());
+		try{
+			map.put("version", Site.class.getPackage().getSpecificationVersion());
+		}catch(Exception e){
+			map.put("version", "unkown_version");
+		}
 		
 		Map<String, TemplateModel> models = registry.getTemplateModels();
 		if(models != null && !models.isEmpty()){
