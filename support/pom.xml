@@ -69,10 +69,38 @@
             <groupId>org.jruby</groupId>
             <artifactId>jruby-core</artifactId>
             <version>${jruby.version}</version>
+			<exclusions>
+				<exclusion>
+		    		 <groupId>com.github.jnr</groupId>
+					 <artifactId>jffi</artifactId>
+		    	</exclusion>
+			</exclusions>
         </dependency>
+
+		<dependency>
+		  <groupId>com.github.jnr</groupId>
+		  <artifactId>jffi</artifactId>
+		  <version>1.2.4</version>
+		  <scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+		  <groupId>com.github.jnr</groupId>
+		  <artifactId>jffi</artifactId>
+		  <version>1.2.4</version>
+		  <scope>runtime</scope>
+		  <classifier>native</classifier>
+		</dependency>
+
+		<dependency>
+		  <groupId>com.github.jnr</groupId>
+		  <artifactId>jnr-x86asm</artifactId>
+		  <version>1.0.2</version>
+		  <scope>compile</scope>
+		</dependency>
         
         <dependency>
-           <groupId>org.nanoko.libs</groupId>
+          <groupId>org.nanoko.libs</groupId>
 		  <artifactId>compass-gems</artifactId>
 		  <version>${compass.version}</version>
         </dependency>
