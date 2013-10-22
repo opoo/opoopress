@@ -62,6 +62,7 @@ public class Preview{
 	private Site site;
 	private JettyServer server;
 	private DirectoryMonitor monitor;
+	private List<DirectoryMonitor> sourceMonitors;
 	private QueuedThreadPool threadPool;
 	
 	public Preview(SiteManager siteManager, File siteDir, Map<String, Object> extraOptions, int port, int interval) {
@@ -125,6 +126,14 @@ public class Preview{
 				monitor = new DirectoryMonitor(siteDir, interval, new L());
 				monitor.start();
 			}
+			if(sourceMonitors == null && site.getSources() != null){
+				sourceMonitors = new ArrayList<DirectoryMonitor>();
+				for(File source: site.getSources()){
+					DirectoryMonitor dm = new DirectoryMonitor(source, interval, new M());
+					sourceMonitors.add(dm);
+					dm.start();
+				}
+			}
 		}
 		
 		if(server == null){
@@ -153,6 +162,11 @@ public class Preview{
 	public void stop() throws Exception{
 		if(monitor != null){
 			monitor.stop();
+		}
+		if(sourceMonitors != null){
+			for(DirectoryMonitor dm: sourceMonitors){
+				dm.stop();
+			}
 		}
 		if(server != null){
 			server.stop();
@@ -231,7 +245,7 @@ public class Preview{
 
 		log.warn("Unkown file changed or 'op.sass.compile.skip=true' or 'op.generate.skip=true', skipping handle file change: " + file);
 	}
-
+	
 	private void mainConfigChanged() {
 		try {
 			if(server != null){
@@ -248,6 +262,30 @@ public class Preview{
 			server.start();
 		} catch (Exception e) {
 			log.error("Handle main config changed error", e);
+		}
+	}
+	
+	/**
+	 * @since 1.0.2
+	 * @param file - other source directory
+	 */
+	private void otherSourceFileChanged(File file){
+		SourceEntry sourceEntry =  new SourceEntry(null, file);
+		try {
+			Source source = Application.getContext().getSourceParser().parse(sourceEntry);
+			if(! showDrafts && isDraft(source.getMeta())){			
+				log.info("showDrafts = false: Draft post file '" + file + "' changed, skip regenerate.");
+				return;
+			}
+			
+			log.info("Source file '" + file + "' changed, regenerate site.");
+			siteManager.build(site);
+			return;
+		} catch (NoFrontMatterException e) {
+			log.debug("Copy static file: " + file);
+			// static file
+			copyStaticFile(sourceEntry);
+			return;
 		}
 	}
 	
@@ -342,6 +380,15 @@ public class Preview{
 
 		public void onFileChange(File file) {
 			handleFileChange(file);
+		}
+	}
+	
+	/**
+	 * @since 1.0.2
+	 */
+	private class M extends L{
+		public void onFileChange(File file) {
+			otherSourceFileChanged(file);
 		}
 	}
 }

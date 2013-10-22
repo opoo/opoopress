@@ -695,6 +695,11 @@ public class SiteImpl implements Site, SiteBuilder{
 	public File getSource() {
 		return source;
 	}
+	
+	@Override
+	public List<File> getSources(){
+		return sources;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Site#getDestination()

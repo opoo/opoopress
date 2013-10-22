@@ -32,7 +32,19 @@ import org.opoo.press.source.Source;
  *
  */
 public interface Site extends SiteBuilder, SiteHelper{
+	/**
+	 * Source directory.
+	 * @return
+	 */
 	File getSource();
+	
+	/**
+	 * Other source directories.
+	 * 
+	 * @since 1.0.2
+	 * @return
+	 */
+	List<File> getSources();
 	
 	File getTemplates();
 	
