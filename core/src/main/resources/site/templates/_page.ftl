@@ -1,7 +1,4 @@
-<#macro pageLayout>
-
-<#include "_default.ftl">
-<@defaultLayout>
+<#macro pageLayout><#include "_default.ftl"><@defaultLayout>
 <div>
 <article role="article">
   <#if (page.title)??>

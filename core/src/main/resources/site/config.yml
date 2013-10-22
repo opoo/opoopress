@@ -131,7 +131,7 @@ navs: {"Blog": "/", "Archives": "/archives/", "Sample Page": "/sample-page.html"
 # list each of the sidebar modules you want to include, in the order you want them to appear.
 # To add custom asides, create files in 'site/templates/asides' or 'site/source/_templates/asides' 
 # and add them to the list like 'custom_aside_name.ftl'
-default_asides: [recent_posts.ftl, github.ftl, delicious.ftl, pinboard.ftl, googleplus.ftl, categories.ftl]
+default_asides: [recent_posts.ftl, github.ftl, delicious.ftl, pinboard.ftl, googleplus.ftl, categories.ftl, tags.ftl]
 
 # Each layout uses the default asides, but they can have their own asides instead. Simply uncomment the lines below
 # and add an array with the asides you want to use.

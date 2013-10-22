@@ -3,6 +3,8 @@
 -->
 <#if (highlighter?? && highlighter == "SyntaxHighlighter")>
 <!-- START: Syntax Highlighter ComPress -->
+<script type="text/javascript" src="${root_url}/plugins/syntax-highlighter/scripts/shCore.js"></script>
+<script type="text/javascript" src="${root_url}/plugins/syntax-highlighter/scripts/shAutoloader.js"></script>
 <script type="text/javascript">
     SyntaxHighlighter.autoloader(
         'applescript			${root_url}/plugins/syntax-highlighter/scripts/shBrushAppleScript.js',

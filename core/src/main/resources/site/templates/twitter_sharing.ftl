@@ -1,4 +1,4 @@
-<#if (site.twitter_follow_button)!false == true || (site.twitter_tweet_button)!false == true >
+<#if (showTweetButton)!false == true>
   <script type="text/javascript">
     (function(){
       var twitterWidgets = document.createElement('script');

@@ -1,9 +1,4 @@
-<#assign single = true>
-
-<#macro postLayout>
-
-<#include "_default.ftl">
-<@defaultLayout>
+<#assign single = true><#macro postLayout><#include "_default.ftl"><@defaultLayout>
 <div>
 <article class="hentry" role="article">
   <#include "article.ftl">

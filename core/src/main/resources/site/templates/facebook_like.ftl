@@ -1,4 +1,4 @@
-<#if (site.facebook_like)!false == true>
+<#if (showFacebookLike)!false == true>
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
