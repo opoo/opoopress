@@ -17,6 +17,8 @@
   <meta name="Generator" content="OpooPress-${version}"/>
   <meta name="Generated" content="${site.time?datetime?iso_local}"/>
   <link rel="canonical" href="${root_url}${page.url}">
+  <#if (paginator.next)??><link href="${root_url}${paginator.next.url}" rel="next" /></#if>
+  <#if (paginator.previous)??><link href="${root_url}${paginator.previous.url}" rel="prev" /></#if>
   <link href="${ root_url }/favicon.ico" rel="icon">
   <link href="${ site.subscribe_rss }" rel="alternate" title="${site.title}" type="application/atom+xml">
   <link href="${ root_url }/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
