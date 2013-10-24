@@ -83,6 +83,8 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 			createSamplePost(site, locale);
 		}	
 		
+		updateCssFile(siteDir);
+
 		return site;
 	}
 
@@ -103,6 +105,14 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 	
 	private void createSamplePost(Site site, Locale locale) throws IOException{
 		renderFile(site, "", SAMPLE_POST_NAME, getNewPostFileStyle(site), SAMPLE_POST_TEMPLATE, false, "markdown");
+	}
+
+	private void updateCssFile(File siteDir){
+		File css = new File(siteDir, "assets/stylesheets/screen.css");
+		if(css.exists() && css.isFile() && css.canWrite()){
+			log.info("Update timestamp for {}", css);
+			css.setLastModified(System.currentTimeMillis());
+		}
 	}
 
 	/* (non-Javadoc)
