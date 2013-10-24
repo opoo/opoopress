@@ -56,7 +56,7 @@ public class Compass {
 	}
 
 	private void buildBasicScript(PrintWriter script) {
-		script.println("require 'rubygems'");
+		//script.println("require 'rubygems'");
 		script.println("require 'compass'");
 		script.println("frameworks = Dir.new(Compass::Frameworks::DEFAULT_FRAMEWORKS_PATH).path");
 		script.println("Compass::Frameworks.register_directory(File.join(frameworks, 'compass'))");
