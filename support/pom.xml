@@ -72,33 +72,39 @@
 			<exclusions>
 				<exclusion>
 		    		 <groupId>com.github.jnr</groupId>
-					 <artifactId>jffi</artifactId>
+					 <artifactId>jnr-ffi</artifactId>
 		    	</exclusion>
 			</exclusions>
         </dependency>
 
 		<dependency>
 		  <groupId>com.github.jnr</groupId>
-		  <artifactId>jffi</artifactId>
-		  <version>1.2.4</version>
-		  <scope>compile</scope>
-		</dependency>
-		
-		<dependency>
-		  <groupId>com.github.jnr</groupId>
-		  <artifactId>jffi</artifactId>
-		  <version>1.2.4</version>
-		  <scope>runtime</scope>
-		  <classifier>native</classifier>
+		  <artifactId>jnr-ffi</artifactId>
+		  <version>1.0.6</version><!-- 1.0.6+ -->
+		  <exclusions>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-util</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-analysis</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-commons</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-tree</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm</artifactId>
+			</exclusion>
+		  </exclusions>
 		</dependency>
 
-		<dependency>
-		  <groupId>com.github.jnr</groupId>
-		  <artifactId>jnr-x86asm</artifactId>
-		  <version>1.0.2</version>
-		  <scope>compile</scope>
-		</dependency>
-        
         <dependency>
           <groupId>org.nanoko.libs</groupId>
 		  <artifactId>compass-gems</artifactId>
