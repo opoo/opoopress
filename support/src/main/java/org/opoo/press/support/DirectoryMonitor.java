@@ -36,8 +36,8 @@ public class DirectoryMonitor {
 		this.siteDir = siteDir;
 		
 		long intervalMillis = interval * 1000;
-		if(intervalMillis <= 1000){
-			intervalMillis = 10000;
+		if(intervalMillis < 1000){
+			intervalMillis = 1000;
 		}
 
 		// observer all site directory
@@ -45,7 +45,7 @@ public class DirectoryMonitor {
 		// set file change listener
 		observer.addListener(listener); 
 		//create file alteration monitor
-		monitor = new FileAlterationMonitor(interval, observer);
+		monitor = new FileAlterationMonitor(intervalMillis, observer);
 	}
 	
     public void start() throws Exception{
