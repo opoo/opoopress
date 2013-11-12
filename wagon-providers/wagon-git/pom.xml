@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.opoo.press.maven.wagon</groupId>
 		<artifactId>opoopress-wagon-providers</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.3</version>
 	</parent>
   	<groupId>org.opoo.press.maven.wagon</groupId>
 	<artifactId>opoopress-wagon-git</artifactId>
