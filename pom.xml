@@ -23,7 +23,7 @@
 	</parent>
   	<groupId>org.opoo.press</groupId>
 	<artifactId>opoopress-parent</artifactId>
-	<version>1.0.3</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>OpooPress Blogging Framework :: Parent</name>
 	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
