@@ -10,7 +10,7 @@
     window.OpooPress = new OpooPressApp({siteUrl:'${site.url}',rootUrl:'${root_url}',pageUrl:'${page.url}',<#if page.title??>title:'${page.title}',</#if><#if showGitHubRepos??>github:{target:'#gh_repos',user:'${site.github_user}',count:${site.github_repo_count},skip_forks:${site.github_skip_forks?string}},</#if><#if showDeliciousLinks??>delicious:{user:'${site.delicious_user}',count:'${site.delicious_count}'},</#if>refreshRelativeTimes:true,verbose:true},{});
     OpooPress.init();
 
-<#if site.disqus_short_name?? && (page.comments)!true == true && (site.disqus_show_comment_count)!false == true>
+<#if site.disqus_short_name?? && (page.comments)!true == true>
 <#assign fullUrl = site.url + root_url + page.url>
     var disqus_shortname = '${ site.disqus_short_name }';
     <#if index??><#if (site.disqus_show_comment_count)!false == true>OpooPress.showDisqusCommentCount();</#if><#else>
@@ -20,6 +20,17 @@
     <#if page.title??>var disqus_title = '${page.title}';</#if>
     //var disqus_category_id = '';
     OpooPress.showDisqusWidgets();</#if>
+</#if>
+
+<#if site.duoshuo_short_name?? && (page.comments)!true == true>
+var duoshuoQuery = {short_name:"${site.duoshuo_short_name}"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
 </#if>
 //-->
 </script>

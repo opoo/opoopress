@@ -11,6 +11,8 @@
 		<#include "post/date.ftl">${time}
 		<#if site.disqus_short_name?? && (page.comments)!true == true && (post.comments)!true == true && (site.disqus_show_comment_count)!false == true>
          | <a href="<#if index??>${root_url}${post.url}</#if>#disqus_thread"><@i18n.msg "Comments"/></a>
+        </#if><#if site.duoshuo_short_name?? && (page.comments)!true == true && (post.comments)!true == true && (site.duoshuo_show_comment_count)!false == true>
+         | <#if index??><a href="${root_url}${post.url}#ds-thread"><span class="ds-thread-count" data-thread-key="${root_url}${post.url}"><@i18n.msg "Comments"/></span></a><#else><a href="#ds-thread"><@i18n.msg "Comments"/></a></#if>
         </#if>
         <#-- permalink -->
         <#-- &bull; <a rel="bookmark" href="${root_url}<#if index??>${post.url}<#else>${page.url}</#if>">${ site.permalink_label }</a> -->
