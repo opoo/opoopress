@@ -16,6 +16,8 @@
 package org.opoo.press.maven.wagon.git;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,10 +183,9 @@ public class Git {
 			throw new GitException("Unable to add files");
 		}
 
-		//String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-		//message = "GitWagon: Adding site to branch " + branch + " at " + timestamp;
 		if(message == null){
-			message = "GitHubWagon: Deploying OpooPress to GitHub Pages.";
+			String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+			message = "GitWagon: Deploying OpooPress to branch " + branch + " at " + timestamp;
 		}
 		if (!execute("commit", "--allow-empty", "-m", message)){
 			throw new GitException("Unable to commit files");
