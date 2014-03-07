@@ -41,7 +41,8 @@ public interface SiteFilter extends Ordered{
 	void postRenderAllPages(Site site);
 	
 	/**
-	 * @deprecated using {@link #postRenderAllPosts(Site)} and {@link #postRenderAllPages(Site)}
+	 * @deprecated Using {@link #postRenderAllPosts(Site)} and {@link #postRenderAllPages(Site)},
+	 * 	 	will be removed in the next main release.
 	 * @param site
 	 */
 	void postRender(Site site);

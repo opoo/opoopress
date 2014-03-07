@@ -342,6 +342,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(pluginClassNames != null && !pluginClassNames.isEmpty()){
 			for(String className: pluginClassNames){
 				Plugin p = (Plugin) ClassUtils.newInstance(className);
+				log.debug("Initializing plugin: {}", p.getClass().getName());
 				p.initialize(registry);
 			}
 		}
@@ -509,24 +510,75 @@ public class SiteImpl implements Site, SiteBuilder{
 		registry.getSiteFilter().postGenerate(this);
 	}
 
-
 	void render(){
 		log.info("Rendering ...");
-		
 		Map<String, Object> rootMap = buildRootMap();
-		
+
 		for(Post post: posts){
+			post.convert();
+			postConvertPost(post);
+			
 			post.render(rootMap);
+			postRenderPost(post);
 		}
+		postRenderPosts();
 		
 		for(Page page: pages){
+			page.convert();
+			postConvertPage(page);
+			
 			page.render(rootMap);
+			postRenderPage(page);
 		}
+		postRenderPages();
+		
 		postRender();
 	}
 	
 	/**
+	 * @param post
+	 */
+	private void postConvertPost(Post post) {
+		registry.getSiteFilter().postConvertPost(this, post);
+	}
+
+	/**
+	 * @param page
+	 */
+	private void postConvertPage(Page page) {
+		registry.getSiteFilter().postConvertPage(this, page);
+	}
+
+	/**
+	 * @param post
+	 */
+	private void postRenderPost(Post post) {
+		registry.getSiteFilter().postRenderPost(this, post);
+	}
+
+	/**
 	 * 
+	 */
+	private void postRenderPosts() {
+		registry.getSiteFilter().postRenderAllPosts(this);
+	}
+
+	/**
+	 * @param page
+	 */
+	private void postRenderPage(Page page) {
+		registry.getSiteFilter().postRenderPage(this, page);
+	}
+
+	/**
+	 * 
+	 */
+	private void postRenderPages() {
+		registry.getSiteFilter().postRenderAllPages(this);
+	}
+
+	/**
+	 * @deprecated Will be removed in the next main release.
 	 */
 	private void postRender() {
 		registry.getSiteFilter().postRender(this);
