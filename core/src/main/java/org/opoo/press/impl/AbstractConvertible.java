@@ -46,7 +46,7 @@ public abstract class AbstractConvertible implements Convertible {
 	
 	protected abstract Renderer getRenderer();
 	
-	protected abstract void convert();
+	//protected abstract void convert();
 	
 	protected abstract void mergeRootMap(Map<String,Object> rootMap);
 
@@ -57,7 +57,8 @@ public abstract class AbstractConvertible implements Convertible {
 	 */
 	@Override
 	public void render(Map<String, Object> rootMap) {
-		convert();
+		//comment this, call convert() separately.
+		//convert();
 		
 		Renderer renderer = getRenderer();
 		boolean isContentRenderRequired = renderer.isRenderRequired(getContent());

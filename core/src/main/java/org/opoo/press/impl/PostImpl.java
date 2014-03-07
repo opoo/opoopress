@@ -174,7 +174,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	 * @see org.opoo.press.impl.Convertible#convert()
 	 */
 	@Override
-	protected void convert() {
+	public void convert() {
 		super.convert();
 		if(isExcerptExtracted){
 			this.excerpt = getConverter().convert(excerpt);

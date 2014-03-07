@@ -74,9 +74,11 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	
 	public void set(String name, Object value){
 		MapUtils.put(data, name, value);
+		//log.debug("Url {} set variable: {} -> {}", getUrl(), name, value);
 	}
 	
 	public Object get(String name){
+		//log.debug("Url {} get variable: {}", getUrl(), name);
 		return data.get(name);
 	}
 	
@@ -184,7 +186,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 		this.content = content;
 	}
 
-	protected void convert(){
+	public void convert(){
 		this.content = this.converter.convert(content);
 	}
 	

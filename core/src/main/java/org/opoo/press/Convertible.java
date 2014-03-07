@@ -27,6 +27,8 @@ import java.util.Map;
  */
 public interface Convertible {
 
+	void convert();
+	
 	/**
 	 * @param rootMap root object for FreeMarker template
 	 */
