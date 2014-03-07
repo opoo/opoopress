@@ -28,14 +28,14 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opoo.press.Site;
 import org.opoo.press.SiteManager;
 import org.opoo.press.importer.Importer;
 import org.opoo.press.util.ClassUtils;
 import org.opoo.press.util.LinkUtils;
 import org.opoo.util.ClassPathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Alex Lin
@@ -111,7 +111,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		File css = new File(siteDir, "assets/stylesheets/screen.css");
 		if(css.exists() && css.isFile() && css.canWrite()){
 			log.info("Update timestamp for {}", css);
-			css.setLastModified(System.currentTimeMillis());
+			css.setLastModified(System.currentTimeMillis() + 10000);
 		}
 	}
 
@@ -195,6 +195,11 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		map.put("site", site);
 		map.put("file", file);
 		map.put("published", !isDraft);
+		try{
+			map.put("version", Site.class.getPackage().getSpecificationVersion());
+		}catch(Exception e){
+			map.put("version", "unkown_version");
+		}
 		
 		FileOutputStream os = null;
 		OutputStreamWriter out = null;
@@ -206,6 +211,11 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 			
 			os = new FileOutputStream(file);
 			out = new OutputStreamWriter(os, "UTF-8");
+			
+			//List<TemplateLoader> list = new ArrayList<TemplateLoader>();
+			//list.add(new ClassTemplateLoader(Site.class, "templates"));
+			//RendererImpl rendererImpl = new RendererImpl(site, list);
+			//rendererImpl.render(newFileTemplate, map, out);
 			site.getRenderer().render(newFileTemplate, map, out);
 		} finally{
 			IOUtils.closeQuietly(out);
