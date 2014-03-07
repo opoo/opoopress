@@ -24,9 +24,6 @@ import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
 
 /**
- * 判断是否非静态文件
- * 
- * 需要过滤源文件
  * 
  * @author Alex Lin
  *
