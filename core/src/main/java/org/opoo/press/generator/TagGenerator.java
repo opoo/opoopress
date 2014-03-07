@@ -74,7 +74,7 @@ public class TagGenerator implements Generator {
 	
 	
 	public static class TagPage extends AbstractConvertible implements Page{
-		public static final String TEMPLATE = "category_index.ftl";
+		public static final String TEMPLATE = "tag.ftl";
 		private String url;
 		private Renderer renderer;
 		private Site site;
@@ -220,7 +220,7 @@ public class TagGenerator implements Generator {
 		 * @see org.opoo.press.impl.AbstractConvertible#convert()
 		 */
 		@Override
-		protected void convert() {
+		public void convert() {
 			//do nothing
 		}
 
