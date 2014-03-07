@@ -22,6 +22,15 @@
   <link href="${ root_url }/favicon.ico" rel="icon">
   <link href="${ site.subscribe_rss }" rel="alternate" title="${site.title}" type="application/atom+xml">
   <link href="${ root_url }/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <#include "custom/head.ftl">
+  
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic|PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+  <#--
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+  -->
+  <#if (highlighter?? && highlighter == "SyntaxHighlighter")>
+  <link type="text/css" rel="stylesheet" href="${root_url}/plugins/syntax-highlighter/styles/shCoreDefault.css"/>
+  </#if>
   <!--[if lt IE 9]><script src="${root_url}/javascripts/html5shiv.js"></script><![endif]-->
 </head>

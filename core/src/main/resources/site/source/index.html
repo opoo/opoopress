@@ -6,7 +6,7 @@ layout: default
 <#list paginator.posts as post>
 	<#assign content = post.content>
     <article>
-      <#include "article.ftl">
+      <#include "post/article.ftl">
     </article>
 </#list>
   
@@ -22,7 +22,7 @@ layout: default
     </#if>
 	-->
 	<#-- new page bar -->
-    <#include "custom/pagination.ftl">
+    <#include "index/pagination.ftl">
   </div>
 </div>
 <aside class="sidebar">

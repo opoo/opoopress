@@ -10,6 +10,6 @@
   <span class="tags"><@i18n.msg "Tags"/>: ${tag_links(post.tags)}</span>
 </#if>
 -->
-<#include "post/categories.ftl">
+<#include "categories.ftl">
 </footer>
 </#if>

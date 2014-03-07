@@ -1,7 +1,7 @@
 <#assign single = true><#macro postLayout><#include "_default.ftl"><@defaultLayout>
 <div>
 <article class="hentry" role="article">
-  <#include "article.ftl">
+  <#include "post/article.ftl">
   <div class="entry-content"><#nested></div>
   <footer>
     <p class="meta">

@@ -8,7 +8,7 @@
 
 	<#if (page.meta)!true == true>
       <p class="meta">
-		<#include "post/date.ftl">${time}
+		<#include "date.ftl">${time}
 		<#if site.disqus_short_name?? && (page.comments)!true == true && (post.comments)!true == true && (site.disqus_show_comment_count)!false == true>
          | <a href="<#if index??>${root_url}${post.url}</#if>#disqus_thread"><@i18n.msg "Comments"/></a>
         </#if><#if site.duoshuo_short_name?? && (page.comments)!true == true && (post.comments)!true == true && (site.duoshuo_show_comment_count)!false == true>
