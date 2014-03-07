@@ -48,7 +48,14 @@ public class SiteConfigImpl extends LinkedHashMap<String, Object> implements Sit
 		if(siteDir == null || !siteDir.exists() || !siteDir.isDirectory() || !siteDir.canRead()){
 			throw new IllegalArgumentException("Site directory not valid.");
 		}
-		this.configFile = new File(siteDir, "config.yml");
+		String config = "config.yml";
+		String configProperty = System.getProperty("config");
+		if(StringUtils.isNotBlank(configProperty)){
+			config = configProperty;
+			log.info("Using config file: {}", config);
+		}
+
+		this.configFile = new File(siteDir, config);
 		this.extraConfig = extraConfig;
 		this.siteDir = siteDir;
 	}
