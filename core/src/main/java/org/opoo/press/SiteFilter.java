@@ -28,6 +28,22 @@ public interface SiteFilter extends Ordered{
 	
 	void postGenerate(Site site);
 	
+	void postConvertPost(Site site, Post post);
+	
+	void postConvertPage(Site site, Page page);
+	
+	void postRenderPost(Site site, Post post);
+	
+	void postRenderPage(Site site, Page page);
+	
+	void postRenderAllPosts(Site site);
+	
+	void postRenderAllPages(Site site);
+	
+	/**
+	 * @deprecated using {@link #postRenderAllPosts(Site)} and {@link #postRenderAllPages(Site)}
+	 * @param site
+	 */
 	void postRender(Site site);
 	
 	void postWrite(Site site);
