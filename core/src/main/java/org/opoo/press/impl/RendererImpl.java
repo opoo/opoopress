@@ -110,7 +110,7 @@ public class RendererImpl implements Renderer {
 		try {
 			FileTemplateLoader loader1 = new FileTemplateLoader(workingTemplateDir);
 			FileTemplateLoader loader2 = new FileTemplateLoader(templateDir);
-			ClassTemplateLoader loader3 = new ClassTemplateLoader(RendererImpl.class, "/opoopress/templates");
+			ClassTemplateLoader loader3 = new ClassTemplateLoader(RendererImpl.class, "/org/opoo/press/templates");
 				
 			if(loaders == null){
 				loaders = new ArrayList<TemplateLoader>();
