@@ -125,6 +125,9 @@ excerpt_separator: "<!--more-->"
 # Converts page and post titles to titlecase
 titlecase: true
 
+# show relative time, e.g. "1 minute ago", "4 years ago"
+refreshRelativeTimes: true
+
 # Main navigation
 navs: {"Blog": "/", "Archives": "/archives/", "Sample Page": "/sample-page.html", "About": "/about/"}
 
@@ -241,3 +244,9 @@ highlighter: "org.opoo.press.highlighter.SyntaxHighlighter"
 
 # auto_import_templates: {"ns" : "template_name.ftl", "ns2" : "template2_name.ftl"}
 # auto_include_templates: ["global_template1.ftl", "global_template2.ftl"]
+
+
+# ----------------------- #
+#   Debug JavaScript      #
+# ----------------------- #
+verbose: false

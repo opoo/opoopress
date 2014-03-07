@@ -125,6 +125,9 @@ excerpt_separator: "<!--more-->"
 # 文章或者页面的标题是否使用 titlecase
 titlecase: true
 
+# 是否以相对时间显示，例如 “5 天前”、“1 分钟前”
+refreshRelativeTimes: true
+
 # 主导航菜单
 navs: {"文章": "/", "归档": "/archives/", "示例页面": "/sample-page.html", "关于": "/about/"}
 
@@ -241,3 +244,9 @@ highlighter: "org.opoo.press.highlighter.SyntaxHighlighter"
 
 # auto_import_templates: {"ns" : "template_name.ftl", "ns2" : "template2_name.ftl"}
 # auto_include_templates: ["global_template1.ftl", "global_template2.ftl"]
+
+
+# ----------------------- #
+#   Debug JavaScript      #
+# ----------------------- #
+verbose: false
