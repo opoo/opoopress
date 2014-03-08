@@ -10,12 +10,14 @@ Here are some main features:
 - **Blog-aware** - Permalinks, tree categories, tags, pages, posts, archives, RSS feed.
 
 OpooPress also have these features:
+
 - A semantic HTML5 template
 - A Mobile first responsive layout (rotate, or resize your browser and see)
 - Built in 3rd party support for Twitter, Google Plus One, Disqus Comments, Pinboard, Delicious, and Google Analytics
 - Easy theming with Compass and Sass
 
 (Note: *description above comes from Octopress, OpooPress have the same features actually*)
+
 - Supports many deployment methods (by [Apache Maven Wagon](http://maven.apache.org/wagon/))
 - Supports code syntax highlighting (by [Syntax Highlighter Compress](http://alexgorbatchev.com/SyntaxHighlighter/))
 - Supports Locale (Currently only `en_US` and `zh_CN`, default use the locale of JVM)
@@ -24,8 +26,8 @@ OpooPress also have these features:
 - Supports custom meta data that is exposed to templates, pages or posts
 
 ## Post Format
-- [Markdown](http://daringfireball.net/projects/markdown/) by [Txtmark](https://github.com/rjeschke/txtmark) - (\*.md, \*.markdown)
 - HTML - (\*.html)
+- [Markdown](http://daringfireball.net/projects/markdown/) by [Txtmark](https://github.com/rjeschke/txtmark) - (\*.md, \*.markdown)
 - [Textile](http://textile.sitemonks.com/) by [Textile-j](https://java.net/projects/textile-j)(also see [Mylyn WikiText](http://wiki.eclipse.org/Mylyn/Incubator/WikiText)) - (\*.textile)
 
 ## Migration
@@ -41,9 +43,10 @@ OpooPress also have these features:
 - [Github Pages](http://www.opoopress.com/en/docs/github-pages/)
 
 # Getting Started
-The first package has be released. It's easy to set up and deploy.
 
-Stable releases are available from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Corg.opoo.press), and snapshot builds are available from the [Sonatype OSS snapshots repository](https://oss.sonatype.org/index.html#nexus-search;quick~org.opoo.press). See [Download](http://www.opoopress.com/en/download/) and [Installation](http://www.opoopress.com/en/docs/installation/) to know how to use them.
+Check the documentation to kown how to [download](http://www.opoopress.com/en/download/) and [install](http://www.opoopress.com/en/docs/installation/) OpooPress.
+
+Stable releases are available from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Corg.opoo.press), and snapshot builds are available from the [Sonatype OSS snapshots repository](https://oss.sonatype.org/index.html#nexus-search;quick~org.opoo.press).
 
 ## Source Code
 You can access the source code at: [https://github.com/opoo/opoopress](https://github.com/opoo/opoopress)
