@@ -31,7 +31,7 @@ import org.opoo.press.source.Source;
 public interface Site extends SiteBuilder, SiteHelper{
 	/**
 	 * Source directory.
-	 * @return
+	 * @return source directory
 	 */
 	File getSource();
 	
@@ -39,7 +39,7 @@ public interface Site extends SiteBuilder, SiteHelper{
 	 * Other source directories.
 	 * 
 	 * @since 1.0.2
-	 * @return
+	 * @return other source directories
 	 */
 	List<File> getSources();
 	
