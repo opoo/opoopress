@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <!--
-	Copyright 2013 Alex Lin.
+	Copyright 2014 Alex Lin.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 	<name>OpooPress Blogging Framework :: Core</name>
 	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
 	<url>http://press.opoo.org/</url>
-	<inceptionYear>2013</inceptionYear>
+	<inceptionYear>2014</inceptionYear>
 	
 	<!--
 	<scm>
@@ -95,10 +95,48 @@
 		</dependency>
 		
 		<!-- Texttile-j textile converter -->
+		<!-- 
 		<dependency>
 		    <groupId>net.java</groupId>
 		    <artifactId>textile-j</artifactId>
 		    <version>2.2</version>
+		</dependency>
+		-->
+		
+		<dependency>
+		    <groupId>net.java.dev.textile-j</groupId>
+		    <artifactId>textile-j</artifactId>
+		    <version>2.2.864</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>wikitext.textile</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>wikitext.twiki</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>wikitext.tracwiki</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>wikitext.mediawiki</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>wikitext.confluence</artifactId>
+			<version>${wikitext.version}</version>
 		</dependency>
 			
 		<dependency> 
@@ -107,4 +145,7 @@
 		</dependency>
 	</dependencies>
 	
+	<properties>
+		<wikitext.version>0.9.4.I20090220-1600-e3x</wikitext.version>
+	</properties>
 </project>
