@@ -215,6 +215,10 @@ facebook_like: false
 converters:
   - org.opoo.press.converter.TxtmarkMarkdownConverter
   - org.opoo.press.converter.TextilejConverter
+  - org.opoo.press.converter.WikiTextMediaWikiConverter
+  - org.opoo.press.converter.WikiTextTracWikiConverter
+  - org.opoo.press.converter.WikiTextTWikiConverter
+  - org.opoo.press.converter.WikiTextConfluenceConverter
 
 generators:
   - org.opoo.press.generator.PaginationGenerator
