@@ -84,8 +84,9 @@ public class StaticFileImpl implements StaticFile {
 	public void write(File dest) {
 		File target = getOutputFile(dest);
 
-		if(target.exists() && target.lastModified() >= sourceEntry.getLastModified()){
-			log.debug("Target file is newer than source file, skip copying.");
+		if(target.exists() && target.length() == sourceEntry.getLength() 
+				&& target.lastModified() >= sourceEntry.getLastModified()){
+			//log.debug("Target file is newer than source file, skip copying.");
 			return;
 		}
 		
@@ -95,6 +96,7 @@ public class StaticFileImpl implements StaticFile {
 				parentFile.mkdirs();
 			}
 			
+			log.debug("Copying static file to " + target);
 			FileUtils.copyFile(sourceEntry.getFile(), target);
 		} catch (IOException e) {
 			log.error("Copying static file error: " + target, e);
