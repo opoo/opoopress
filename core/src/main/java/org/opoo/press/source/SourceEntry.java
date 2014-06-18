@@ -41,9 +41,9 @@ public class SourceEntry extends FileEntry {
 	 * @param parent
 	 * @param file
 	 */
-	public SourceEntry(FileEntry parent, File file) {
+	public SourceEntry(SourceEntry parent, File file) {
 		super(parent, file);
-		path = getPath(this);
+		path = getPath(parent);
 		refresh(file);
 	}
 	
@@ -52,10 +52,10 @@ public class SourceEntry extends FileEntry {
 	 * @param entry
 	 * @return
 	 */
-	private static String getPath(FileEntry entry){
-		FileEntry parent = entry.getParent();
+	private static String getPath(SourceEntry parent){
 		if(parent != null){
-			return getPath(parent) + "/" + parent.getName();
+			//return getPath(parent) + "/" + parent.getName();
+			return parent.getPath() + "/" + parent.getName();
 		}
 		return "";
 	}
