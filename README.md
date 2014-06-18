@@ -5,7 +5,7 @@ OpooPress Blogging Framework is a java based static blog generator, it's also a 
 Here are some main features:
 
 - **Simple** - No more databases, no more runtime language (such as php, java), a web server is sufficient
-- **Fast** - A very fast generate engine by Java, [generate 1000 posts in several seconds](http://opoo.org/why-i-develop-opoopress/)
+- **Fast** - A very fast generate engine by Java, [generate **1k** posts in several seconds](http://opoo.org/why-i-develop-opoopress/), how abount [**10k** posts](http://opoo.org/2014/opoopress-site-generated-in-multi-thread/)?
 - **Static** - Markdown/Textile/WikiText, FreeMarker, HTML & CSS & Images go in, completely static sites come out ready for deployment to anywhere
 - **Blog-aware** - Permalinks, tree categories, tags, pages, posts, archives, RSS feed.
 
