@@ -36,6 +36,10 @@ public interface Renderer {
 
 	String prepareWorkingTemplate(String layout, boolean isValidLayout,
 			String content, boolean isContentRenderRequired, SourceEntry entry);
+	
+	void prepareLayoutWorkingTemplates();
+	
+	String getLayoutWorkingTemplate(String layout);
 
 	boolean isRenderRequired(String content);
 

@@ -16,6 +16,7 @@
 package org.opoo.press.impl;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -26,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -176,7 +178,7 @@ public class RendererImpl implements Renderer {
 			String content, boolean isContentRenderRequired, SourceEntry entry) {
 		log.debug("Prepare template for " + entry.getFile());
 
-		String name = isContentRenderRequired ? buildTemplateName(layout, entry) : buildPlainTextTemplateName(layout);
+		String name = isContentRenderRequired ? buildTemplateName(layout, entry) : getLayoutWorkingTemplate(layout);
 		File targetTemplateFile = new File(this.workingTemplateDir, name);
 		
 		if(targetTemplateFile.exists() && targetTemplateFile.lastModified() >= entry.getLastModified()){
@@ -198,9 +200,9 @@ public class RendererImpl implements Renderer {
 		return name;
 	}
 	
-	private String buildPlainTextTemplateName(String layout){
-		return "_" + layout + ".content.ftl";
-	}
+//	private String buildPlainTextTemplateName(String layout){
+//		return "_" + layout + ".content.ftl";
+//	}
 	
 	private String buildTemplateName(String layout, SourceEntry entry){
 		String name = entry.getPath() + "/" + entry.getName() + "." + layout + ".ftl";
@@ -277,5 +279,45 @@ public class RendererImpl implements Renderer {
 		}
 //		return (layout != null) && !"nil".equals(layout);
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Renderer#prepareLayoutWorkingTemplates()
+	 */
+	@Override
+	public void prepareLayoutWorkingTemplates() {
+		log.debug("Prepare layout working templates...");
+		
+		File templates = site.getTemplates();
+		File[] layoutFiles = templates.listFiles(new FilenameFilter(){
+			public boolean accept(File file, String name) {
+				return name.startsWith("_") && name.endsWith(".ftl");
+			}
+		});
+		
+		for(File layoutFile: layoutFiles){
+			String layout = FilenameUtils.getBaseName(layoutFile.getName()).substring(1);
+			String name = getLayoutWorkingTemplate(layout);
+			
+			File targetTemplateFile = new File(this.workingTemplateDir, name);
+			if(targetTemplateFile.exists() && targetTemplateFile.lastModified() >= layoutFile.lastModified()){
+				log.debug("Layout template exists and newer than source file: " + targetTemplateFile);
+			}else{
+				StringBuffer templateContent = buildTemplateContent(layout, true, null, false);
+				try {
+					FileUtils.write(targetTemplateFile, templateContent, "UTF-8");
+					//targetTemplateFile.setLastModified(sourceEntry.getLastModified());
+					if(log.isDebugEnabled()){
+						log.debug("Create layout template: " + targetTemplateFile);
+					}
+				} catch (IOException e) {
+					throw new RuntimeException("Write layout template error: " + targetTemplateFile, e);
+				}
+			}
+		}
+	}
+	
+	public String getLayoutWorkingTemplate(String layout){
+		return "_" + layout + ".content.ftl";
 	}
 }
