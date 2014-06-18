@@ -27,10 +27,11 @@ public abstract class URLUtils {
 
 	public static String encodeURL(String url){
 		try {
-			return URLEncoder.encode(url, "UTF-8");
+			url = URLEncoder.encode(url, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+		return url.replaceAll("\\+", "%20").replaceAll("%2F", "/");
 	}
 	
 	public static String decodeURL(String url){
