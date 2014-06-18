@@ -51,6 +51,7 @@ public class TextilejConverter implements Converter {
 		parser.setBuilder(builder);
 		
 		parser.parse(content);
+		parser.setBuilder(null);
 		return writer.toString();
 	}
 
