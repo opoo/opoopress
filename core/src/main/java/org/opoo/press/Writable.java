@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Alex Lin.
+ * Copyright 2014 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,11 @@
 package org.opoo.press;
 
 import java.io.File;
-import java.util.Map;
-
 
 /**
- * Interface to describe convertible object.
- * 
  * @author Alex Lin
  *
  */
-public interface Convertible extends Writable{
-
-	void convert();
-	
-	/**
-	 * @param rootMap root object for FreeMarker template
-	 */
-	void render(Map<String, Object> rootMap);
-
-	/**
-	 * @param dest
-	 * @return output file
-	 */
-	File getOutputFile(File dest);
-
-	/**
-	 * @param dest
-	 */
+public interface Writable {
 	void write(File dest);
 }

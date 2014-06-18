@@ -21,7 +21,7 @@ import java.io.File;
  * @author Alex Lin
  *
  */
-public interface StaticFile {
+public interface StaticFile extends Writable{
 
 	/**
 	 * @param dest

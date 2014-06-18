@@ -41,8 +41,8 @@ import org.opoo.util.MapUtils;
 public abstract class AbstractBase extends AbstractConvertible implements Base{
 	protected Logger log = LoggerFactory.getLogger(getClass());
 	
-	private static DateFormat f1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	private static DateFormat f2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private DateFormat f1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private DateFormat f2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private final Map<String, Object> data;
 	
 	private Source source;
@@ -265,5 +265,18 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	 */
 	public String getUpdated_formatted(){
 		return getUpdatedFormatted();
+	}
+
+
+	protected String getUrlForOutputFile(){
+		String url = getUrl();
+		if(site.get("urldecode_for_output_file") != null){
+			try{
+				url = java.net.URLDecoder.decode(url, "UTF-8");
+			}catch(Exception e){
+				log.warn("url decode error", e);
+			}
+		}
+		return url;
 	}
 }

@@ -37,8 +37,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opoo.press.Application;
 import org.opoo.press.Category;
 import org.opoo.press.Converter;
@@ -54,6 +52,7 @@ import org.opoo.press.SiteConfig;
 import org.opoo.press.SlugHelper;
 import org.opoo.press.StaticFile;
 import org.opoo.press.Tag;
+import org.opoo.press.Writable;
 import org.opoo.press.converter.IdentityConverter;
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.plugin.DefaultPlugin;
@@ -63,8 +62,12 @@ import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
 import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceParser;
+import org.opoo.press.task.RunnableTask;
+import org.opoo.press.task.TaskExecutor;
 import org.opoo.press.template.TitleCaseModel;
 import org.opoo.press.util.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.template.TemplateModel;
 
@@ -117,6 +120,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	private RelatedPostsFinder relatedPostsFinder;
 	
 	private File lastBuildInfoFile;
+	private TaskExecutor taskExecutor;
 	
 	SiteImpl(SiteConfigImpl siteConfig) {
 		super();
@@ -148,6 +152,8 @@ public class SiteImpl implements Site, SiteBuilder{
 				log.info(name + ": " + en.getValue());
 			}
 		}
+		
+		taskExecutor = new TaskExecutor(config);
 	}
 	
 	private void setupDirs(){
@@ -248,7 +254,8 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 		this.pages = new ArrayList<Page>();
 		this.posts = new ArrayList<Post>();
-		this.staticFiles = new ArrayList<StaticFile>();
+		//在多线程中 add
+		this.staticFiles = Collections.synchronizedList(new ArrayList<StaticFile>());
 		
 		resetCategories();
 		resetTags();
@@ -365,9 +372,31 @@ public class SiteImpl implements Site, SiteBuilder{
 
 
 	void read(){
+		Runnable t1 = new Runnable(){
+			public void run() {
+				readSources();
+			}
+		};
+		
+		Runnable t2 = new Runnable(){
+			public void run() {
+				readStaticFiles();
+			}
+		};
+		
+		taskExecutor.run(t1, t2);
+		
+		postRead();
+	}
+	
+	private void readSources(){
 		log.info("Reading sources ...");
-		SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
-		SourceParser parser = Application.getContext().getSourceParser();
+		
+		final SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
+		final SourceParser parser = Application.getContext().getSourceParser();
+		
+		//load sources and load static files
+		
 		FileFilter fileFilter = buildFilter();
 		List<SourceEntry> list = loader.loadSourceEntries(source, fileFilter);
 		if(sources != null && !sources.isEmpty()){
@@ -389,9 +418,8 @@ public class SiteImpl implements Site, SiteBuilder{
 		
 //		sort(categories);
 //		sort(tags);
-		
-		postRead();
 	}
+	
 	
 	/**
 	 * @param posts2
@@ -419,6 +447,18 @@ public class SiteImpl implements Site, SiteBuilder{
 			prev = curr;
 		}
 	}
+	
+	private void readStaticFiles(){
+		if(assets != null){
+			log.info("Reading assets ...");
+			SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
+			FileFilter fileFilter = buildFilter();
+			List<SourceEntry> list = loader.loadSourceEntries(assets, fileFilter);
+			for(SourceEntry se: list){
+				this.staticFiles.add(new StaticFileImpl(this, se));
+			}
+		}
+	}
 
 
 	/**
@@ -434,6 +474,8 @@ public class SiteImpl implements Site, SiteBuilder{
 	private void read(SourceEntry en, SourceParser parser) {
 		try {
 			Source src = parser.parse(en);
+			log.debug("read source " + src.getSourceEntry().getFile());
+			
 			Map<String, Object> map = src.getMeta();
 			String layout = (String) map.get("layout");
 			if("post".equals(layout)){
@@ -511,28 +553,49 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	void render(){
-		log.info("Rendering ...");
-		Map<String, Object> rootMap = buildRootMap();
-
-		for(Post post: posts){
-			post.convert();
-			postConvertPost(post);
-			
-			post.render(rootMap);
-			postRenderPost(post);
-		}
+		final Map<String, Object> rootMap = buildRootMap();
+		renderer.prepareLayoutWorkingTemplates();
+		
+//		for(Post post: posts){
+//			post.convert();
+//			postConvertPost(post);
+//			
+//			post.render(rootMap);
+//			postRenderPost(post);
+//		}
+		log.info("Rendering {} posts...", posts.size());
+		taskExecutor.run(posts, new RunnableTask<Post>(){
+			public void run(Post post) {
+				post.convert();
+				postConvertPost(post);
+//				
+				post.render(rootMap);
+				postRenderPost(post);
+			}});
 		postRenderPosts();
 		
-		for(Page page: pages){
-			page.convert();
-			postConvertPage(page);
-			
-			page.render(rootMap);
-			postRenderPage(page);
-		}
+//		for(Page page: pages){
+//			page.convert();
+//			postConvertPage(page);
+//			
+//			page.render(rootMap);
+//			postRenderPage(page);
+//		}
+		
+		log.info("Rendering {} pages...", pages.size());
+		taskExecutor.run(pages, new RunnableTask<Page>(){
+			public void run(Page page) {
+				page.convert();
+				postConvertPage(page);
+				
+				page.render(rootMap);
+				postRenderPage(page);
+			}
+		});
 		postRenderPages();
 		
 		postRender();
+		
 	}
 	
 	/**
@@ -591,8 +654,14 @@ public class SiteImpl implements Site, SiteBuilder{
 //		String rootUrl = (String)config.get("root");
 		map.put("root_url", getRoot());
 		try{
-			map.put("version", Site.class.getPackage().getSpecificationVersion());
+			String version = Site.class.getPackage().getSpecificationVersion();
+			if(StringUtils.isNotBlank(version)){
+				map.put("version", version);
+			}
 		}catch(Exception e){
+			//map.put("version", "unkown_version");
+		}
+		if(map.get("version") == null){
 			map.put("version", "unkown_version");
 		}
 		
@@ -611,34 +680,59 @@ public class SiteImpl implements Site, SiteBuilder{
 	 * 
 	 */
 	void cleanup() {
-		List<File> destFiles = getAllDestFiles(dest);
+		log.info("cleanup...");
+		final List<File> destFiles = getAllDestFiles(dest);
 		List<File> files = new ArrayList<File>();
-
-		for(Post post: posts){
-			files.add(post.getOutputFile(dest));
-		}
-		for(Page page: pages){
-			files.add(page.getOutputFile(dest));
-		}
+		
+//		for(Post post: posts){
+//			files.add(post.getOutputFile(dest));
+//		}
+//		for(Page page: pages){
+//			files.add(page.getOutputFile(dest));
+//		}
 		for(StaticFile staticFile: staticFiles){
 			files.add(staticFile.getOutputFile(dest));
+		}
+		
+		if(log.isDebugEnabled()){
+			log.debug("Files in target: " + destFiles.size());
+			log.debug("Assets file in src: " + files.size());
+		}
+		
+		if(log.isDebugEnabled()){
+			log.debug("Files in target: " + destFiles.size());
+			log.debug("Assets file in src: " + files.size());
 		}
 		
 		//find obsolete files
 		for(File file: files){
 			destFiles.remove(file);
 		}
+//		destFiles.removeAll(files);
 		
+		if(log.isDebugEnabled()){
+			log.debug("Files in target will be deleted: " + destFiles.size());
+		}
+
 		//delete obsolete files
 		if(!destFiles.isEmpty()){
-			for(File destFile: destFiles){
-				FileUtils.deleteQuietly(destFile);
-				if(IS_DEBUG_ENABLED){
-					log.debug("Delete file " + destFile);
+//			for(File destFile: destFiles){
+//				//FileUtils.deleteQuietly(destFile);
+//				if(IS_DEBUG_ENABLED){
+//					log.debug("Delete file " + destFile);
+//				}
+//			}
+			
+			taskExecutor.run(destFiles, new RunnableTask<File>() {
+				public void run(File file) {
+					FileUtils.deleteQuietly(file);
+					if(IS_DEBUG_ENABLED){
+						log.debug("Delete file " + file);
+					}
 				}
-			}
+			});
 		}
-		
+
 		//call post cleanup
 		postCleanup();
 	}
@@ -674,40 +768,54 @@ public class SiteImpl implements Site, SiteBuilder{
 
 
 	void write(){
-		log.info("Writing files ...");
-
+		log.info("Writing {} posts, {} pages, and {} static files ...", 
+				posts.size(), pages.size(), staticFiles.size());
+		
 		if(!dest.exists()){
 			dest.mkdirs();
 		}
-
-		log.info("Writing " + posts.size() + " posts");
-		for(Post post: posts){
-			post.write(dest);
-		}
 		
-		log.info("Writing " + pages.size() + " pages");
-		for(Page page: pages){
-			page.write(dest);
-		}
+//		log.info("Writing " + posts.size() + " posts");
+//		for(Post post: posts){
+//			post.write(dest);
+//		}
+//		
+//		log.info("Writing " + pages.size() + " pages");
+//		for(Page page: pages){
+//			page.write(dest);
+//		}
+//		
+//		if(!staticFiles.isEmpty()){
+//			log.info("Copying " + staticFiles.size() + " static files");
+//			for(StaticFile sf: staticFiles){
+//				sf.write(dest);
+//			}
+//		}
 		
+		List<Writable> list = new ArrayList<Writable>();
+		list.addAll(posts);
+		list.addAll(pages);
 		if(!staticFiles.isEmpty()){
-			log.info("Copying " + staticFiles.size() + " static files");
-			for(StaticFile sf: staticFiles){
-				sf.write(dest);
-			}
+			list.addAll(staticFiles);
 		}
-
-		if(assets != null){
-			try {
-				log.info("Copying 1 assets directory");
-				log.debug("Copying assets...");
-				FileUtils.copyDirectory(assets, dest, buildFilter());
-				
-				log.debug("All asset files copied.");
-			} catch (IOException e) {
-				log.error("Copy assets error", e);
+		
+		taskExecutor.run(list, new RunnableTask<Writable>() {
+			public void run(Writable o) {
+				o.write(dest);
 			}
-		}
+		});
+		
+//		if(assets != null){
+//			try {
+//				log.info("Copying 1 assets directory");
+//				log.debug("Copying assets...");
+//				FileUtils.copyDirectory(assets, dest, buildFilter());
+//				
+//				log.debug("All asset files copied.");
+//			} catch (IOException e) {
+//				log.error("Copy assets error", e);
+//			}
+//		}
 		postWrite();
 	}
 
@@ -901,7 +1009,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(categories.containsKey(categoryNameOrNicename)){
 			return categories.get(categoryNameOrNicename);
 		}
-		for(Category category: categories.values()){
+		for(Category category: new ArrayList<Category>(categories.values())){
 			if(category.isNameOrNicename(categoryNameOrNicename)){
 				return category;
 			}
@@ -924,7 +1032,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 		return null;
 	}
-	
 	
 	private static class CategoriesList extends AbstractList<Category>{
 		private final List<Category> list = new ArrayList<Category>();
@@ -963,7 +1070,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 	}
 
-
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Site#getPermalink()
 	 */
@@ -978,13 +1084,14 @@ public class SiteImpl implements Site, SiteBuilder{
 	public File getSite() {
 		return site;
 	}
+	
 	/**
 	 * @return the showDrafts
 	 */
 	public boolean showDrafts() {
 		return showDrafts;
 	}
-
+	
 	private void saveLastBuildInfo(){
 		Properties props = new Properties();
 		props.setProperty("build_time", String.valueOf(System.currentTimeMillis()));

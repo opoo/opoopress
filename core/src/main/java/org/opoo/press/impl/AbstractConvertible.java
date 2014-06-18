@@ -79,12 +79,17 @@ public abstract class AbstractConvertible implements Convertible {
 			rootMap.put("content", getContent());
 		}
 		
-		String name = renderer.prepareWorkingTemplate(getLayout(), isValidLayout, 
+		String name = isContentRenderRequired ? renderer.prepareWorkingTemplate(getLayout(), isValidLayout, 
 				getContent(), isContentRenderRequired, 
-				getSource().getSourceEntry());
+				getSource().getSourceEntry()) 
+				: renderer.getLayoutWorkingTemplate(getLayout());
 		String output = renderer.render(name, rootMap);
 //		String output = getRenderer().render(getLayout(), getContent(), getSource().getSourceEntry(), rootMap);
 		setContent(output);
+	}
+
+	protected String getUrlForOutputFile(){
+		return getUrl();
 	}
 
 	/* (non-Javadoc)
@@ -92,7 +97,7 @@ public abstract class AbstractConvertible implements Convertible {
 	 */
 	@Override
 	public File getOutputFile(File dest) {
-		String url = getUrl();
+		String url = getUrlForOutputFile();
 		if(url.endsWith("/")){
 			url += "index" + getOutputFileExtension();
 		}
@@ -117,6 +122,7 @@ public abstract class AbstractConvertible implements Convertible {
 //			IOUtils.write(getContent(), fw);
 //			fw.flush();
 			
+			log.debug("Writing file to " + file + " <== " + getUrl());
 			FileUtils.write(file, getContent(), "UTF-8");
 		} catch (IOException e) {
 			log.error("Write file error: " + file, e);
