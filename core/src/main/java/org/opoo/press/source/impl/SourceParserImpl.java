@@ -41,20 +41,6 @@ public class SourceParserImpl implements SourceParser {
 	private static final Logger log = LoggerFactory.getLogger(SourceParserImpl.class);
 	private Yaml yaml = new Yaml();
 	
-	/**
-	 * @return the yaml
-	 */
-	public Yaml getYaml() {
-		return yaml;
-	}
-
-	/**
-	 * @param yaml the yaml to set
-	 */
-	public void setYaml(Yaml yaml) {
-		this.yaml = yaml;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.opoo.press.source.SourceParser#parse(org.opoo.press.source.SourceEntry)
 	 */

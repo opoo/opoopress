@@ -114,7 +114,7 @@ public class CategoryImpl implements Category{
 	}
 
 	public boolean isNameOrNicename(String nameOrNicename){
-		if(nameOrNicename.equals(getNicename())){
+		if(nameOrNicename.equalsIgnoreCase(getNicename())){
 			return true;
 		}
 		

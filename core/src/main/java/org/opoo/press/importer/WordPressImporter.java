@@ -270,7 +270,7 @@ public class WordPressImporter implements Importer {
 			importDir = "wordpress";
 		}
 		
-		File dir = site.getSource();
+		File dir = site.getBasedir();
 		File file = new File(dir, importDir + "/" + filename);
 
 		if(!file.getParentFile().exists()){

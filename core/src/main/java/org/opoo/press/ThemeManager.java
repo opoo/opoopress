@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Alex Lin.
+ * Copyright 2014 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package org.opoo.press;
 
 /**
  * @author Alex Lin
- *
+ * @since 1.2
  */
-public interface Initializable {
-	void initialize(Site site);
+public interface ThemeManager {
+	Theme getTheme(Site site);
 }

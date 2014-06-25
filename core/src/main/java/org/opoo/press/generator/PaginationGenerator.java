@@ -17,8 +17,8 @@ package org.opoo.press.generator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import org.opoo.press.Config;
 import org.opoo.press.Generator;
 import org.opoo.press.Page;
 import org.opoo.press.Pager;
@@ -39,11 +39,11 @@ public class PaginationGenerator implements Generator {
 	@Override
 	public void generate(Site site) {
 		List<Page> pages = site.getPages();
-		Map<String, Object> map = site.getConfig().toMap();
+		Config config = site.getConfig();
 		
 		List<Page> allNewPages = new ArrayList<Page>();
 		for(Page page: pages){
-			if(isPaginationEnabled(map, page)){
+			if(isPaginationEnabled(config, page)){
 				List<Page> list = paginate(site, page, site.getPosts());
 				allNewPages.addAll(list);
 			}
@@ -108,15 +108,15 @@ public class PaginationGenerator implements Generator {
 	
 	
 	public static boolean isPaginationEnabled(Site site, Page page){
-		return isPaginationEnabled(site.getConfig().toMap(), page);
+		return isPaginationEnabled(site.getConfig(), page);
 	}
 
-	public static boolean isPaginationEnabled(Map<String, Object> config, Page page) {
+	public static boolean isPaginationEnabled(Config config, Page page) {
 		SourceEntry entry = page.getSource().getSourceEntry();
 		String name = entry.getName();
 		String path = entry.getPath();
 		// (isIndexPaginationEnabled || isNormalPagePaginationEnabled) && containsPaginatorInContent
-		return (config.containsKey("paginate") && "".equals(path) && "index.html".equals(name)
+		return (config.get("paginate") != null && "".equals(path) && "index.html".equals(name)
 				|| page.get("paginate") != null)
 				&& page.getContent().contains("paginator.");
 	}

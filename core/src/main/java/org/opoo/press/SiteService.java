@@ -26,11 +26,9 @@ public interface SiteService {
 
 	Site createSite(File siteDir);
 	
-	Site createSite(File siteDir, Map<String,Object> extraOptions);
+	Site createSite(File siteDir, Map<String,Object> override);
 	
-	SiteConfig createSiteConfig(File siteDir, Map<String,Object> extraOptions);
+	Config createConfig(File siteDir, Map<String,Object> override);
 	
-	Site createSite(SiteConfig siteConfig);
-	
-	CompassConfig createCompassConfig(File compassProjectPath);
+	Site createSite(Config siteConfig);
 }

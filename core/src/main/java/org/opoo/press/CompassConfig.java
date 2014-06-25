@@ -19,7 +19,7 @@ import java.io.File;
 
 /**
  * @author Alex Lin
- *
+ * @deprecated
  */
 public interface CompassConfig {
 	

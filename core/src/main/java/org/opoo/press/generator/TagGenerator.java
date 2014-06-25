@@ -82,7 +82,7 @@ public class TagGenerator implements Generator {
 		private String title;
 		private List<Post> posts;
 		
-		private TagPage(Site site) {
+		public TagPage(Site site) {
 			super();
 			this.site = site;
 			this.renderer = site.getRenderer();

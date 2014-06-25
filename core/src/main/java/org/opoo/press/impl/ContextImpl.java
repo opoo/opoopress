@@ -21,6 +21,7 @@ import java.util.Map;
 import org.opoo.press.Application;
 import org.opoo.press.Context;
 import org.opoo.press.SiteManager;
+import org.opoo.press.ThemeManager;
 import org.opoo.press.slug.ChineseToPinyinSlugHelper;
 import org.opoo.press.slug.DefaultSlugHelper;
 import org.opoo.press.source.SourceEntryLoader;
@@ -50,13 +51,10 @@ public class ContextImpl implements Context{
 			sourceEntryLoader = new SourceEntryLoaderImpl();
 			
 			sourceParser = new SourceParserImpl();
-			sourceParser.setYaml(yaml);
 			
 			sourceManager = new SourceManagerImpl();
-			sourceManager.setYaml(yaml);
 			
 			siteManager = new SiteManagerImpl();
-			siteManager.setYaml(yaml);
 
 			set(DefaultSlugHelper.class.getName(), new DefaultSlugHelper());
 			set(ChineseToPinyinSlugHelper.class.getName(), new ChineseToPinyinSlugHelper());
@@ -110,5 +108,14 @@ public class ContextImpl implements Context{
 	
 	public void set(String name, Object bean){
 		beans.put(name, bean);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Context#getThemeManager()
+	 */
+	@Override
+	public ThemeManager getThemeManager() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

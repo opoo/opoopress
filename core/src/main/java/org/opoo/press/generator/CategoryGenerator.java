@@ -82,7 +82,7 @@ public class CategoryGenerator implements Generator {
 		private String title;
 		private List<Post> posts;
 		
-		private CategoryPage(Site site) {
+		public CategoryPage(Site site) {
 			super();
 			this.site = site;
 			this.renderer = site.getRenderer();

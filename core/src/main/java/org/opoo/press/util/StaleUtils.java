@@ -19,13 +19,14 @@ import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opoo.press.CompassConfig;
+import org.opoo.press.Config;
 import org.opoo.press.Site;
 import org.opoo.press.Site.BuildInfo;
-import org.opoo.press.SiteConfig;
 
 /**
  * @author Alex Lin
@@ -94,15 +95,17 @@ public class StaleUtils {
 			return true;
 		}
 		
-		SiteConfig config = site.getConfig();
-		File configFile = config.getConfigFile();
+		Config config = site.getConfig();
+		File[] configFiles = config.getConfigFiles();
 		
-		//config file
-		if(configFile.lastModified() > lastBuildTime){
-			if(log.isInfoEnabled()){
-				log.info("Config file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
+		for(File configFile: configFiles){
+			//config file
+			if(configFile.lastModified() > lastBuildTime){
+				if(log.isInfoEnabled()){
+					log.info("Config file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
+				}
+				return true;
 			}
-			return true;
 		}
 		
 		FileFilter filter = new FileFilter() {
@@ -122,28 +125,32 @@ public class StaleUtils {
 		};
 		
 		//source file
-		File source = site.getSource();
-		boolean newer = isNewer(source, lastBuildTime, filter);
-		if(newer){
-			log.info("Source file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
-			return true;
+		List<File> sources = site.getSources();
+		for(File source: sources){
+			boolean newer = isNewer(source, lastBuildTime, filter);
+			if(newer){
+				log.info("Source file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
+				return true;
+			}
 		}
 		
 		//templates
 		File templates = site.getTemplates();
-		newer = isNewer(templates, lastBuildTime, filter);
+		boolean newer = isNewer(templates, lastBuildTime, filter);
 		if(newer){
 			log.info("Template file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
 			return true;
 		}
 		
 		//assets
-		File assets = site.getAssets();
-		if(assets != null && assets.exists()){
-			newer = isNewer(assets, lastBuildTime, filter);
-			if(newer){
-				log.info("Asset file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
-				return true;
+		List<File> assets = site.getAssets();
+		if(assets != null && !assets.isEmpty()){
+			for(File asset: assets){
+				newer = isNewer(asset, lastBuildTime, filter);
+				if(newer){
+					log.info("Asset file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
+					return true;
+				}
 			}
 		}
 		

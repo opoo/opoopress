@@ -15,8 +15,10 @@
  */
 package org.opoo.press.util;
 
-import org.opoo.press.Initializable;
+import org.opoo.press.Config;
+import org.opoo.press.ConfigAware;
 import org.opoo.press.Site;
+import org.opoo.press.SiteAware;
 
 /**
  * @author Alex Lin
@@ -24,21 +26,38 @@ import org.opoo.press.Site;
  */
 public abstract class ClassUtils extends org.apache.commons.lang.ClassUtils {
 	
+	@SuppressWarnings("unchecked")
+	public static <T> T newInstance(String className, Site site, Class<T> clazz){
+		return (T) newInstance(className, clazz.getClassLoader(), site, site != null ? site.getConfig() : null);
+	}
+	
 	/**
-	 * Create a new instance for the specified class name and call 
-	 * {@link Initializable#initialize(Site)} if required.
+	 * Create a new instance for the specified class name.
 	 * @param className class name
 	 * @param site site object
 	 * @return new instance
 	 */
 	public static Object newInstance(String className, Site site){
-		return newInstance(className, (ClassLoader) null, site);
+		return newInstance(className, null, site, site != null ? site.getConfig() : null);
 	}
 	
-	public static Object newInstance(String className, ClassLoader classLoader, Site site){
+	/**
+	 * Create a new instance for the specified class name.
+	 * @param className class name
+	 * @param config site configuration
+	 * @return new instance
+	 */
+	public static Object newInstance(String className, Config config){
+		return newInstance(className, null, null, config);
+	}
+	
+	public static Object newInstance(String className, ClassLoader classLoader, Site site, Config config){
 		Object instance = newInstance(className, classLoader);
-		if(instance instanceof Initializable){
-			((Initializable) instance).initialize(site);
+		if(instance instanceof SiteAware){
+			((SiteAware) instance).setSite(site);
+		}
+		if(instance instanceof ConfigAware){
+			((ConfigAware)instance).setConfig(config);
 		}
 		return instance;
 	}

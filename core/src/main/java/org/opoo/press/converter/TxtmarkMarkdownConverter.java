@@ -18,15 +18,13 @@ package org.opoo.press.converter;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opoo.press.Converter;
-import org.opoo.press.Initializable;
 import org.opoo.press.Site;
-import org.opoo.press.SiteConfig;
+import org.opoo.press.SiteAware;
 import org.opoo.press.highlighter.Highlighter;
 import org.opoo.press.source.Source;
-import org.opoo.press.util.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.rjeschke.txtmark.BlockEmitter;
 import com.github.rjeschke.txtmark.Configuration;
@@ -36,7 +34,7 @@ import com.github.rjeschke.txtmark.Processor;
  * A <code>txtmark</code> implemented converter.
  * @author Alex Lin
  */
-public class TxtmarkMarkdownConverter implements Converter, Initializable {
+public class TxtmarkMarkdownConverter implements Converter, SiteAware {
 	private static final Logger log = LoggerFactory.getLogger(TxtmarkMarkdownConverter.class);
 	private Configuration config;
 	private Highlighter highlighter;
@@ -45,17 +43,12 @@ public class TxtmarkMarkdownConverter implements Converter, Initializable {
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Initializable#initialize(org.opoo.press.Site)
-	 */
 	@Override
-	public void initialize(Site site) {
-		SiteConfig map = site.getConfig();
-		String highlighterClassName = (String) map.get("highlighter");
-		if(highlighterClassName == null){
+	public void setSite(Site site) {
+		this.highlighter = site.getHighlighter();
+		if(this.highlighter == null){
 			log.warn("This converter might be need a Highlighter.");
 		}else{
-			highlighter = (Highlighter) ClassUtils.newInstance(highlighterClassName, site);
 			config = Configuration.builder()
 					.setCodeBlockEmitter(new BlockEmitterImpl(highlighter))
 					.forceExtentedProfile()

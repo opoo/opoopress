@@ -46,11 +46,8 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 	
 	public static final String NEW_POST_TEMPLATE = "new_post.ftl";
 	public static final String NEW_PAGE_TEMPLATE = "new_page.ftl";
-	public static final String DEFAULT_NEW_POST_FILE = "article/${year}-${month}-${day}-${name}.${format}";
-	public static final String DEFAULT_NEW_PAGE_FILE = "${name}.${format}";
 	public static final String NEW_POST_FILE_KEY = "new_post";
 	public static final String NEW_PAGE_FILE_KEY = "new_page";
-	
 	public static final String SAMPLE_POST_TEMPLATE = "sample-post.ftl";
 	public static final String SAMPLE_POST_NAME = "hello-world";
 	
@@ -144,7 +141,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		
 		String newPageFile = (String) site.getConfig().get(NEW_PAGE_FILE_KEY);
 		if(StringUtils.isBlank(newPageFile)){
-			newPageFile = DEFAULT_NEW_PAGE_FILE;
+			newPageFile = ConfigImpl.DEFAULT_NEW_PAGE_FILE;
 		}
 		
 		return renderFile(site, title, name, newPageFile, NEW_PAGE_TEMPLATE, false, format);
@@ -153,7 +150,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 	private String getNewPostFileStyle(Site site){
 		String newPostFile = (String) site.getConfig().get(NEW_POST_FILE_KEY);
 		if(StringUtils.isBlank(newPostFile)){
-			newPostFile = DEFAULT_NEW_POST_FILE;
+			newPostFile = ConfigImpl.DEFAULT_NEW_POST_FILE;
 		}
 		return newPostFile;
 	}
@@ -190,7 +187,7 @@ public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
 		LinkUtils.addDateParams(map, date);
 		
 		String filename = site.getRenderer().renderContent(newFileStyle, map);
-		File file = new File(site.getSource(), filename);
+		File file = new File(site.getBasedir(), filename);
 		
 		map.put("site", site);
 		map.put("file", file);

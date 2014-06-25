@@ -34,11 +34,7 @@ import org.yaml.snakeyaml.Yaml;
  *
  */
 public class SourceManagerImpl implements SourceManager {
-	private Yaml yaml;// = new Yaml();
-
-	public void setYaml(Yaml yaml) {
-		this.yaml = yaml;
-	}
+	private Yaml yaml= new Yaml();
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.source.SourceManager#saveSourceToFile(org.opoo.press.source.Source)

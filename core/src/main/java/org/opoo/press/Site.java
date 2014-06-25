@@ -30,13 +30,7 @@ import org.opoo.press.source.Source;
  */
 public interface Site extends SiteBuilder, SiteHelper{
 	/**
-	 * Source directory.
-	 * @return source directory
-	 */
-	File getSource();
-	
-	/**
-	 * Other source directories.
+	 * Source directories.
 	 * 
 	 * @since 1.0.2
 	 * @return other source directories
@@ -45,17 +39,17 @@ public interface Site extends SiteBuilder, SiteHelper{
 	
 	File getTemplates();
 	
-	File getAssets();
+	List<File> getAssets();
 	
 	File getDestination();
 	
 	File getWorking();
 	
-	File getSite();
+	File getBasedir();
 	
 	String getRoot();
 	
-	SiteConfig getConfig();
+	Config getConfig();
 	
 	List<Post> getPosts();
 	
@@ -114,6 +108,12 @@ public interface Site extends SiteBuilder, SiteHelper{
 	void set(String name, Object value);
 	
 	BuildInfo getLastBuildInfo();
+	
+	/**
+	 * @since 1.2
+	 * @return then theme of this site
+	 */
+	Theme getTheme();
 
 	interface BuildInfo{
 		long getBuildTime();

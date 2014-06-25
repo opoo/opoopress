@@ -24,14 +24,12 @@ import freemarker.template.TemplateModel;
  *
  */
 public interface Registry {
-	
-	Site getSite();
-	
+
 	void registerConverter(Converter c);
 	
 	void registerGenerator(Generator g);
 	
-	void registerSiteFilter(SiteFilter filter);
+	void registerProcessor(Processor processor);
 	
 	void registerTemplateModel(String name, TemplateModel model);
 

@@ -20,10 +20,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.opoo.press.Category;
-import org.opoo.press.Initializable;
+import org.opoo.press.Config;
+import org.opoo.press.ConfigAware;
 import org.opoo.press.Post;
 import org.opoo.press.RelatedPostsFinder;
-import org.opoo.press.Site;
 import org.opoo.press.Tag;
 
 /**
@@ -34,23 +34,19 @@ import org.opoo.press.Tag;
  * @author Alex Lin
  * @since 1.0.2
  */
-public class SimpleRelatedPostsFinder implements RelatedPostsFinder, Initializable {
+public class SimpleRelatedPostsFinder implements RelatedPostsFinder, ConfigAware {
 	private int size = 5;
 	
-	public SimpleRelatedPostsFinder(Site site){
-		initialize(site);
+	SimpleRelatedPostsFinder(Config config){
+		setConfig(config);
 	}
 	
 	public SimpleRelatedPostsFinder(){
-		
 	}
 	
 	@Override
-	public void initialize(Site site) {
-		Number num = (Number) site.getConfig().get("related_posts");
-		if(num != null){
-			this.size = num.intValue();
-		}
+	public void setConfig(Config config) {
+		this.size = config.get("related_posts", size);
 	}
 
 	/* (non-Javadoc)

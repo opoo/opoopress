@@ -19,8 +19,17 @@ import java.io.File;
 
 /**
  * @author Alex Lin
- * @since 1.1.1
+ * @since 1.2
  */
-public interface Writable {
-	void write(File dest);
+public interface Config {
+	
+	File[] getConfigFiles();
+	
+//	File getConfigFile();
+	
+	File getBasedir();
+	
+	<T> T get(String name);
+	
+	<T> T get(String name, T defaultValue);	
 }

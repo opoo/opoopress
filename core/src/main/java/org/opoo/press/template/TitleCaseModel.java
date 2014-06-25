@@ -19,8 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.opoo.press.Config;
 import org.opoo.press.Site;
-import org.opoo.press.SiteConfig;
 
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;
@@ -60,7 +60,7 @@ public class TitleCaseModel implements TemplateMethodModel {
 	
 	private boolean titlecase;
 	public TitleCaseModel(Site site){
-		SiteConfig config = site.getConfig();
+		Config config = site.getConfig();
 		titlecase = config.get("titlecase", false);
 	}
 	

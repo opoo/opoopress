@@ -20,9 +20,10 @@ package org.opoo.press;
  * 
  * @author Alex Lin
  */
-public interface Plugin/* extends Ordered*/{
+public interface Plugin{
 	
 	/**
+	 * Initialize plugin.
 	 * 
 	 * @param registry
 	 */

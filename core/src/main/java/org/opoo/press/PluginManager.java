@@ -15,12 +15,29 @@
  */
 package org.opoo.press;
 
-import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import org.opoo.press.source.Source;
+
+import freemarker.cache.TemplateLoader;
+import freemarker.template.TemplateModel;
 
 /**
  * @author Alex Lin
- * @since 1.1.1
+ * @since 1.2
  */
-public interface Writable {
-	void write(File dest);
+public interface PluginManager extends Registry{
+
+	List<Converter> getConverters();
+	
+	Converter getConverter(Source source);
+
+	List<Generator> getGenerators();
+
+	List<Processor> getProcessors();
+	
+	List<TemplateLoader> getTemplateLoaders();
+	
+	Map<String, TemplateModel> getTemplateModels();
 }

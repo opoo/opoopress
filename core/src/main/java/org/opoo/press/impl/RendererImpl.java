@@ -30,12 +30,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opoo.press.Config;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
-import org.opoo.press.SiteConfig;
 import org.opoo.press.source.SourceEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -63,7 +63,6 @@ public class RendererImpl implements Renderer {
 	 * @param site 
 	 * @param templateLoaders
 	 */
-	@SuppressWarnings("unchecked")
 	public RendererImpl(Site site, List<TemplateLoader> templateLoaders) {
 		super();
 		this.site = site;
@@ -75,7 +74,7 @@ public class RendererImpl implements Renderer {
 		if(!workingTemplateDir.exists()){
 			workingTemplateDir.mkdirs();
 		}
-		log.debug("Working template directory: " + workingTemplateDir.getAbsolutePath());
+		log.debug("Working template directory: {}", workingTemplateDir.getAbsolutePath());
 		
 		//configuration
 		configuration = new Configuration();
@@ -90,8 +89,8 @@ public class RendererImpl implements Renderer {
 		//Add import i18n messages template.
 		configuration.addAutoImport("i18n", "i18n/messages.ftl");
 		
-		SiteConfig config = site.getConfig();
-		List<String> autoIncludeTemplates = (List<String>) config.get("auto_include_templates");
+		Config config = site.getConfig();
+		List<String> autoIncludeTemplates = config.get("auto_include_templates");
 		if(autoIncludeTemplates != null && !autoIncludeTemplates.isEmpty()){
 			for(String template: autoIncludeTemplates){
 				configuration.addAutoInclude(template);
@@ -99,7 +98,7 @@ public class RendererImpl implements Renderer {
 			}
 		}
 		
-		Map<String,String> autoImportTemplates = (Map<String, String>) config.get("auto_import_templates");
+		Map<String,String> autoImportTemplates = config.get("auto_import_templates");
 		if(autoImportTemplates != null && !autoImportTemplates.isEmpty()){
 			for(Map.Entry<String, String> en: autoImportTemplates.entrySet()){
 				configuration.addAutoImport(en.getKey(), en.getValue());

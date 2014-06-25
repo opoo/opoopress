@@ -15,37 +15,37 @@
  */
 package org.opoo.press;
 
+import java.io.File;
 
 /**
+ * Theme
+ * 
  * @author Alex Lin
- *
+ * @since 1.2
  */
-public interface SiteFilter extends Ordered{
-	
-	void postSetup(Site site);
-	
-	void postRead(Site site);
-	
-	void postGenerate(Site site);
-	
-	void postConvertPost(Site site, Post post);
-	
-	void postConvertPage(Site site, Page page);
-	
-	void postRenderPost(Site site, Post post);
-	
-	void postRenderPage(Site site, Page page);
-	
-	void postRenderAllPosts(Site site);
-	
-	void postRenderAllPages(Site site);
+public interface Theme {
+	/**
+	 * Theme path
+	 * @return
+	 */
+	File getPath();
+	/**
+	 * Source directory.
+	 * @return source directory
+	 */
+	File getSource();
 	
 	/**
-	 * @deprecated Using {@link #postRenderAllPosts(Site)} and {@link #postRenderAllPages(Site)},
-	 * 	 	will be removed in the next main release.
-	 * @param site
+	 * Template directory of theme.
+	 * @return
 	 */
-	void postRender(Site site);
+	File getTemplates();
 	
-	void postWrite(Site site);
+	File getAssets();
+	
+	void build();
+	
+	void watch();
+	
+	Object get(String name);
 }

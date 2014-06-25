@@ -15,12 +15,10 @@
  */
 package org.opoo.press;
 
-import java.io.File;
-
 /**
  * @author Alex Lin
- * @since 1.1.1
+ * @since 1.2
  */
-public interface Writable {
-	void write(File dest);
+public interface SiteAware {
+	void setSite(Site site);
 }

@@ -37,5 +37,7 @@ public interface Context {
 	
 	SourceManager getSourceManager();
 	
+	ThemeManager getThemeManager();
+	
 	<T> T get(String name, Class<T> clazz);
 }

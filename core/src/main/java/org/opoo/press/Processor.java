@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Alex Lin.
+ * Copyright 2014 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,35 @@
  */
 package org.opoo.press;
 
-import java.io.File;
-import java.util.Map;
-
 /**
  * @author Alex Lin
- *
+ * @since 1.2
  */
-public interface SiteConfig {
+public interface Processor extends Ordered{
+	
+	void postSetup(Site site);
+	
+	void postRead(Site site);
+	
+	void postGenerate(Site site);
+	
+	void postConvertPost(Site site, Post post);
+	
+	void postConvertPage(Site site, Page page);
+	
+	void postRenderPost(Site site, Post post);
+	
+	void postRenderPage(Site site, Page page);
+	
+	void postRenderAllPosts(Site site);
+	
+	void postRenderAllPages(Site site);
+	
+	void postCleanup(Site site);
+	
+	void postWrite(Site site);
+	
+	void beforeBuildTheme(Theme theme);
 
-	File getConfigFile();
-	
-	Map<String,Object> getExtraConfig();
-	
-	Map<String,Object> toMap();
-	
-	Object get(String name);
-	
-	<T> T get(String name, T defaultValue);
-	
-	/**
-	 * @since 1.0.2
-	 */
-	void reload();
+	void afterBuildTheme(Theme theme);
 }
