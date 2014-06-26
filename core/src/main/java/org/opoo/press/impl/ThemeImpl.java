@@ -49,6 +49,8 @@ public class ThemeImpl implements Theme{
 	private final SiteImpl site;
 	private ThemeBuilder builder;
 	
+	private boolean isThemeBuilderInitialized = false;
+	
 	@SuppressWarnings("unchecked")
 	public ThemeImpl(File path, Site site){
 		this.site = (site instanceof SiteImpl)? (SiteImpl)site : null;
@@ -89,11 +91,17 @@ public class ThemeImpl implements Theme{
 			sourceConfig = "templates";
 		}
 		templates = new File(path, "templates");
-		
-		String builderClassName = (String)config.get("builder");
-		if(StringUtils.isNotBlank(builderClassName)){
-			this.builder = (ThemeBuilder) ClassUtils.newInstance(builderClassName, site);
-			log.info("Using CSS builder: {}", builder);
+	}
+	
+	private void initializeThemeBuilder(){
+		if(!isThemeBuilderInitialized){
+			String builderClassName = (String)config.get("builder");
+			if(StringUtils.isNotBlank(builderClassName)){
+				this.builder = (ThemeBuilder) ClassUtils.newInstance(builderClassName, site);
+				log.info("Using theme builder: {}", builder);
+			}
+			
+			isThemeBuilderInitialized = true;
 		}
 	}
 	
@@ -138,6 +146,7 @@ public class ThemeImpl implements Theme{
 			site.getProcessors().beforeBuildTheme(this);
 		}
 		
+		initializeThemeBuilder();
 		if(builder != null){
 			builder.build(this);
 		}
@@ -152,6 +161,7 @@ public class ThemeImpl implements Theme{
 	 */
 	@Override
 	public void watch() {
+		initializeThemeBuilder();
 		if(builder != null){
 			builder.watch(this);
 		}

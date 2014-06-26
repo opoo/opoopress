@@ -22,6 +22,7 @@ import org.opoo.press.Application;
 import org.opoo.press.Context;
 import org.opoo.press.SiteManager;
 import org.opoo.press.ThemeManager;
+import org.opoo.press.highlighter.SyntaxHighlighter;
 import org.opoo.press.slug.ChineseToPinyinSlugHelper;
 import org.opoo.press.slug.DefaultSlugHelper;
 import org.opoo.press.source.SourceEntryLoader;
@@ -30,23 +31,21 @@ import org.opoo.press.source.SourceParser;
 import org.opoo.press.source.impl.SourceEntryLoaderImpl;
 import org.opoo.press.source.impl.SourceManagerImpl;
 import org.opoo.press.source.impl.SourceParserImpl;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * @author Alex Lin
  *
  */
 public class ContextImpl implements Context{
-	private Yaml yaml;
 	private SiteManagerImpl siteManager;
 	private SourceEntryLoaderImpl sourceEntryLoader;
 	private SourceParserImpl sourceParser;
 	private SourceManagerImpl sourceManager;
+	private ThemeManagerImpl themeManager;
 	private Map<String, Object> beans = new HashMap<String,Object>();
 	
 	public void initialize() {
 		if(!Application.isInitialized()){
-			yaml = new Yaml();
 		
 			sourceEntryLoader = new SourceEntryLoaderImpl();
 			
@@ -55,9 +54,13 @@ public class ContextImpl implements Context{
 			sourceManager = new SourceManagerImpl();
 			
 			siteManager = new SiteManagerImpl();
+			
+			themeManager = new ThemeManagerImpl();
 
 			set(DefaultSlugHelper.class.getName(), new DefaultSlugHelper());
 			set(ChineseToPinyinSlugHelper.class.getName(), new ChineseToPinyinSlugHelper());
+			set(SyntaxHighlighter.class.getName(), new SyntaxHighlighter());
+			set(NoOpRelatedPostsFinder.class.getName(), new NoOpRelatedPostsFinder());
 
 			Application.setContext(this);
 		}
@@ -87,12 +90,6 @@ public class ContextImpl implements Context{
 		return sourceParser;
 	}
 
-	@Override
-	public Yaml getYaml() {
-		return yaml;
-	}
-	
-	
 	public SourceManager getSourceManager(){
 		return sourceManager;
 	}
@@ -115,7 +112,6 @@ public class ContextImpl implements Context{
 	 */
 	@Override
 	public ThemeManager getThemeManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return themeManager;
 	}
 }

@@ -157,9 +157,58 @@
 		    <artifactId>jackson-mapper-asl</artifactId>
 		    <version>1.9.13</version>
 		</dependency>
+		
+		<!-- compass -->
+		<dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby-core</artifactId>
+            <version>${jruby.version}</version>
+			<exclusions>
+				<exclusion>
+		    		 <groupId>com.github.jnr</groupId>
+					 <artifactId>jnr-ffi</artifactId>
+		    	</exclusion>
+			</exclusions>
+        </dependency>
+
+		<dependency>
+		  <groupId>com.github.jnr</groupId>
+		  <artifactId>jnr-ffi</artifactId>
+		  <version>1.0.6</version><!-- 1.0.6+ -->
+		  <exclusions>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-util</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-analysis</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-commons</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-tree</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm</artifactId>
+			</exclusion>
+		  </exclusions>
+		</dependency>
+
+        <dependency>
+          <groupId>org.nanoko.libs</groupId>
+		  <artifactId>compass-gems</artifactId>
+		  <version>${compass.version}</version>
+        </dependency>
 	</dependencies>
 	
 	<properties>
 		<wikitext.version>0.9.4.I20090220-1600-e3x</wikitext.version>
+		<compass.version>0.12.2</compass.version>
+        <jruby.version>1.7.4</jruby.version>
 	</properties>
 </project>

@@ -126,7 +126,7 @@ public class ConfigImpl extends HashMap<String,Object> implements Config {
 		);
 	}
 	
-	private Map<String,Object> defaultOpooPressOptions(){
+	public static Map<String,Object> defaultOpooPressOptions(){
 		Map<String,Object> options = new HashMap<String,Object>();
 		Package pkg = ConfigImpl.class.getPackage();
 		String version = pkg != null ? pkg.getSpecificationVersion() : null;

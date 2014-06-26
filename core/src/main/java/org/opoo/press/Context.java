@@ -27,8 +27,6 @@ import org.yaml.snakeyaml.Yaml;
  */
 public interface Context {
 	
-	Yaml getYaml();
-	
 	SourceEntryLoader getSourceEntryLoader();
 	
 	SourceParser getSourceParser();
