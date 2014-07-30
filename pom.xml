@@ -23,7 +23,7 @@
 	</parent>
   	<groupId>org.opoo.press</groupId>
 	<artifactId>opoopress-parent</artifactId>
-	<version>1.1.2</version>
+	<version>1.1.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>OpooPress Blogging Framework :: Parent</name>
 	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
@@ -91,7 +91,7 @@
 		<connection>scm:git:git://github.com/opoo/opoopress.git</connection>
 		<developerConnection>scm:git:git@github.com:opoo/opoopress.git</developerConnection>
 		<url>https://github.com/opoo/opoopress</url>
-	  <tag>version-1.1.2</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<modules>
