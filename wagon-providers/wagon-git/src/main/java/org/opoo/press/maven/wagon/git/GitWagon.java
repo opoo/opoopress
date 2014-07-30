@@ -184,6 +184,10 @@ public class GitWagon extends AbstractWagon{
 		String remote = url.substring(4);
 		String branch = repo.getParameter("branch");
 		String message = repo.getParameter("message");
+
+		if(remote.startsWith("default://")){
+			remote = remote.substring(10);
+		}
 		
 		if(branch == null){
 			branch = "master";

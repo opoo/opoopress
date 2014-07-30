@@ -114,7 +114,8 @@ public class Git {
 			}
 		}else{
 			if(!execute("checkout", branch)){
-				throw new GitException("git checkout failed");
+				//throw new GitException("git checkout failed");
+				log.error("[{}] Git checkout branch {} failed.", workingDirectory.getAbsolutePath(), branch);
 			}
 		}
 		
