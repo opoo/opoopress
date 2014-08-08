@@ -74,7 +74,7 @@ public class JettyServer extends Server{
 			server.setHandler(handlers);
 //			server.setHandlers(new Handler[]{handlers, logHandler});
 			
-			log.info( "Starting Jetty on http://localhost:" + port + "/" );
+			log.info( "Starting preview server on http://localhost:" + port + "/" );
 		}else{
 			log.info("Using " + ContextHandler.class.getName());
 			ContextHandler contextHandler = new ContextHandler();
@@ -84,8 +84,9 @@ public class JettyServer extends Server{
 			server.setHandler(contextHandler);
 //			server.setHandlers(new Handler[]{contextHandler, logHandler});
 			
-			log.info( "Starting Jetty on http://localhost:" + port + root );
+			log.info( "Starting preview server on http://localhost:" + port + root );
 		}
+		log.info("Press Ctrl+C to stop.");
 	}
 	
 	public void startAndJoin() throws Exception{
