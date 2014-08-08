@@ -1,0 +1,3 @@
+org.opoo.press.generator.CategoryGenerator
+org.opoo.press.generator.PaginationGenerator
+org.opoo.press.generator.TagGenerator

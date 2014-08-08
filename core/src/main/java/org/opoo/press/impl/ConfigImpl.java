@@ -29,15 +29,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.opoo.press.Config;
-import org.opoo.press.converter.TextilejConverter;
-import org.opoo.press.converter.TxtmarkMarkdownConverter;
-import org.opoo.press.converter.WikiTextConfluenceConverter;
-import org.opoo.press.converter.WikiTextMediaWikiConverter;
-import org.opoo.press.converter.WikiTextTWikiConverter;
-import org.opoo.press.converter.WikiTextTracWikiConverter;
-import org.opoo.press.generator.CategoryGenerator;
-import org.opoo.press.generator.PaginationGenerator;
-import org.opoo.press.generator.TagGenerator;
 import org.opoo.press.highlighter.SyntaxHighlighter;
 import org.opoo.press.slug.DefaultSlugHelper;
 import org.slf4j.Logger;
@@ -99,6 +90,7 @@ public class ConfigImpl extends HashMap<String,Object> implements Config {
 		put("sources", Arrays.asList(DEFAULT_PAGES_FOLDER, DEFAULT_POSTS_FOLDER));
 		put("destination", "target/public");
 		put("working_dir", "target/work");
+		put("plugins_dir", "plugins");
 		put("permalink", DEFAULT_PERMALINK_STYLE);
 		put("permalink_label", "&infin;");
 		put("new_post", DEFAULT_NEW_POST_FILE);
@@ -109,21 +101,6 @@ public class ConfigImpl extends HashMap<String,Object> implements Config {
 		put("slugHelper", DefaultSlugHelper.class.getName());
 		
 		put("relatedPostsFinder", NoOpRelatedPostsFinder.class.getName());
-		
-		put("converters", Arrays.asList(
-				TxtmarkMarkdownConverter.class.getName(),
-				TextilejConverter.class.getName(),
-				WikiTextMediaWikiConverter.class.getName(),
-				WikiTextTracWikiConverter.class.getName(),
-				WikiTextTWikiConverter.class.getName(),
-				WikiTextConfluenceConverter.class.getName())
-		);
-		
-		put("generators", Arrays.asList(
-				PaginationGenerator.class.getName(),
-				CategoryGenerator.class.getName(),
-				TagGenerator.class.getName())
-		);
 	}
 	
 	public static Map<String,Object> defaultOpooPressOptions(){

@@ -93,6 +93,10 @@ public class ThemeImpl implements Theme{
 		templates = new File(path, "templates");
 	}
 	
+	public File getConfigFile(){
+		return configFile;
+	}
+	
 	private void initializeThemeBuilder(){
 		if(!isThemeBuilderInitialized){
 			String builderClassName = (String)config.get("builder");
@@ -148,7 +152,7 @@ public class ThemeImpl implements Theme{
 		
 		initializeThemeBuilder();
 		if(builder != null){
-			builder.build(this);
+			builder.build(site, this);
 		}
 		
 		if(site != null){
@@ -163,7 +167,7 @@ public class ThemeImpl implements Theme{
 	public void watch() {
 		initializeThemeBuilder();
 		if(builder != null){
-			builder.watch(this);
+			builder.watch(site, this);
 		}
 	}
 

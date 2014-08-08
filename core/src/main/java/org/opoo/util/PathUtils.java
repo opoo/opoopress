@@ -16,9 +16,14 @@
 package org.opoo.util;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * @author Alex Lin
@@ -29,8 +34,7 @@ public abstract class PathUtils {
 		NONE, CREATE_IF_NOT_EXISTS, THROW_EXCEPTION_IF_NOT_EXISTS, CREATE_ALWAYS;
 	}
 	
-	public static File dir(File basedir, String path, Strategy p){
-		File dir = new File(basedir, path);
+	public static void checkDir(File dir, Strategy p){
 		if(!dir.exists()){
 			if(p == Strategy.CREATE_IF_NOT_EXISTS){
 				dir.mkdirs();
@@ -49,16 +53,9 @@ public abstract class PathUtils {
 			}
 			dir.mkdirs();
 		}
-		
-		return dir;
 	}
 	
-	public static File dir(File basedir, String path){
-		return dir(basedir, path, Strategy.NONE);
-	}
-	
-	public static File file(File basedir, String path, Strategy p){
-		File file = new File(basedir, path);
+	public static void checkFile(File file, Strategy p){
 		if(!file.exists()){
 			if(Strategy.CREATE_IF_NOT_EXISTS == p){
 				file.getParentFile().mkdirs();
@@ -80,12 +77,6 @@ public abstract class PathUtils {
 				file.getParentFile().mkdirs();
 			}
 		}
-		
-		return file;
-	}
-	
-	public static File file(File basedir, String path){
-		return file(basedir, path, Strategy.NONE);
 	}
 	
 	public static File canonical(File file){
@@ -98,5 +89,57 @@ public abstract class PathUtils {
 	
 	public static boolean isValidDirectory(File dir){
 		return dir != null && dir.exists() && dir.isDirectory() && dir.canRead();
+	}
+	
+	public static File appendBaseIfNotAbsolute(File basedir, String name){
+		File file = null;
+
+		//maybe absolute path
+		if(FilenameUtils.separatorsToUnix(name).indexOf('/') != -1){
+			File tmp = new File(name);
+			if(tmp.isAbsolute()){
+				file = tmp;
+			}
+		}
+		
+		if(file == null){
+			file = new File(basedir, name);
+		}
+		
+		return PathUtils.canonical(file);
+	}
+	
+	public static List<File> listFiles(File dir, FileFilter filter, boolean recursive){
+		List<File> list = new ArrayList<File>();
+		listFilesInternal(list, dir, filter, recursive);
+		return list;
+	}
+
+	private static void listFilesInternal(List<File> list, File dir, FileFilter filter, boolean recursive) {
+		File[] files = dir.listFiles(filter);
+		for(File f: files){
+			if(f.isFile()){
+				list.add(f);
+			}else if(recursive && f.isDirectory()){
+				listFilesInternal(list, f, filter, recursive);
+			}
+		}
+	}
+	
+	public static List<File> listFiles(File dir, FilenameFilter filter, boolean recursive){
+		List<File> list = new ArrayList<File>();
+		listFilesInternal(list, dir, filter, recursive);
+		return list;
+	}
+
+	private static void listFilesInternal(List<File> list, File dir, FilenameFilter filter, boolean recursive) {
+		File[] files = dir.listFiles(filter);
+		for(File f: files){
+			if(f.isFile()){
+				list.add(f);
+			}else if(recursive && f.isDirectory()){
+				listFilesInternal(list, f, filter, recursive);
+			}
+		}
 	}
 }

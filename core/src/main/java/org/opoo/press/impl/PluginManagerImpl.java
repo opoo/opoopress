@@ -15,11 +15,17 @@
  */
 package org.opoo.press.impl;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import org.opoo.press.Config;
 import org.opoo.press.Converter;
@@ -28,10 +34,13 @@ import org.opoo.press.Ordered;
 import org.opoo.press.Plugin;
 import org.opoo.press.PluginManager;
 import org.opoo.press.Processor;
+import org.opoo.press.Site;
+import org.opoo.press.SiteAware;
 import org.opoo.press.converter.IdentityConverter;
 import org.opoo.press.source.Source;
 import org.opoo.press.template.TitleCaseModel;
 import org.opoo.press.util.ClassUtils;
+import org.opoo.util.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,50 +61,39 @@ public class PluginManagerImpl implements PluginManager {
 	private Map<String, TemplateModel> templateModels = new HashMap<String,TemplateModel>();
 	
 	public PluginManagerImpl(SiteImpl site){
-//		this.siteImpl = site;
-	
-		//defaults
-//		registerConverter(new TxtmarkMarkdownConverter(site));
-//		registerConverter(new IdentityConverter());
-//		registerGenerator(new PaginationGenerator());
-//		registerGenerator(new CategoryGenerator());
-		
 		Config config = site.getConfig();
 		List<String> converterNames = config.get("converters");
 		List<String> generatorNames = config.get("generators");
 		List<String> processorNames = config.get("processors");
 		List<String> pluginNames = config.get("plugins");
-
-		converters.add(new IdentityConverter());
-		if(converterNames != null && !converterNames.isEmpty()){
-			for(String converterName: converterNames){
-				converters.add(ClassUtils.newInstance(converterName, site, Converter.class));
-				log.debug("Register converter: {}", converterName);
-			}
-			Collections.sort(converters, Ordered.COMPARATOR);
-		}
+		String pluginsDir = config.get("plugins_dir");
 		
-		if(generatorNames != null && !generatorNames.isEmpty()){
-			for(String generatorName: generatorNames){
-				generators.add(ClassUtils.newInstance(generatorName, site, Generator.class));
-				log.debug("Register generator: {}", generatorName);
+		Thread currentThread = Thread.currentThread();
+		ClassLoader oldLoader = currentThread.getContextClassLoader();
+		try{
+			File dir = PathUtils.canonical(new File(site.getBasedir(), pluginsDir));
+			ClassLoader classLoader = buildClassLoader(dir, getClass());
+			if(classLoader != null){
+				currentThread.setContextClassLoader(classLoader);
 			}
-			Collections.sort(generators, Ordered.COMPARATOR);
-		}
-		
-		if(processorNames != null && !processorNames.isEmpty()){
-			for(String processorName: processorNames){
-				processors.add(ClassUtils.newInstance(processorName, site, Processor.class));
-				log.debug("Register processor: {}", processorName);
-			}
-			Collections.sort(processors, Ordered.COMPARATOR);
-		}
-		
-		if(pluginNames != null && !pluginNames.isEmpty()){
-			for(String pluginName: pluginNames){
-				Plugin plugin = ClassUtils.newInstance(pluginName, site, Plugin.class);
-				log.debug("Initializing plugin: {}", pluginName);
+			
+			converters.add(new IdentityConverter());
+			initialize(converters, Converter.class, converterNames, site);
+			initialize(generators, Generator.class, generatorNames, site);
+			initialize(processors, Processor.class, processorNames, site);
+			
+			List<Plugin> plugins = load(Plugin.class, pluginNames, site);
+			for(Plugin plugin: plugins){
+				log.debug("Initializing plugin: {}", plugin);
 				plugin.initialize(this);
+			}
+		}catch(RuntimeException e){
+			throw e;
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}finally{
+			if(oldLoader != null){
+				currentThread.setContextClassLoader(oldLoader);
 			}
 		}
 		
@@ -103,6 +101,55 @@ public class PluginManagerImpl implements PluginManager {
 		TitleCaseModel model = new TitleCaseModel(site);
 		templateModels.put("titleCase", model);
 		templateModels.put("titlecase", model);
+	}
+	
+	void apply(Object object, Site site){
+		if(object instanceof SiteAware){
+			((SiteAware) object).setSite(site);
+		}
+	}
+
+	<T> List<T> load(Class<T> clazz, List<String> classNames, Site site){
+		List<T> list = new ArrayList<T>();
+		ServiceLoader<T> loader = ServiceLoader.load(clazz);
+		for(T t: loader){
+			apply(t, site);
+			list.add(t);
+			log.debug("Service load {}", t.getClass().getName());
+		}
+		if(classNames != null && !classNames.isEmpty()){
+			for(String className: classNames){
+				list.add(ClassUtils.newInstance(className, site, clazz));
+				log.debug("New instance {}", className);
+			}
+		}
+		return list;
+	}
+
+	<T extends Ordered> void initialize(List<T> list, Class<T> clazz, List<String> classNames, Site site){
+		list.addAll(load(clazz, classNames, site));
+		if(!list.isEmpty()){
+			Collections.sort(list, Ordered.COMPARATOR);
+		}
+	}
+	
+	ClassLoader buildClassLoader(File pluginDir, Class<?> clazz) throws MalformedURLException{
+		System.out.println(pluginDir);
+		File[] files = pluginDir.listFiles(new ValidClassPathEntryFileFilter());
+		if(files == null || files.length == 0){
+			return null;
+		}
+		
+		URL[] urls = new URL[files.length];
+		for(int i = 0 ; i < files.length ; i++){
+			urls[i] = files[i].toURI().toURL();
+		}
+		
+		ClassLoader parent = clazz.getClassLoader();
+		if(parent == null){
+			parent = ClassLoader.getSystemClassLoader();
+		}
+		return new URLClassLoader(urls, parent);
 	}
 	
 	@Override
@@ -173,5 +220,36 @@ public class PluginManagerImpl implements PluginManager {
 	@Override
 	public List<Processor> getProcessors() {
 		return processors;
+	}
+	
+	public static class ValidClassPathEntryFileFilter implements FileFilter{
+		/* (non-Javadoc)
+		 * @see java.io.FileFilter#accept(java.io.File)
+		 */
+		@Override
+		public boolean accept(File file) {
+			String name = file.getName();
+			char firstChar = name.charAt(0);
+			if(firstChar == '.' || firstChar == '_' || firstChar == '#'){
+				return false;
+			}
+			char lastChar = name.charAt(name.length() - 1);
+			if(lastChar == '~'){
+				return false;
+			}
+			if(file.isHidden()){
+				return false;
+			}
+			if(file.isDirectory()){
+				return true;
+			}
+			if(file.isFile()){
+				name = name.toLowerCase();
+				if(name.endsWith(".jar") || name.endsWith(".zip")){
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }

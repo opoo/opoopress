@@ -34,6 +34,8 @@ import org.opoo.press.Config;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.source.SourceEntry;
+import org.opoo.util.PathUtils;
+import org.opoo.util.PathUtils.Strategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,9 +73,7 @@ public class RendererImpl implements Renderer {
 		
 		//Working directory
 		workingTemplateDir = new File( site.getWorking(), "templates");
-		if(!workingTemplateDir.exists()){
-			workingTemplateDir.mkdirs();
-		}
+		PathUtils.checkDir(workingTemplateDir, Strategy.CREATE_IF_NOT_EXISTS);
 		log.debug("Working template directory: {}", workingTemplateDir.getAbsolutePath());
 		
 		//configuration

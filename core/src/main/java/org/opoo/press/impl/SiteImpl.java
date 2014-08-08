@@ -173,11 +173,11 @@ public class SiteImpl implements Site, SiteBuilder{
 
 		//target directory
 		String destDir = config.get("destination");
-		this.dest = PathUtils.canonical(new File(destDir));
+		this.dest = PathUtils.appendBaseIfNotAbsolute(basedir, destDir);
 		
 		//working directory
 		String workingDir = config.get("working_dir");
-		this.working = PathUtils.canonical(new File(workingDir));
+		this.working = PathUtils.appendBaseIfNotAbsolute(basedir, workingDir);
 		
 		this.lastBuildInfoFile = new File(working, LAST_BUILD_FILE_SUFFIX);
 		

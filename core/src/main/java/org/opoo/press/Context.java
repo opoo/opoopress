@@ -18,7 +18,6 @@ package org.opoo.press;
 import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceManager;
 import org.opoo.press.source.SourceParser;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * The global application context.

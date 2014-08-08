@@ -20,6 +20,6 @@ package org.opoo.press;
  * @since 1.2
  */
 public interface ThemeBuilder {
-	void build(Theme theme);
-	void watch(Theme theme);
+	void build(Site site, Theme theme);
+	void watch(Site site, Theme theme);
 }

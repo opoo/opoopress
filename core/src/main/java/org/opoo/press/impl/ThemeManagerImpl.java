@@ -37,10 +37,9 @@ public class ThemeManagerImpl implements ThemeManager {
 	public Theme getTheme(Site site) {
 		Config config = site.getConfig();
 		String name = config.get("theme", "default");
-		File base = config.getBasedir();
-		File themeDir = PathUtils.dir(base, "themes/" + name, Strategy.THROW_EXCEPTION_IF_NOT_EXISTS);
-		themeDir = PathUtils.canonical(themeDir);
+		File themes = new File(config.getBasedir(), "themes");
+		File themeDir = PathUtils.appendBaseIfNotAbsolute(themes, name);
+		PathUtils.checkDir(themeDir, Strategy.THROW_EXCEPTION_IF_NOT_EXISTS);
 		return new ThemeImpl(themeDir, site);
 	}
-
 }

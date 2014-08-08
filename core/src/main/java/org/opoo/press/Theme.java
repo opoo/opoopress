@@ -24,6 +24,8 @@ import java.io.File;
  * @since 1.2
  */
 public interface Theme {
+	
+	File getConfigFile();
 	/**
 	 * Theme path
 	 * @return

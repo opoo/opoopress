@@ -31,18 +31,27 @@ import org.opoo.press.source.SourceParser;
 import org.opoo.press.source.impl.SourceEntryLoaderImpl;
 import org.opoo.press.source.impl.SourceManagerImpl;
 import org.opoo.press.source.impl.SourceParserImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Alex Lin
  *
  */
 public class ContextImpl implements Context{
+	private static final Logger log = LoggerFactory.getLogger(ContextImpl.class);
+	
 	private SiteManagerImpl siteManager;
 	private SourceEntryLoaderImpl sourceEntryLoader;
 	private SourceParserImpl sourceParser;
 	private SourceManagerImpl sourceManager;
 	private ThemeManagerImpl themeManager;
 	private Map<String, Object> beans = new HashMap<String,Object>();
+	
+	public ContextImpl(){
+		log.debug("Initializing {}...", this);
+		initialize();
+	}
 	
 	public void initialize() {
 		if(!Application.isInitialized()){
