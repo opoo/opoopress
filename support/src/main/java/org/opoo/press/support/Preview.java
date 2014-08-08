@@ -30,9 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.mortbay.thread.QueuedThreadPool;
 import org.opoo.press.Application;
-import org.opoo.press.CompassConfig;
 import org.opoo.press.Site;
-import org.opoo.press.SiteConfig;
 import org.opoo.press.SiteManager;
 import org.opoo.press.impl.StaticFileImpl;
 import org.opoo.press.source.NoFrontMatterException;
@@ -52,13 +50,11 @@ public class Preview{
 	private final File siteDir;
 //	private final Map<String,Object> extraOptions;
 	private final SiteManager siteManager;
-	private final SiteConfig siteConfig;
 	
 	private boolean showDrafts;
 	private boolean skipSassCompile;
 	private boolean skipGenerate;
 
-	private CompassConfig compassConfig;
 	private Site site;
 	private JettyServer server;
 	private DirectoryMonitor monitor;
