@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-	Copyright 2013 Alex Lin.
+	Copyright 2014 Alex Lin.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -31,5 +31,5 @@
 	
 	<modules>
         <module>opoopress-maven-plugin</module>
-    </modules>
+	</modules>
 </project>
