@@ -130,7 +130,6 @@ public class SiteImpl implements Site, SiteBuilder{
 	private CacheManager cacheManager;
 
 	SiteImpl(SiteConfigImpl siteConfig) {
-		super();
 		init(siteConfig);
 		reset();
 		setup();
@@ -175,6 +174,7 @@ public class SiteImpl implements Site, SiteBuilder{
 			set("cacheManager", cacheManager);
 			log.info("Cacheable build...");
 
+			cacheManager.removeAllCaches();
 			cacheManager.addCache("sourceContentCache");
 			cacheManager.addCache("contentCache");
 		}
@@ -722,17 +722,10 @@ public class SiteImpl implements Site, SiteBuilder{
 		for(StaticFile staticFile: staticFiles){
 			files.add(staticFile.getOutputFile(dest));
 		}
-		
-		if(log.isDebugEnabled()){
-			log.debug("Files in target: " + destFiles.size());
-			log.debug("Assets file in src: " + files.size());
-		}
-		
-		if(log.isDebugEnabled()){
-			log.debug("Files in target: " + destFiles.size());
-			log.debug("Assets file in src: " + files.size());
-		}
-		
+
+		log.debug("Files in target: {}", destFiles.size());
+		log.debug("Asset files in src: {}", files.size());
+
 		//find obsolete files
 		for(File file: files){
 			destFiles.remove(file);

@@ -213,7 +213,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	private synchronized String buildCacheKey() {
 		if(cacheKey == null) {
 			cacheKey = "content-" + hashCode() + "-" + RandomStringUtils.randomAlphanumeric(13);
-			log.debug("The cache key of '{}' is {}", getUrl(), cacheKey);
+			log.debug("The cache key: {}", cacheKey);
 		}
 		return cacheKey;
 	}
