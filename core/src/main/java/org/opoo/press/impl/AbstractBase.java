@@ -213,11 +213,13 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	private synchronized String buildCacheKey() {
 		if(cacheKey == null) {
 			cacheKey = "content-" + hashCode() + "-" + RandomStringUtils.randomAlphanumeric(13);
+			log.debug("The cache key of '{}' is {}", getUrl(), cacheKey);
 		}
 		return cacheKey;
 	}
 
 	public void convert(){
+		log.debug("Convert content for '{}'", getUrl());
 		//this.content = this.converter.convert(content);
 		setContent(converter.convert(getContent()));
 	}

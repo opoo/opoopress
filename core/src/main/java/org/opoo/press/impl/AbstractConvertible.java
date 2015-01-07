@@ -71,6 +71,8 @@ public abstract class AbstractConvertible implements Convertible {
 			//do nothing
 			return;
 		}
+
+		log.debug("Rendering '{}'", getUrl());
 		
 		rootMap = new HashMap<String,Object>(rootMap);
 		mergeRootMap(rootMap);
@@ -122,7 +124,7 @@ public abstract class AbstractConvertible implements Convertible {
 //			IOUtils.write(getContent(), fw);
 //			fw.flush();
 			
-			log.debug("Writing file to " + file + " <== " + getUrl());
+			log.debug("Writing file '{}' to {}", getUrl(), file);
 			FileUtils.write(file, getContent(), "UTF-8");
 		} catch (IOException e) {
 			log.error("Write file error: " + file, e);
