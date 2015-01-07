@@ -23,6 +23,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opoo.press.Base;
@@ -60,6 +64,9 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	
 	private String outputFileExtension;
 	private Converter converter;
+
+	private Cache contentCache;
+	private String cacheKey;
 	
 	AbstractBase(Site site, Source source){
 		this.source = source;
@@ -85,8 +92,14 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	private void init() {
 		this.converter = site.getConverter(source);
 		this.outputFileExtension = this.converter.getOutputFileExtension(source);
-		
-		this.content = source.getContent();
+
+		CacheManager cacheManager = (CacheManager) site.get("cacheManager");
+		if(cacheManager != null){
+			this.contentCache = cacheManager.getCache("contentCache");
+		}
+		//this.content = source.getContent();
+		setContent(source.getContent());
+
 		this.layout = (String) source.getMeta().get("layout");
 		this.permalink = (String) source.getMeta().get("permalink");
 
@@ -180,14 +193,33 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	 * @return the content
 	 */
 	public String getContent() {
-		return content;
+		if(contentCache == null) {
+			return content;
+		}else{
+			String key = buildCacheKey();
+			Element e = contentCache.get(key);
+			return e != null ? (String)e.getObjectValue() : null;
+		}
 	}
 	public void setContent(String content){
-		this.content = content;
+		if(contentCache == null) {
+			this.content = content;
+		}else{
+			String key = buildCacheKey();
+			contentCache.put(new Element(key, content));
+		}
+	}
+
+	private synchronized String buildCacheKey() {
+		if(cacheKey == null) {
+			cacheKey = "content-" + hashCode() + "-" + RandomStringUtils.randomAlphanumeric(13);
+		}
+		return cacheKey;
 	}
 
 	public void convert(){
-		this.content = this.converter.convert(content);
+		//this.content = this.converter.convert(content);
+		setContent(converter.convert(getContent()));
 	}
 	
 	protected void mergeRootMap(Map<String,Object> rootMap){

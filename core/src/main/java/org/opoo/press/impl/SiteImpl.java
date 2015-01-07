@@ -20,6 +20,7 @@ import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +34,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.LocaleUtils;
@@ -62,6 +65,8 @@ import org.opoo.press.source.Source;
 import org.opoo.press.source.SourceEntry;
 import org.opoo.press.source.SourceEntryLoader;
 import org.opoo.press.source.SourceParser;
+import org.opoo.press.source.impl.EHCachedSourceParseImpl;
+import org.opoo.press.source.impl.SourceParserImpl;
 import org.opoo.press.task.RunnableTask;
 import org.opoo.press.task.TaskExecutor;
 import org.opoo.press.template.TitleCaseModel;
@@ -121,14 +126,21 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	private File lastBuildInfoFile;
 	private TaskExecutor taskExecutor;
-	
+
+	private CacheManager cacheManager;
+
 	SiteImpl(SiteConfigImpl siteConfig) {
 		super();
 		init(siteConfig);
 		reset();
 		setup();
+		postSetup();
 	}
-	
+
+	private void postSetup() {
+		registry.getSiteFilter().postSetup(this);
+	}
+
 	private void init(SiteConfigImpl siteConfig){
 		this.config = siteConfig;
 		
@@ -154,6 +166,18 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 		
 		taskExecutor = new TaskExecutor(config);
+
+		//cache
+		if(config.get("cache_build", false)){
+			URL url = SiteImpl.class.getClassLoader().getResource("ehcache.xml");
+			log.info("Cache config: {}", url);
+			cacheManager = CacheManager.newInstance(url);
+			set("cacheManager", cacheManager);
+			log.info("Cacheable build...");
+
+			cacheManager.addCache("sourceContentCache");
+			cacheManager.addCache("contentCache");
+		}
 	}
 	
 	private void setupDirs(){
@@ -259,6 +283,10 @@ public class SiteImpl implements Site, SiteBuilder{
 		
 		resetCategories();
 		resetTags();
+
+		if(cacheManager != null){
+			cacheManager.clearAll();
+		}
 	}
 	
 	void resetCategories(){
@@ -393,8 +421,9 @@ public class SiteImpl implements Site, SiteBuilder{
 		log.info("Reading sources ...");
 		
 		final SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
-		final SourceParser parser = Application.getContext().getSourceParser();
-		
+		//final SourceParser parser = Application.getContext().getSourceParser();
+		final SourceParser parser = cacheManager != null ? new EHCachedSourceParseImpl(cacheManager) : new SourceParserImpl();
+
 		//load sources and load static files
 		
 		FileFilter fileFilter = buildFilter();
@@ -422,7 +451,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	
 	/**
-	 * @param posts2
+	 * @param posts
 	 */
 	private void setPostNextOrPrevious(List<Post> posts) {
 		/*
@@ -738,7 +767,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 	
 	/**
-	 * @param dest2
+	 * @param dest
 	 * @return
 	 */
 	private List<File> getAllDestFiles(File dest) {

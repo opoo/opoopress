@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -116,6 +117,10 @@ public class SourceParserImpl implements SourceParser {
 		Map<String, Object> map = (Map<String, Object>) yaml.load(metaWriter.toString());
 		String content = contentWriter.toString();
 		
+		return createSource(sourceEntry, map, content);
+	}
+
+	protected Source createSource(SourceEntry sourceEntry, Map<String,Object> map, String content){
 		return new SimpleSource(sourceEntry, map, content);
 	}
 	

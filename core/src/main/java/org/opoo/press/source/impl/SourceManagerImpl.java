@@ -34,10 +34,10 @@ import org.yaml.snakeyaml.Yaml;
  *
  */
 public class SourceManagerImpl implements SourceManager {
-	private Yaml yaml;// = new Yaml();
+	private Yaml yaml = new Yaml();
 
 	public void setYaml(Yaml yaml) {
-		this.yaml = yaml;
+		//this.yaml = yaml;
 	}
 
 	/* (non-Javadoc)

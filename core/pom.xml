@@ -143,6 +143,12 @@
 		  <groupId>ch.qos.logback</groupId>
 		  <artifactId>logback-classic</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>2.9.0</version>
+		</dependency>
 	</dependencies>
 	
 	<properties>
