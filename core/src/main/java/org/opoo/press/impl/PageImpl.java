@@ -15,16 +15,10 @@
  */
 package org.opoo.press.impl;
 
-import java.util.Map;
-
 import org.apache.commons.io.FilenameUtils;
-import org.opoo.press.Page;
-import org.opoo.press.Pager;
-import org.opoo.press.Post;
-import org.opoo.press.Site;
-import org.opoo.press.highlighter.Highlighter;
-import org.opoo.press.source.Source;
-import org.opoo.press.source.SourceEntry;
+import org.opoo.press.*;
+
+import java.util.Map;
 
 /**
  * @author Alex Lin
@@ -123,11 +117,13 @@ public class PageImpl extends AbstractBase implements Page{
 		
 		//check pager.posts excerpt
 		if(pager != null && pager.getPosts() != null){
-			for(Post post: pager.getPosts()){
-				String excerpt = post.getExcerpt();
+			for(Base post: pager.getPosts()){
+				if(post instanceof Excerptable){
+				String excerpt = ((Excerptable)post).getExcerpt();
 				if(highlighter.containsHighlightCodeBlock(excerpt)){
 					log.debug("Found highlighter code block in post excerpt: " + post.getTitle());
 					return true;
+				}
 				}
 			}
 		}

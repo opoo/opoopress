@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-	Copyright 2013 Alex Lin.
+	Copyright 2015 Alex Lin.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -14,38 +14,39 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
-  	<groupId>org.opoo.press</groupId>
-	<artifactId>opoopress-parent</artifactId>
-	<version>1.1.4-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>OpooPress Blogging Framework :: Parent</name>
-	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
-	<url>http://press.opoo.org/</url>
-	<inceptionYear>2013</inceptionYear>
-	
-	<organization>
-  		<name>Opoo.org</name>
-  		<url>http://opoo.org/</url>
- 	</organization>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opoo.press</groupId>
+        <artifactId>opoopress-parent</artifactId>
+        <version>2</version>
+        <relativePath>parent</relativePath>
+    </parent>
+    <artifactId>opoopress</artifactId>
+    <version>2.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>OpooPress Framework</name>
+    <description>OpooPress Framework is a java based blog aware static site generator.</description>
+    <url>http://www.opoopress.com/</url>
+    <inceptionYear>2015</inceptionYear>
 
-	<developers>
-		<developer>
-			<id>alex</id>
-			<name>Alex Lin</name>
-			<email>opoo@users.sf.net</email>
-			<url>http://opoo.org</url>
-			<timezone>+8</timezone>
-		</developer>
-	</developers>
+    <organization>
+        <name>Opoo.org</name>
+        <url>http://opoo.org/</url>
+    </organization>
 
-   <licenses>
+    <developers>
+        <developer>
+            <id>alex</id>
+            <name>Alex Lin</name>
+            <email>opoo@users.sf.net</email>
+            <url>http://opoo.org</url>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
+
+    <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
@@ -53,13 +54,13 @@
         </license>
     </licenses>
 
-	<issueManagement>
-		<url>https://github.com/opoo/opoopress/issues</url>
-		<system>GitHub Issues</system>
-	</issueManagement>
-    
-	<!--
-  	<distributionManagement>	
+    <issueManagement>
+        <url>https://github.com/opoo/opoopress/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+
+    <!--
+      <distributionManagement>
         <repository>
             <id>local-file</id>
             <name>Local File System Repository</name>
@@ -71,121 +72,147 @@
             <url>file:///${user.home}/maven.local/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
-	-->
+    -->
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
-			<url>${sonatypeOssDistMgmtSnapshotsUrl}</url>
-			<uniqueVersion>false</uniqueVersion>
-		</snapshotRepository>
-		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>Nexus Release Repository</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
-    
- 	<scm>
-		<connection>scm:git:git://github.com/opoo/opoopress.git</connection>
-		<developerConnection>scm:git:git@github.com:opoo/opoopress.git</developerConnection>
-		<url>https://github.com/opoo/opoopress</url>
-	  <tag>HEAD</tag>
-  </scm>
+    <scm>
+        <connection>scm:git:git://github.com/opoo/opoopress.git</connection>
+        <developerConnection>scm:git:git@github.com:opoo/opoopress.git</developerConnection>
+        <url>https://github.com/opoo/opoopress</url>
+        <tag>HEAD</tag>
+    </scm>
 
-	<modules>
+    <modules>
+        <!--<module>parent</module>-->
+        <module>api</module>
         <module>core</module>
-        <module>support</module>
-		<module>wagon-providers</module>
-		<module>maven-plugins</module>
+        <!--<module>wagon-providers</module>-->
+        <module>maven-plugins</module>
+        <module>maven-archetypes</module>
+        <!--<module>themes</module>-->
     </modules>
 
-  	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
 
-			<plugin>
-	        	<groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-eclipse-plugin</artifactId>
-		        <version>2.5.1</version>
-		        <configuration>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
                     <downloadSources>true</downloadSources>
                     <downloadJavadocs>true</downloadJavadocs>
                     <wtpversion>2.0</wtpversion>
                 </configuration>
-	      	</plugin>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Specification-Title>${project.name}</Specification-Title>
-							<Specification-Vendor>${project.organization.name}</Specification-Vendor>
-							<Specification-Version>${project.version}</Specification-Version>
-							<URL>${project.url}</URL>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Specification-Title>${project.name}</Specification-Title>
+                            <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                            <Specification-Version>${project.version}</Specification-Version>
+                            <URL>${project.url}</URL>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5</version>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5</version>
+            </plugin>
 
-		</plugins>
-	</build>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>(,2.1.0),(2.1.0,2.2.0),(2.2.0,)</version>
+                                    <message>Maven 2.1.0 and 2.2.0 produce incorrect GPG signatures and checksums
+                                        respectively.
+                                    </message>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>1.6</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>commons-logging</groupId>
-				<artifactId>commons-logging</artifactId>
-				<version>1.1.1</version>
-			</dependency>
-			
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>2.4</version>
-			</dependency>
+        </plugins>
+    </build>
 
-			<dependency>
-				<groupId>commons-lang</groupId>
-				<artifactId>commons-lang</artifactId>
-				<version>2.6</version>
-			</dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.8.1</version>
+                <scope>test</scope>
+            </dependency>
 
-			<dependency> 
-			  <groupId>ch.qos.logback</groupId>
-			  <artifactId>logback-classic</artifactId>
-			  <version>1.0.13</version>
-			</dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.1.1</version>
+            </dependency>
 
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				 <version>1.7.5</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.4</version>
+            </dependency>
 
-  	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.test.skip>true</maven.test.skip>
-	</properties>
-	
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.13</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>2.3.19</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <properties>
+        <maven.test.skip>true</maven.test.skip>
+    </properties>
 </project>

@@ -15,7 +15,8 @@
  */
 package org.opoo.press.impl;
 
-import org.opoo.press.source.Source;
+import org.opoo.press.Site;
+import org.opoo.press.Source;
 
 /**
  * @author Alex Lin
@@ -26,7 +27,7 @@ public class Draft extends PostImpl {
 	 * @param site
 	 * @param frontMatterSource
 	 */
-	Draft(SiteImpl site, Source frontMatterSource) {
+	Draft(Site site, Source frontMatterSource) {
 		super(site, frontMatterSource);
 	}
 

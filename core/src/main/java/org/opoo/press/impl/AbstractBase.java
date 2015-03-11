@@ -16,27 +16,23 @@
 package org.opoo.press.impl;
 
 
+import org.opoo.press.Base;
+import org.opoo.press.Converter;
+import org.opoo.press.Renderer;
+import org.opoo.press.Site;
+import org.opoo.press.Highlighter;
+import org.opoo.press.Source;
+import org.opoo.press.SourceEntry;
+import org.opoo.util.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import org.apache.commons.lang.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.opoo.press.Base;
-import org.opoo.press.Converter;
-import org.opoo.press.Renderer;
-import org.opoo.press.Site;
-import org.opoo.press.highlighter.Highlighter;
-import org.opoo.press.source.Source;
-import org.opoo.press.source.SourceEntry;
-import org.opoo.util.MapUtils;
 
 /**
  * @author Alex Lin
@@ -52,6 +48,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	private Source source;
 	private Site site;
 
+	private String title;
 	private String content;
 	private String url;
 	private String path;
@@ -64,15 +61,12 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	
 	private String outputFileExtension;
 	private Converter converter;
-
-	private Cache contentCache;
-	private String cacheKey;
 	
 	AbstractBase(Site site, Source source){
 		this.source = source;
 		this.site = site;
 		this.data = new HashMap<String,Object>(source.getMeta()); 
-		String title = (String) data.get("title");
+		title = (String) data.get("title");
 		if(title != null){
 			log = LoggerFactory.getLogger(getClass().getName() + "[" + title + "]");
 		}
@@ -92,14 +86,8 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	private void init() {
 		this.converter = site.getConverter(source);
 		this.outputFileExtension = this.converter.getOutputFileExtension(source);
-
-		CacheManager cacheManager = (CacheManager) site.get("cacheManager");
-		if(cacheManager != null){
-			this.contentCache = cacheManager.getCache("contentCache");
-		}
-		//this.content = source.getContent();
-		setContent(source.getContent());
-
+		
+		this.content = source.getContent();
 		this.layout = (String) source.getMeta().get("layout");
 		this.permalink = (String) source.getMeta().get("permalink");
 
@@ -120,7 +108,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	}
 	
 	private String getDateFormat(){
-		String dateStyle = (String) site.getConfig().get("date_format");
+		String dateStyle = site.getConfig().get("date_format");
 		if(dateStyle == null){
 			dateStyle = "yyyy-MM-dd";
 		}else if("ordinal".equals(dateStyle)){
@@ -166,6 +154,11 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 		return (Date)date;
 	}
 
+	@Override
+	public String getTitle(){
+		return title;
+	}
+
 	public String getOutputFileExtension(){
 		return this.outputFileExtension;
 	}
@@ -193,35 +186,14 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	 * @return the content
 	 */
 	public String getContent() {
-		if(contentCache == null) {
-			return content;
-		}else{
-			String key = buildCacheKey();
-			Element e = contentCache.get(key);
-			return e != null ? (String)e.getObjectValue() : null;
-		}
+		return content;
 	}
 	public void setContent(String content){
-		if(contentCache == null) {
-			this.content = content;
-		}else{
-			String key = buildCacheKey();
-			contentCache.put(new Element(key, content));
-		}
-	}
-
-	private synchronized String buildCacheKey() {
-		if(cacheKey == null) {
-			cacheKey = "content-" + hashCode() + "-" + RandomStringUtils.randomAlphanumeric(13);
-			log.debug("The cache key: {}", cacheKey);
-		}
-		return cacheKey;
+		this.content = content;
 	}
 
 	public void convert(){
-		log.debug("Convert content for '{}'", getUrl());
-		//this.content = this.converter.convert(content);
-		setContent(converter.convert(getContent()));
+		this.content = this.converter.convert(content);
 	}
 	
 	protected void mergeRootMap(Map<String,Object> rootMap){
@@ -234,7 +206,7 @@ public abstract class AbstractBase extends AbstractConvertible implements Base{
 	 * @param rootMap
 	 */
 	private void mergeHighlighterParam(Map<String, Object> rootMap) {
-		Highlighter highlighter = site.getHighlighter();
+		Highlighter highlighter = site.getFactory().getHighlighter();
 		if(highlighter != null && ".html".equals(outputFileExtension)
 				&& containsHighlightCodeBlock(highlighter)){
 			log.debug("The content contains highlight code block.");

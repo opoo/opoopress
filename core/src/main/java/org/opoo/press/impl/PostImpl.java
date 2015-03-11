@@ -15,22 +15,18 @@
  */
 package org.opoo.press.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.opoo.press.Category;
 import org.opoo.press.Post;
 import org.opoo.press.Site;
 import org.opoo.press.Tag;
-import org.opoo.press.source.Source;
-import org.opoo.press.source.SourceEntry;
+import org.opoo.press.Source;
+import org.opoo.press.SourceEntry;
 import org.opoo.press.util.LinkUtils;
+
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author Alex Lin
@@ -48,7 +44,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	
 	private String id;
 	private boolean published = true;
-	private String title;
+//	private String title;
 	private String excerpt;
 	private boolean excerpted;
 	private boolean isExcerptExtracted = false;
@@ -58,10 +54,10 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	private Post previous;
 	
 	/**
-	 * @param siteManager
-	 * @param frontMatterSource
+	 * @param site
+	 * @param source
 	 */
-	PostImpl(SiteImpl site, Source source) {
+	PostImpl(Site site, Source source) {
 		super(site, source);
 		init();
 	}
@@ -74,7 +70,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		
 		Map<String, Object> frontMatter = getSource().getMeta();
 		
-		title = (String) frontMatter.get("title");
+//		title = (String) frontMatter.get("title");
 
 		stringCategories = getStringList(frontMatter, "categories", "category");
 		
@@ -196,12 +192,12 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		return id;
 	}
 
-	/**
-	 * @return the title
-	 */
-	public String getTitle() {
-		return title;
-	}
+//	/**
+//	 * @return the title
+//	 */
+//	public String getTitle() {
+//		return title;
+//	}
 
 	/**
 	 * @return the excerpt
@@ -275,7 +271,7 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		//set("related_posts", findRelatedPost());
 		
 		//since 1.0.2
-		List<Post> relatedPosts = getSite().getRelatedPostsFinder().findRelatedPosts(this);
+		List<Post> relatedPosts = getSite().getFactory().getRelatedPostsFinder().findRelatedPosts(this);
 		set("related_posts", relatedPosts);
 	}
 
@@ -326,12 +322,13 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		}
 		return getSite().getPermalink();
 	}
-	
+
 	/**
+	 *
 	 * @param permalinkStyle
 	 * @param date
-	 * @param path
-	 * @param name
+	 * @param pathToFile
+	 * @param fileName
 	 * @param meta
 	 * @return
 	 */

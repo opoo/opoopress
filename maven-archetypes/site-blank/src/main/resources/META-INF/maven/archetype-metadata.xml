@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor
+        xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd"
+        xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        name="opoopress-archetype-site-blank">
+    <fileSets>
+        <fileSet encoding="UTF-8">
+            <directory></directory>
+            <includes>
+                <include>config.yml</include>
+                <include>config_zh_CN.yml</include>
+                <include>factory-default.yml</include>
+            </includes>
+        </fileSet>
+
+        <!-- empty directories -->
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>assets</directory>
+        </fileSet>
+
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>pages</directory>
+        </fileSet>
+
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>posts</directory>
+        </fileSet>
+
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>plugins</directory>
+        </fileSet>
+
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>themes</directory>
+        </fileSet>
+    </fileSets>
+
+    <requiredProperties>
+        <requiredProperty key="groupId">
+            <defaultValue>com.opoopress.site</defaultValue>
+        </requiredProperty>
+        <!--<requiredProperty key="artifactId">-->
+            <!--<defaultValue>${name}</defaultValue>-->
+        <!--</requiredProperty>-->
+        <requiredProperty key="version">
+            <defaultValue>1.0-SNAPSHOT</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="package">
+            <defaultValue>com.opoopress.site</defaultValue>
+        </requiredProperty>
+    </requiredProperties>
+
+</archetype-descriptor>
+

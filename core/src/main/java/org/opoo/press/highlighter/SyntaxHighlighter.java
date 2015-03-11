@@ -15,9 +15,10 @@
  */
 package org.opoo.press.highlighter;
 
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
+import org.opoo.press.Highlighter;
+
+import java.util.List;
 
 /**
  * @author Alex Lin

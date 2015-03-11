@@ -15,11 +15,11 @@
  */
 package org.opoo.press.util;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Alex Lin

@@ -15,13 +15,13 @@
  */
 package org.opoo.press.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opoo.press.Post;
 import org.opoo.press.Site;
 import org.opoo.press.Tag;
 import org.opoo.util.URLUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alex Lin
@@ -38,12 +38,20 @@ public class TagImpl implements Tag {
 	 * @param name
 	 */
 	public TagImpl(String slug, String name, Site site) {
+		this(buildDefaultUrl(site, slug), slug, name);
+	}
+
+	public TagImpl(String url, String slug, String name){
+		this.url = url;
 		this.slug = slug;
 		this.name = name;
-		
-		String tagDir = site.getConfig().get("tag_dir", "");
-		this.url = /*rootUrl + */ tagDir + "/" + URLUtils.encodeURL(slug) + "/";
 	}
+
+	private static String buildDefaultUrl(Site site, String slug){
+		String tagDir = site.getConfig().get("tag_dir", "");
+		return /*rootUrl + */ tagDir + "/" + URLUtils.encodeURL(slug) + "/";
+	}
+
 	/**
 	 * @return the slug
 	 */

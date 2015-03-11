@@ -15,15 +15,15 @@
  */
 package org.opoo.press.template;
 
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModelException;
+import org.opoo.press.Config;
+import org.opoo.press.ConfigAware;
+import org.opoo.press.Named;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import org.opoo.press.Site;
-import org.opoo.press.SiteConfig;
-
-import freemarker.template.TemplateMethodModel;
-import freemarker.template.TemplateModelException;
 
 /**
  * Usage: ${titlecase(post.title)}
@@ -31,11 +31,38 @@ import freemarker.template.TemplateModelException;
  * @author Alex Lin
  *
  */
-public class TitleCaseModel implements TemplateMethodModel {
+public class TitleCaseModel implements TemplateMethodModel, Named, ConfigAware {
 	private static String[] smallWords = {"a", "an", "am", "and", "as", "at", "but", "by", "en", "for", 
 			"if", "in", "of", "on", "or", "the", "to", "v", "v.", "via", "vs", "vs.", "be"};
 	private static List<String> smallWordList = Arrays.asList(smallWords);
-			
+
+	private boolean titlecase;
+
+	/* (non-Javadoc)
+	 * @see freemarker.template.TemplateMethodModel#exec(java.util.List)
+	 */
+	@Override
+	public Object exec(@SuppressWarnings("rawtypes") List arguments) throws TemplateModelException {
+		if(arguments == null || arguments.isEmpty()){
+			return "";
+		}
+		String str = (String)arguments.get(0);
+//		return WordUtils.capitalizeFully(str);
+		return titlecase ? toTitleCase(str) : str;
+	}
+
+	@Override
+	public String getName() {
+		return "titlecase";
+	}
+
+	@Override
+	public void setConfig(Config config) {
+		if(config != null) {
+			titlecase = config.get("titlecase", false);
+		}
+	}
+
 	public static String toTitleCase(String string){
 		StringTokenizer st = new StringTokenizer(string);
 		StringBuffer sb = new StringBuffer();
@@ -55,25 +82,5 @@ public class TitleCaseModel implements TemplateMethodModel {
 			}
 		}
 		return sb.toString();
-	}
-	
-	
-	private boolean titlecase;
-	public TitleCaseModel(Site site){
-		SiteConfig config = site.getConfig();
-		titlecase = config.get("titlecase", false);
-	}
-	
-	/* (non-Javadoc)
-	 * @see freemarker.template.TemplateMethodModel#exec(java.util.List)
-	 */
-	@Override
-	public Object exec(@SuppressWarnings("rawtypes") List arguments) throws TemplateModelException {
-		if(arguments == null || arguments.isEmpty()){
-			return "";
-		}
-		String str = (String)arguments.get(0);
-//		return WordUtils.capitalizeFully(str);
-		return titlecase ? toTitleCase(str) : str;
 	}
 }

@@ -18,15 +18,14 @@
   	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.opoo.press</groupId>
-		<artifactId>opoopress-parent</artifactId>
-        <version>1.1.4-SNAPSHOT</version>
+		<artifactId>opoopress</artifactId>
+        <version>2.0-SNAPSHOT</version>
 	</parent>
-  	<groupId>org.opoo.press</groupId>
 	<artifactId>opoopress-core</artifactId>
 	<packaging>jar</packaging>
-	<name>OpooPress Blogging Framework :: Core</name>
-	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
-	<url>http://press.opoo.org/</url>
+	<name>OpooPress Framework :: Core</name>
+	<description>OpooPress Framework is a java based blog aware static site generator.</description>
+	<url>http://www.opoopress.com/</url>
 	<inceptionYear>2014</inceptionYear>
 	
 	<!--
@@ -43,6 +42,12 @@
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.opoo.press</groupId>
+			<artifactId>opoopress-api</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		
 		<dependency>
@@ -143,15 +148,100 @@
 		  <groupId>ch.qos.logback</groupId>
 		  <artifactId>logback-classic</artifactId>
 		</dependency>
+		
+		<!-- 
+		<dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>17.0</version>
+		</dependency>
+		-->
+		
+		<dependency>
+		    <groupId>org.codehaus.jackson</groupId>
+		    <artifactId>jackson-mapper-asl</artifactId>
+		    <version>1.9.13</version>
+		</dependency>
+		
+		<!-- compass -->
+		<dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby-core</artifactId>
+            <version>${jruby.version}</version>
+			<exclusions>
+				<exclusion>
+		    		 <groupId>com.github.jnr</groupId>
+					 <artifactId>jnr-ffi</artifactId>
+		    	</exclusion>
+			</exclusions>
+        </dependency>
 
 		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<version>2.9.0</version>
+		  <groupId>com.github.jnr</groupId>
+		  <artifactId>jnr-ffi</artifactId>
+		  <version>1.0.6</version><!-- 1.0.6+ -->
+		  <exclusions>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-util</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-analysis</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-commons</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm-tree</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.ow2.asm</groupId>
+			  <artifactId>asm</artifactId>
+			</exclusion>
+		  </exclusions>
 		</dependency>
+
+        <dependency>
+          <groupId>org.nanoko.libs</groupId>
+		  <artifactId>compass-gems</artifactId>
+		  <version>${compass.version}</version>
+        </dependency>
+        
+        <dependency>
+          <groupId>com.yahoo.platform.yui</groupId>
+		  <artifactId>yuicompressor</artifactId>
+		  <version>2.4.7</version>
+		</dependency>
+		
+		<!-- for preview -->
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<version>6.1.26</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-container-default</artifactId>
+			<version>1.0-alpha-9-stable-1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+		</dependency>
+
 	</dependencies>
 	
 	<properties>
 		<wikitext.version>0.9.4.I20090220-1600-e3x</wikitext.version>
+		<compass.version>0.12.2</compass.version>
+        <jruby.version>1.7.4</jruby.version>
 	</properties>
 </project>

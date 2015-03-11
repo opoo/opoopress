@@ -15,20 +15,14 @@
  */
 package org.opoo.press.task;
 
+import org.opoo.press.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import org.opoo.press.impl.SiteConfigImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.*;
 
 /**
  * @author Alex Lin
@@ -43,7 +37,7 @@ public class TaskExecutor {
 	private static final Logger log = LoggerFactory.getLogger(TaskExecutor.class);
 	private ExecutorService executorService;
 	
-	public TaskExecutor(SiteConfigImpl config) {
+	public TaskExecutor(Config config) {
 		//thread count
 		int threadsCount = Integer.parseInt(System.getProperty("threads", "-1"));
 		if(threadsCount <= 0){

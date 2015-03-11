@@ -1,0 +1,38 @@
+name: "${artifactId}"
+desription: "OpooPress theme: ${artifactId}"
+
+artifact: "${groupId}:${artifactId}:${version}"
+url-release:
+url-snapshot:
+
+
+#---------------------#
+#    主题变量          #
+#---------------------#
+
+#--------------------- 定义您的主题需要的变量 ---------------------#
+
+
+
+
+
+
+
+#---------------------#
+#  目录配置            #
+#---------------------#
+
+# 主题静态资源所在的目录，用于放置静态资源（图片、css、js文件等）。
+# 默认值 assets
+# asset_dir: assets
+
+# 主题源文件(文章，页面等)目录，用于放置内容，例如站点的首页，归档页面等。
+# 默认值 'sources'
+# source_dir: sources
+
+# 主题的模板文件目录。.
+# 默认值 'templates'.
+# template_dir: templates
+
+# 主题的插件目录，如果您的主题包含插件包（jar文件），将插件文件放在 plugins 目录下，并取消下面的注释即可。
+# plugin_dir: plugins

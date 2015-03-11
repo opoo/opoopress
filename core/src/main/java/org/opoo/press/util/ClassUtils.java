@@ -15,50 +15,76 @@
  */
 package org.opoo.press.util;
 
-import org.opoo.press.Initializable;
+import org.opoo.press.Config;
+import org.opoo.press.ConfigAware;
 import org.opoo.press.Site;
+import org.opoo.press.SiteAware;
 
 /**
  * @author Alex Lin
  *
  */
 public abstract class ClassUtils extends org.apache.commons.lang.ClassUtils {
-	
+
 	/**
-	 * Create a new instance for the specified class name and call 
-	 * {@link Initializable#initialize(Site)} if required.
+	 * Create a new instance for the specified class name.
 	 * @param className class name
 	 * @param site site object
 	 * @return new instance
 	 */
-	public static Object newInstance(String className, Site site){
-		return newInstance(className, (ClassLoader) null, site);
-	}
-	
-	public static Object newInstance(String className, ClassLoader classLoader, Site site){
-		Object instance = newInstance(className, classLoader);
-		if(instance instanceof Initializable){
-			((Initializable) instance).initialize(site);
-		}
-		return instance;
+	public static <T> T newInstance(String className, Site site){
+		return newInstance(className, null, site, site != null ? site.getConfig() : null);
 	}
 	
 	/**
 	 * Create a new instance for the specified class name.
 	 * @param className class name
+	 * @param config site configuration
 	 * @return new instance
 	 */
-	public static Object newInstance(String className){
-		return newInstance(className, (ClassLoader)null);
+	public static <T> T newInstance(String className, Config config){
+		return newInstance(className, null, null, config);
 	}
 	
-	public static Object newInstance(String className, ClassLoader classLoader){
+	/**
+	 * Create a new instance for the specified class name.
+	 * @param className class name
+	 * @param <T>
+	 * @return new instance
+	 */
+	public static <T> T newInstance(String className){
+		return newInstance(className, (ClassLoader)null);
+	}
+
+	/**
+	 *
+	 * @param className
+	 * @param classLoader
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> T newInstance(String className, ClassLoader classLoader){
+		return newInstance(className, classLoader, null, null);
+	}
+
+	/**
+	 *
+	 * @param className class name
+	 * @param classLoader class loader
+	 * @param site site
+	 * @param config site configuration
+	 * @param <T> type of class
+	 * @return class instance
+	 */
+	public static <T> T newInstance(String className, ClassLoader classLoader, Site site, Config config){
+		if(classLoader == null){
+			classLoader = Thread.currentThread().getContextClassLoader();
+		}
+
+		T instance = null;
 		try {
-			if(classLoader == null){
-				classLoader = Thread.currentThread().getContextClassLoader();
-			}
 			Class<?> clazz = getClass(classLoader, className);
-			return clazz.newInstance();
+			instance = (T) clazz.newInstance();
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Create instance failed: " + className, e);
 		} catch (InstantiationException e) {
@@ -66,5 +92,14 @@ public abstract class ClassUtils extends org.apache.commons.lang.ClassUtils {
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException("Create instance failed: " + className, e);
 		}
+
+		if(instance instanceof SiteAware){
+			((SiteAware) instance).setSite(site);
+		}
+		if(instance instanceof ConfigAware){
+			((ConfigAware)instance).setConfig(config);
+		}
+		return instance;
 	}
+
 }
