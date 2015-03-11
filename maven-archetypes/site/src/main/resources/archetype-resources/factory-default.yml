@@ -1,0 +1,55 @@
+#####################################################################################
+# rename this file to 'factory.yml' to configuration your custom plugin or
+# configuration your custom plugin in 'META-INF/services/org.opoo.press.Plugin' file.
+#####################################################################################
+
+#"org.opoo.press.SourceEntryLoader": "org.opoo.press.source.SourceEntryLoaderImpl"
+
+#"org.opoo.press.SourceParser": "org.opoo.press.source.SourceParserImpl"
+
+#"org.opoo.press.SourceManager": "org.opoo.press.source.SourceManagerImpl"
+
+#"org.opoo.press.Highlighter": "org.opoo.press.highlighter.SyntaxHighlighter"
+
+# slug helper for zh_CN
+#"org.opoo.press.SlugHelper-zh_CN": "org.opoo.press.slug.ChineseToPinyinSlugHelper"
+
+# slug helper (default)
+#"org.opoo.press.SlugHelper": "org.opoo.press.slug.DefaultSlugHelper"
+
+#"org.opoo.press.RelatedPostsFinder": "org.opoo.press.impl.NoOpRelatedPostsFinder"
+
+# converters, list
+#'org.opoo.press.Converter':
+#  - org.opoo.press.converter.TextilejConverter
+#  - org.opoo.press.converter.TxtmarkMarkdownConverter
+#  - org.opoo.press.converter.WikiTextMediaWikiConverter
+#  - org.opoo.press.converter.WikiTextTracWikiConverter
+#  - org.opoo.press.converter.WikiTextTWikiConverter
+#  - org.opoo.press.converter.WikiTextConfluenceConverter
+
+# generators, list
+#'org.opoo.press.Generator':
+#  - org.opoo.press.generator.PaginationGenerator
+#  - org.opoo.press.generator.CategoryGenerator
+#  - org.opoo.press.generator.TagGenerator
+
+# processors, list
+# 'org.opoo.press.Processor':
+
+# template loaders, list
+# 'freemarker.cache.TemplateLoader':
+
+# plugins, list
+# 'org.opoo.press.Plugin':
+
+# template models, map
+#'freemarker.template.TemplateModel':
+#  titlecase: "org.opoo.press.template.TitleCaseModel"
+
+# default theme builders, map
+#'org.opoo.press.ThemeResourceBuilder':
+#  js: org.opoo.press.theme.JsBuilder
+#  css: org.opoo.press.theme.CssBuilder
+#  compass: org.opoo.press.theme.CompassBuilder
+

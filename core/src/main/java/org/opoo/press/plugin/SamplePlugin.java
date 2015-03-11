@@ -3,7 +3,7 @@ package org.opoo.press.plugin;
 import org.opoo.press.Plugin;
 import org.opoo.press.Registry;
 import org.opoo.press.Site;
-import org.opoo.press.filter.SiteFilterAdapter;
+import org.opoo.press.processor.ProcessorAdapter;
 
 
 /**
@@ -16,11 +16,11 @@ public class SamplePlugin implements Plugin {
 	@Override
 	public void initialize(Registry registry) {
 		System.out.println("=========Initialize plugin 'SamplePlugin' for " 
-				+ registry.getSite() + "===========");
-		registry.registerSiteFilter(new SampleSiteFilter());
+				+ registry + "===========");
+		registry.registerProcessor(new SampleProcessor());
 	}
 
-	public static class SampleSiteFilter extends SiteFilterAdapter{
+	public static class SampleProcessor extends ProcessorAdapter{
 		@Override
 		public void postWrite(Site site) {
 			System.out.println("=========Site Write Complete!===========");

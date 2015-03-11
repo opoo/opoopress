@@ -1,0 +1,191 @@
+# OpooPress site configuration
+
+# ----------------------- #
+#      Main               #
+# ----------------------- #
+
+# The title of your site
+title: My OpooPress Blog
+
+# The subtitle of your site
+subtitle: Just another OpooPress site
+
+# author, your name
+author: Your Name
+
+# The description of your site. Use as web page description meta value normaly.
+description: "OpooPress Blogging Framework is a java based static site generator."
+
+# The keywords of your site.
+keywords: "OpooPress, Blog"
+
+# The locale(region and language) of your site.
+# check java.util.Locale at http://docs.oracle.com/javase/7/docs/api/java/util/Locale.html
+locale: en_US
+
+
+# ----------------------- #
+#      URL                #
+# ----------------------- #
+
+# The URL of your site.
+url: http://yoursite.com
+
+# The root directory of your site.
+# If your site is put in a subdirectory such as 'http://yoursite.com/blogs', set root to '/blogs'
+# No '/' at the end of root.
+# Default value is ''.
+# root: ''
+
+# The permalink format of posts.
+# Supported variables: All front-matter meta properties, and ${year}, ${month}, ${day}, ${hour},${minute}, ${second},
+# ${name}, ${pathToFile}, ${fileName} etc.
+# Default value is '/article/${year}/${month}/${name}.html'.
+# permakink: ‘/article/${year}/${month}/${name}.html’
+
+# The label of permalink.
+# Default value is '&infin;'.
+# permalink_label: '&infin;'
+
+#
+# permalink_label_feed: "&#9875; Permalink"
+
+
+# ----------------------- #
+#   Directory             #
+# ----------------------- #
+# default layout
+#(.)
+# |
+# +- pom.xml
+# |
+# +- config.yml
+# |
+# +- assets/
+# |
+# +- pages/
+# |
+# +- posts/
+# |
+# +- plugins/
+# |
+# +- themes/
+#     |
+#     +- default/
+#     |    |
+#     |    +- theme.yml
+#     |    |
+#     |    +- ...
+#     |
+#     +- another-theme/
+
+# Asset folders, these folders are where you can put your static resources, such as images, css files, javascript files.
+# Default value is [assets].
+# asset_dirs: [assets]
+
+# Source folders, these folders are where you can put your content.
+# Default value is [pages, posts].
+# source_dirs: [pages, posts]
+
+# Plugin folder, this folder is where you can put plugin jar files.
+# Default value is 'plugins'.
+# plugin_dir: plugins
+
+# Destination folder, this folder is where the generated files will be.
+# Default value is 'target/public'
+# dest_dir: target/public
+
+# Working directory.
+# Default value is 'target/work'
+# work_dir: target/work
+
+
+# ----------------------- #
+#    Writing              #
+# ----------------------- #
+
+# The full path and filename of the new post.
+# Supported variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
+# The default value of format is 'markdown'.
+#
+# The default value of new_post is 'posts/${year}-${month}-${day}-${name}.${format}'.
+# new_post: 'posts/${year}-${month}-${day}-${name}.${format}'
+
+# The full path and filename of the new page.
+# Supported: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
+# The default value of format is 'markdown'.
+#
+# The default value of new_post is 'pages/${name}.${format}'
+# new_page: 'pages/${name}.${format}'
+
+# Transform title into proper title case.
+# Default value is false.
+# titlecase: false
+
+# Excerpt separator.
+# Default value is '<!--more-->'
+# excerpt_separator: '<!--more-->'
+
+
+# ----------------------- #
+#  Category & Tag         #
+# ----------------------- #
+
+# The directory of generated category pages. Default value is '/category'.
+# category_dir: /category
+
+# The mapping of category nicename and name.
+# Please keep nicename lower case, no space and special characters.
+#
+# This is optional, no default value.
+# category_names: {"opoopress": "OpooPress", "blog": "Blog"}
+
+# The directory of generated tag pages. Default value is '/tag'.
+# tag_dir: /tag
+
+# The mapping of tag slug and name.
+# Please keep slug lower case, no space and special characters.
+#
+# This is optional, no default value.
+# tag_names: {"opensource":"Open Source"}
+
+
+# ----------------------- #
+# Pagination & Limitation #
+# ----------------------- #
+
+# The amount of the posts displayed in index page. Default value is 10.
+# paginate: 10
+
+# Recent posts limit. Default value is 5.
+# recent_posts: 5
+
+# Related post count of a single post. Default value is 5.
+# related_posts: 5
+
+
+# ----------------------- #
+#   Date/Time format      #
+# ----------------------- #
+
+# The default value of date format is 'yyyy-MM-dd'(ref java.util.Date).
+# The special value ‘ordinal’ equals to 'MMM d yyyy', eg. ‘SEP 15 2013’
+# http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html.
+# date_format: "ordinal"
+
+# Time format. http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html.
+# time_format: 'HH:mm:ss'
+
+
+# ----------------------- #
+#   Deployment Settings   #
+# ----------------------- #
+
+# Deployment servers info.
+# You can deploy OpooPress to multiple servers/repositories.
+# ref http://maven.apache.org/pom.html#Distribution_Management
+#
+# deploy:
+# - {id: server1, url: 'scp://server1.com/var/www/html'}
+# - {id: server2, url: 'scp://server2.com/var/www/html'}
+# - {id: local, url: 'file://D:/www'}

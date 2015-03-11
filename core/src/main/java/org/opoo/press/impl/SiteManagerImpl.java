@@ -15,260 +15,221 @@
  */
 package org.opoo.press.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.opoo.press.Config;
 import org.opoo.press.Site;
 import org.opoo.press.SiteManager;
-import org.opoo.press.importer.Importer;
-import org.opoo.press.util.ClassUtils;
 import org.opoo.press.util.LinkUtils;
-import org.opoo.util.ClassPathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 /**
  * @author Alex Lin
- *
  */
-public class SiteManagerImpl extends SiteServiceImpl implements SiteManager {
-	private static final Logger log = LoggerFactory.getLogger(SiteManagerImpl.class);
-	
-	public static final String NEW_POST_TEMPLATE = "new_post.ftl";
-	public static final String NEW_PAGE_TEMPLATE = "new_page.ftl";
-	public static final String DEFAULT_NEW_POST_FILE = "article/${year}-${month}-${day}-${name}.${format}";
-	public static final String DEFAULT_NEW_PAGE_FILE = "${name}.${format}";
-	public static final String NEW_POST_FILE_KEY = "new_post";
-	public static final String NEW_PAGE_FILE_KEY = "new_page";
-	
-	public static final String SAMPLE_POST_TEMPLATE = "sample-post.ftl";
-	public static final String SAMPLE_POST_NAME = "hello-world";
-	
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteManager#install(java.io.File, java.util.Locale, boolean)
-	 */
-	@Override
-	public Site install(File siteDir, Locale locale, boolean createSamplePost) throws Exception {
-		if(siteDir.exists()){
-			throw new Exception("Site already initialized - " + siteDir.getAbsolutePath());
-		}
+public class SiteManagerImpl implements SiteManager {
+    private static final Logger log = LoggerFactory.getLogger(SiteManagerImpl.class);
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-		siteDir.mkdirs();
-		ClassLoader threadLoader = Thread.currentThread().getContextClassLoader();
-		ClassPathUtils.copyPath(threadLoader, "site", siteDir);
-		
-		if(locale == null){
-			locale = Locale.getDefault();
-		}
-		
-		updateConfigFile(siteDir, locale);
-		
-		Site site = createSite(siteDir);
-		
-		if(createSamplePost){
-			log.info("Creating sample post.");
-			//create sample post: hello world
-			createSamplePost(site, locale);
-		}	
-		
-		updateCssFile(siteDir);
+    @Override
+    public void initialize(File baseDirectory, Locale locale) throws Exception {
+        updateConfigurationFile(baseDirectory, locale);
+        checkDirectories(baseDirectory);
+    }
 
-		return site;
-	}
+    private void updateConfigurationFile(File baseDirectory, Locale locale) {
+        File configFile = new File(baseDirectory, "config.yml");
+        File configFileZH = new File(baseDirectory, "config_zh_CN.yml");
 
-	/**
-	 * @param siteDir
-	 * @param locale
-	 */
-	private void updateConfigFile(File siteDir, Locale locale) {
-		boolean isZH = "zh".equals(locale.getLanguage());
-		if(isZH){
-			FileUtils.deleteQuietly(new File(siteDir, "config.yml"));
-			File file = new File(siteDir, "config_zh_CN.yml");
-			file.renameTo(new File(siteDir, "config.yml"));
-		}else{
-			FileUtils.deleteQuietly(new File(siteDir, "config_zh_CN.yml"));
-		}
-	}
-	
-	private void createSamplePost(Site site, Locale locale) throws IOException{
-		renderFile(site, "", SAMPLE_POST_NAME, getNewPostFileStyle(site), SAMPLE_POST_TEMPLATE, false, "markdown");
-	}
+        if (!configFileZH.exists()) {
+            log.debug("config-zh_CN.yml not exists, skip update.");
+            return;
+        }
 
-	private void updateCssFile(File siteDir){
-		File css = new File(siteDir, "assets/stylesheets/screen.css");
-		if(css.exists() && css.isFile() && css.canWrite()){
-			log.info("Update timestamp for {}", css);
-			css.setLastModified(System.currentTimeMillis() + 10000);
-		}
-	}
+        if (!configFile.exists()) {
+            //simple rename
+            configFileZH.renameTo(configFile);
+            return;
+        }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteManager#clean(org.opoo.press.Site)
-	 */
-	@Override
-	public void clean(Site site) throws Exception {
-		File destination = site.getDestination();
-		File working  = site.getWorking();
-		
-		log.info("Cleaning destination directory " + destination);
-		FileUtils.deleteDirectory(destination);
-		
-		log.info("Cleaning working directory " + working);
-		FileUtils.deleteDirectory(working);
-	}
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteManager#newPage(org.opoo.press.Site, java.lang.String, java.lang.String)
-	 */
-	@Override
-	public File newPage(Site site, String title, String name) throws Exception {
-		return newPage(site, title, name, null);
-	}	
-	public File newPage(Site site, String title, String name, String format) throws Exception {
-		if(StringUtils.isBlank(title)){
-			throw new IllegalArgumentException("Title is required.");
-		}
-		
-		String newPageFile = (String) site.getConfig().get(NEW_PAGE_FILE_KEY);
-		if(StringUtils.isBlank(newPageFile)){
-			newPageFile = DEFAULT_NEW_PAGE_FILE;
-		}
-		
-		return renderFile(site, title, name, newPageFile, NEW_PAGE_TEMPLATE, false, format);
-	}
-	
-	private String getNewPostFileStyle(Site site){
-		String newPostFile = (String) site.getConfig().get(NEW_POST_FILE_KEY);
-		if(StringUtils.isBlank(newPostFile)){
-			newPostFile = DEFAULT_NEW_POST_FILE;
-		}
-		return newPostFile;
-	}
+        boolean isZH = "zh".equals(locale.getLanguage());
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteManager#newPost(org.opoo.press.Site, java.lang.String, java.lang.String, boolean)
-	 */
-	@Override
-	public File newPost(Site site, String title, String name, boolean draft) throws Exception {
-		return newPost(site, title, name, draft, null);
-	}
-	
-	public File newPost(Site site, String title, String name, boolean draft, String format) throws Exception {
-		if(StringUtils.isBlank(title)){
-			throw new IllegalArgumentException("Title is required.");
-		}
-		
-		return renderFile(site, title, name, getNewPostFileStyle(site), NEW_POST_TEMPLATE, draft, format);
-	}
-	
-	private File renderFile(Site site, String title, String name, String newFileStyle, String newFileTemplate, boolean isDraft, String format) throws IOException{
-		name = processName(site, title, name);
-		
-		if(format == null){
-			format = "markdown";
-		}
-		
-		Date date = new Date();
-		Map<String,Object> map = new HashMap<String,Object>();
-		map.put("title", title);
-		map.put("name", name);
-		map.put("format", format);
-		map.put("date", DATE_FORMAT.format(date) );
-		LinkUtils.addDateParams(map, date);
-		
-		String filename = site.getRenderer().renderContent(newFileStyle, map);
-		File file = new File(site.getSource(), filename);
-		
-		map.put("site", site);
-		map.put("file", file);
-		map.put("published", !isDraft);
-		try{
-			map.put("version", Site.class.getPackage().getSpecificationVersion());
-		}catch(Exception e){
-			map.put("version", "unkown_version");
-		}
-		
-		FileOutputStream os = null;
-		OutputStreamWriter out = null;
-		try {
-			File dir = file.getParentFile();
-			if(!dir.exists()){
-				dir.mkdirs();
-			}
-			
-			os = new FileOutputStream(file);
-			out = new OutputStreamWriter(os, "UTF-8");
-			
-			//List<TemplateLoader> list = new ArrayList<TemplateLoader>();
-			//list.add(new ClassTemplateLoader(Site.class, "templates"));
-			//RendererImpl rendererImpl = new RendererImpl(site, list);
-			//rendererImpl.render(newFileTemplate, map, out);
-			site.getRenderer().render(newFileTemplate, map, out);
-		} finally{
-			IOUtils.closeQuietly(out);
-			IOUtils.closeQuietly(os);
-		}
-		
-		log.info("Write to file " + file);
-		return file;
-	}
-	
-	private String processName(Site site, String title, String name) {
-		if(name == null){
-			log.info("Using title as post name.");
-			name = title;
-		}else{
-			name = name.trim();
-		}
-		name = site.toSlug(name);
-		
-		return name;
-	}
+        if (isZH) {
+            FileUtils.deleteQuietly(configFile);
+            configFileZH.renameTo(configFile);
+        } else {
+            FileUtils.deleteQuietly(configFileZH);
+        }
+    }
 
-	public void build(Site site){
-		long start = System.currentTimeMillis();
-		try{
-			site.build();
-		}catch(Exception e){
-			log.error("Generate site exception", e);
-		}finally{
-			long time = System.currentTimeMillis() - start;
-			log.info("Generate time: " + time + "ms");
-		}
-	}
+    private void checkDirectories(File baseDirectory) throws Exception {
+        Map<String, Object> override = new HashMap<String, Object>();
+        ConfigImpl config = new ConfigImpl(baseDirectory, override);
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteManager#doImport(org.opoo.press.Site, java.lang.String, java.util.Map)
-	 */
-	@Override
-	public void doImport(Site site, String importer, Map<String, Object> params) throws Exception {
-		@SuppressWarnings("unchecked")
-		Map<String,String> importers = (Map<String, String>) site.getConfig().get("importers");
-		Importer importerInstance = null;
-		if(importers != null){
-			String className = importers.get(importer);
-			if(className != null){
-				importerInstance = (Importer) ClassUtils.newInstance(className, site);
-			}
-		}
-		
-		if(importerInstance == null){
-			throw new Exception("No valid importer: " + importer);
-		}
-		
-		importerInstance.doImport(site, params);
-	}
+        File[] configFiles = config.getConfigFiles();
+        if (configFiles.length == 0) {
+            log.warn("No site configuration file.");
+            return;
+        }
+
+        List<String> sourcesConfig = config.get("source_dirs");
+        checkDirectoryList(baseDirectory, sourcesConfig);
+
+        List<String> assetsConfig = config.get("asset_dirs");
+        checkDirectoryList(baseDirectory, assetsConfig);
+
+        String sitePluginsDir = config.get("plugin_dir");
+        checkDirectory(baseDirectory, sitePluginsDir);
+
+        checkDirectory(baseDirectory, "themes");
+    }
+
+    private void checkDirectoryList(File basedir, List<String> dirs) throws Exception {
+        if (dirs != null && !dirs.isEmpty()) {
+            for (String dir : dirs) {
+                checkDirectory(basedir, dir);
+            }
+        }
+    }
+
+    private void checkDirectory(File basedir, String dir) throws Exception {
+        File file = new File(basedir, dir);
+        if (!file.exists()) {
+            file.mkdirs();
+            log.info("mkdir: {}", file);
+        } else if (!file.isDirectory() || !file.canRead() || !file.canWrite()) {
+            throw new Exception(file + " must be a valid directory.");
+        }
+    }
+
+
+    @Override
+    public File createNewFile(Site site, String layout, String title, String name, String format,
+                              String newFilePattern, String template, Map<String, Object> meta) throws Exception {
+        //FIXME validate title
+//        if (StringUtils.isBlank(title)) {
+//            throw new Exception("Title is required.");
+//        }
+
+        name = processName(site, title, name);
+
+        if (format == null) {
+            format = "markdown";
+        }
+
+        Config config = site.getConfig();
+
+        if (StringUtils.isBlank(newFilePattern)) {
+            //new_page, new_page, new_pic
+            newFilePattern = config.get("new_" + layout);
+            if(StringUtils.isBlank(newFilePattern)){
+                if("post".equals(layout)){
+                    newFilePattern = ConfigImpl.DEFAULT_NEW_POST_FILE;
+                }else if("page".equals(layout)){
+                    newFilePattern = ConfigImpl.DEFAULT_NEW_PAGE_FILE;
+                }
+            }
+        }
+
+        if(StringUtils.isBlank(template)){
+            template = config.get("new_" + layout + "_template");
+            if(StringUtils.isBlank(template)){
+                if("post".equals(layout)){
+                    template = ConfigImpl.DEFAULT_NEW_POST_TEMPLATE;
+                }else if("page".equals(layout)){
+                    template = ConfigImpl.DEFAULT_NEW_PAGE_TEMPLATE;
+                }
+            }
+        }
+
+        return renderFile(site, title, name, format, newFilePattern, template, meta);
+    }
+
+    private File renderFile(Site site, String title, String name, String format,
+                            String newFilePattern, String template, Map<String, Object> meta) throws Exception {
+
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        if(meta != null){
+            map.putAll(meta);
+        }
+
+        if(title != null) {
+            map.put("title", title);
+        }
+
+        if(name != null){
+            map.put("name", name);
+        }
+
+        map.put("format", format);
+
+        Date date = new Date();
+        map.put("date", DATE_FORMAT.format(date));
+        LinkUtils.addDateParams(map, date);
+
+        //render file path and name
+//        String filename = site.getRenderer().renderContent(newFilePattern, map);
+        String filename = renderFilename(newFilePattern, map);
+        File file = new File(site.getBasedir(), filename);
+
+        //render
+        map.put("site", site);
+        map.put("file", file);
+        map.put("opoopress", site.getConfig().get("opoopress"));
+
+        FileOutputStream os = null;
+        OutputStreamWriter out = null;
+        try {
+            file.getParentFile().mkdirs();
+
+            os = new FileOutputStream(file);
+            out = new OutputStreamWriter(os, "UTF-8");
+
+            site.getRenderer().render(template, map, out);
+        } finally {
+            IOUtils.closeQuietly(out);
+            IOUtils.closeQuietly(os);
+        }
+
+        log.info("Write to file: {}", file);
+        return file;
+    }
+
+    private String processName(Site site, String title, String name) {
+        if (name == null) {
+            log.info("Using title as post name.");
+            name = title;
+        } else {
+            name = name.trim();
+        }
+        name = site.toSlug(name);
+
+        return name;
+    }
+
+    private String renderFilename(String filenamePattern, Map<String,Object> rootMap) throws Exception {
+        Configuration configuration = new Configuration();
+        Template template = new Template("filename", new StringReader(filenamePattern), configuration, "UTF-8");
+        StringWriter writer = new StringWriter();
+        template.process(rootMap, writer);
+        writer.flush();
+        return writer.toString();
+    }
 }

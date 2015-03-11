@@ -29,7 +29,7 @@ public class WikiTextTextileConverter extends AbstractWikiTextConverter {
 	 */
 	@Override
 	public int getOrder() {
-		return 130;
+		return 150;
 	}
 
 	/* (non-Javadoc)

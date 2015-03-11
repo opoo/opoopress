@@ -15,30 +15,23 @@
  */
 package org.opoo.press.generator;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.opoo.press.Generator;
-import org.opoo.press.Page;
-import org.opoo.press.Pager;
-import org.opoo.press.Post;
-import org.opoo.press.Renderer;
-import org.opoo.press.Site;
-import org.opoo.press.Tag;
+import org.opoo.press.*;
 import org.opoo.press.impl.AbstractConvertible;
-import org.opoo.press.source.Source;
+import org.opoo.press.Source;
+import org.opoo.util.I18NUtills;
 import org.opoo.util.URLUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * @author Alex Lin
  *
  */
 public class TagGenerator implements Generator {
-
+	private static final Logger log = LoggerFactory.getLogger(TagGenerator.class);
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Ordered#getOrder()
 	 */
@@ -52,9 +45,12 @@ public class TagGenerator implements Generator {
 	 */
 	@Override
 	public void generate(Site site) {
+		log.debug("Generating tag pages...");
 		List<Tag> tags = site.getTags();
-		String tagTitlePrefix = site.getConfig().get("tag_title_prefix", "");
-		
+
+		String tagPageTitlePrefix = getTagPageTitlePrefix(site);
+		String template = getTagPageTemplate(site);
+
 		for(Tag tag : tags){
 			List<Post> posts = tag.getPosts();
 			if(posts.isEmpty()){
@@ -63,29 +59,42 @@ public class TagGenerator implements Generator {
 			Collections.sort(posts);
 			Collections.reverse(posts);
 
-			TagPage page = new TagPage(site);
-			page.setTitle(tagTitlePrefix + tag.getName());
+			TagPage page = new TagPage(site, template);
+			page.setTitle(tagPageTitlePrefix + tag.getName());
 			page.setUrl(tag.getUrl());
 			page.setPosts(posts);
 			
 			site.getPages().add(page);
 		}
 	}
-	
+
+	private String getTagPageTitlePrefix(Site site){
+		String prefix = I18NUtills.getString("messages", site.getLocale(), "tag.page.title.prefix");
+		if(prefix == null){
+			prefix = site.getConfig().get("tag_page_title_prefix", "");
+		}
+		return prefix;
+	}
+
+	private String getTagPageTemplate(Site site){
+		return site.getConfig().get("tag_page_template", "tag.ftl");
+	}
 	
 	public static class TagPage extends AbstractConvertible implements Page{
-		public static final String TEMPLATE = "tag.ftl";
+//		public static final String TEMPLATE = "tag.ftl";
 		private String url;
 		private Renderer renderer;
 		private Site site;
 		private String content;// = "<#include \"category_index.ftl\">";
 		private String title;
 		private List<Post> posts;
+		private String template;
 		
-		private TagPage(Site site) {
+		public TagPage(Site site, String template) {
 			super();
 			this.site = site;
 			this.renderer = site.getRenderer();
+			this.template = template;
 		}
 
 		@Override
@@ -93,7 +102,7 @@ public class TagGenerator implements Generator {
 			rootMap = new HashMap<String,Object>(rootMap);
 			mergeRootMap(rootMap);
 
-			String output = getRenderer().render(TEMPLATE, rootMap);
+			String output = getRenderer().render(template, rootMap);
 			setContent(output);
 		}
 

@@ -15,15 +15,14 @@
  */
 package org.opoo.press.converter;
 
-import java.io.StringWriter;
-
 import net.java.textilej.parser.MarkupParser;
 import net.java.textilej.parser.builder.HtmlDocumentBuilder;
 import net.java.textilej.parser.markup.textile.TextileDialect;
-
 import org.apache.commons.io.FilenameUtils;
 import org.opoo.press.Converter;
-import org.opoo.press.source.Source;
+import org.opoo.press.Source;
+
+import java.io.StringWriter;
 
 /**
  * @author Alex Lin
@@ -56,7 +55,7 @@ public class TextilejConverter implements Converter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.source.Source)
+	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
 	 */
 	@Override
 	public String getOutputFileExtension(Source src) {
@@ -64,7 +63,7 @@ public class TextilejConverter implements Converter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#matches(org.opoo.press.source.Source)
+	 * @see org.opoo.press.Converter#matches(org.opoo.press.Source)
 	 */
 	@Override
 	public boolean matches(Source src) {

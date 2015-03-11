@@ -29,7 +29,7 @@ public class WikiTextMediaWikiConverter extends AbstractWikiTextConverter {
 	 */
 	@Override
 	public int getOrder() {
-		return 130;
+		return 140;
 	}
 
 	/* (non-Javadoc)

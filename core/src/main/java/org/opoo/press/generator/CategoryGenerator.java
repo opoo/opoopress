@@ -15,30 +15,23 @@
  */
 package org.opoo.press.generator;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.opoo.press.Category;
-import org.opoo.press.Generator;
-import org.opoo.press.Page;
-import org.opoo.press.Pager;
-import org.opoo.press.Post;
-import org.opoo.press.Renderer;
-import org.opoo.press.Site;
+import org.opoo.press.*;
 import org.opoo.press.impl.AbstractConvertible;
-import org.opoo.press.source.Source;
+import org.opoo.press.Source;
+import org.opoo.util.I18NUtills;
 import org.opoo.util.URLUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * @author Alex Lin
  *
  */
 public class CategoryGenerator implements Generator {
-
+	private static final Logger log = LoggerFactory.getLogger(CategoryGenerator.class);
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Ordered#getOrder()
 	 */
@@ -52,9 +45,12 @@ public class CategoryGenerator implements Generator {
 	 */
 	@Override
 	public void generate(Site site) {
+		log.debug("Generating category pages...");
 		List<Category> categories = site.getCategories();
-		String categoryTitlePrefix = site.getConfig().get("category_title_prefix", "");
-		
+
+		String categoryPageTitlePrefix = getCategoryPageTitlePrefix(site);
+		String template = getCategoryPageTemplate(site);
+
 		for(Category category: categories){
 			List<Post> posts = category.getPosts();
 			if(posts.isEmpty()){
@@ -63,29 +59,43 @@ public class CategoryGenerator implements Generator {
 			Collections.sort(posts);
 			Collections.reverse(posts);
 			
-			CategoryPage page = new CategoryPage(site);
-			page.setTitle(categoryTitlePrefix + category.getTitle());
+			CategoryPage page = new CategoryPage(site, template);
+			page.setTitle(categoryPageTitlePrefix + category.getTitle());
 			page.setUrl(category.getUrl());
 			page.setPosts(posts);
 			
 			site.getPages().add(page);
 		}
 	}
-	
-	
+
+	private String getCategoryPageTitlePrefix(Site site){
+		String prefix = I18NUtills.getString("messages", site.getLocale(), "category.page.title.prefix");
+		if(prefix == null){
+			prefix = site.getConfig().get("category_page_title_prefix", "");
+		}
+		return prefix;
+	}
+
+	private String getCategoryPageTemplate(Site site) {
+		return site.getConfig().get("category_page_template", "category.ftl");
+	}
+
+
 	public static class CategoryPage extends AbstractConvertible implements Page{
-		public static final String TEMPLATE = "category.ftl";
+//		public static final String TEMPLATE = "category.ftl";
 		private String url;
 		private Renderer renderer;
 		private Site site;
 		private String content;// = "<#include \"category_index.ftl\">";
 		private String title;
 		private List<Post> posts;
+		private String template;
 		
-		private CategoryPage(Site site) {
+		public CategoryPage(Site site, String template) {
 			super();
 			this.site = site;
 			this.renderer = site.getRenderer();
+			this.template = template;
 		}
 
 		@Override
@@ -93,7 +103,7 @@ public class CategoryGenerator implements Generator {
 			rootMap = new HashMap<String,Object>(rootMap);
 			mergeRootMap(rootMap);
 
-			String output = getRenderer().render(TEMPLATE, rootMap);
+			String output = getRenderer().render(template, rootMap);
 			setContent(output);
 		}
 

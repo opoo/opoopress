@@ -1,0 +1,38 @@
+name: "${artifactId}"
+desription: "OpooPress theme: ${artifactId}"
+
+artifact: "${groupId}:${artifactId}:${version}"
+url-release:
+url-snapshot:
+
+
+#---------------------#
+# theme variables     #
+#---------------------#
+
+#--------------------- your theme variables here ---------------------#
+
+
+
+
+
+
+
+#---------------------#
+# Directories         #
+#---------------------#
+
+# Asset folder, this folder is where you can put your static resources of your theme, such as images, css files, javascript files.
+# Default value is 'assets'.
+# asset_dir: assets
+
+# Source folder, this folders is where you can put your content of your theme, such as home index page, archive index page, etc.
+# Default value is 'sources'
+# source_dir: sources
+
+# Template folder, this folder is where you can put template files of your theme..
+# Default value is 'templates'.
+# template_dir: templates
+
+# Plugins folder, this folder is where you can put plugin jar files of your theme.
+# plugin_dir: plugins

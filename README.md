@@ -1,64 +1,47 @@
-# About OpooPress
+# OpooPress 2.0
 
-OpooPress Blogging Framework is a java based static blog generator, it's also a static site generator. The site is [www.opoopress.com](http://www.opoopress.com/).
+OpooPress Framework is a completely flexible, totally extensible Java-based static site generator. 
 
-Here are some main features:
+[OpooPress](http://www.opoopress.com/) 2.0 is in development.
 
-- **Simple** - No more databases, no more runtime language (such as php, java), a web server is sufficient
-- **Fast** - A very fast generate engine by Java, [generate **1k** posts in several seconds](http://opoo.org/why-i-develop-opoopress/), how about [**10k** posts](http://opoo.org/2014/opoopress-site-generated-in-multi-thread/)?
-- **Static** - Markdown/Textile/WikiText, FreeMarker, HTML & CSS & Images go in, completely static sites come out ready for deployment to anywhere
-- **Blog-aware** - Permalinks, tree categories, tags, pages, posts, archives, RSS feed.
 
-OpooPress also have these features:
+# Features
 
-- A semantic HTML5 template
-- A Mobile first responsive layout (rotate, or resize your browser and see)
-- Built in 3rd party support for Twitter, Google Plus One, Disqus Comments, Pinboard, Delicious, and Google Analytics
-- Easy theming with Compass and Sass
+## Source Types (Layout)
+- Post
+- Page
+- (Your custom layout)
 
-(Note: *description above comes from Octopress, OpooPress have the same features actually*)
+## Template Engine
+- FreeMarker
+- Velocity
+- (Your template engine by your custom `Renderer`)
 
-- Supports many deployment methods (by [Apache Maven Wagon](http://maven.apache.org/wagon/))
-- Supports code syntax highlighting (by [Syntax Highlighter Compress](http://alexgorbatchev.com/SyntaxHighlighter/))
-- Supports Locale (Currently only `en_US` and `zh_CN`, default use the locale of JVM)
-- Supports Plugin, easy to customize or secondary develop
-- Customisable templates ([FreeMarker](http://www.freemarker.org/))
-- Supports custom meta data that is exposed to templates, pages or posts
-
-## Post Format
+## Source Format
 - HTML - (\*.html)
-- [Markdown](http://daringfireball.net/projects/markdown/) by [Txtmark](https://github.com/rjeschke/txtmark) - (\*.md, \*.markdown)
-- [Textile](http://textile.sitemonks.com/) by [Textile-j](https://java.net/projects/textile-j)(also see [Mylyn WikiText](http://wiki.eclipse.org/Mylyn/Incubator/WikiText)) - (\*.textile)
-- [WikiText](http://wiki.eclipse.org/Mylyn/WikiText) - (\*.textile, \*.tracwiki, \*.mediawiki, \*.twiki, \*.confluence)
+- Markdown - (\*.md, \*.markdown)
+- Textile - (\*.textile)
+- WikiText - (\*.textile, \*.tracwiki, \*.mediawiki, \*.twiki, \*.confluence)
+- (Your format by your custom `Converter`)
 
-## Migration
-- Octopress
-- WordPress
 
-## Deployment
-- File
-- HTTP
-- FTP
-- SSH/SCP
-- WebDAV
-- [Github Pages](http://www.opoopress.com/en/docs/github-pages/)
+## Deployment Protocol
+- File, HTTP, FTP, SSH/SCP, WebDAV, GitHub Pages, Qiniu Cloud Storage
+- (Your deployment protocol by your custom maven wagon plugin)
 
 # Getting Started
 
-Check the documentation to kown how to [download](http://www.opoopress.com/en/download/) and [install](http://www.opoopress.com/en/docs/installation/) OpooPress.
-
-Stable releases are available from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Corg.opoo.press), and snapshot builds are available from the [Sonatype OSS snapshots repository](https://oss.sonatype.org/index.html#nexus-search;quick~org.opoo.press).
+TODO:
 
 ## Source Code
-You can access the source code at: [https://github.com/opoo/opoopress](https://github.com/opoo/opoopress)
+[https://github.com/opoo/opoopress](https://github.com/opoo/opoopress)
 
-## Demo Sites
-- [OpooPress.com](http://www.opoopress.com/)
-- [Opoo.org](http://opoo.org/)
+## OpooPress Sites
+- [Who is using OpooPress](https://github.com/opoo/opoopress/wiki/Who-is-using-OpooPress%3F)
 
 ## License
 
-Copyright 2013 Alex Lin.
+Copyright 2015 Alex Lin.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

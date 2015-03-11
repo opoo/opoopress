@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
+    <packaging>opoopress-theme</packaging>
+    <name>${artifactId}</name>
+    <description>OpooPress theme: ${artifactId}</description>
+    <url>http://www.opoopress.com/</url>
+    <inceptionYear>2015</inceptionYear>
+
+    <!--
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+    -->
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.opoo.press.maven.plugins</groupId>
+                <artifactId>theme-packaging</artifactId>
+                <version>${opoopress.version}</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <groupId>org.opoo.press.maven.plugins</groupId>
+                <artifactId>theme-maven-plugin</artifactId>
+                <version>${opoopress.version}</version>
+                <extensions>false</extensions>
+
+                <!-- build theme at compile phase -->
+                <!-- TODO: uncomment for developer -->
+                <!--
+                <executions>
+                    <execution>
+                        <id>build-theme</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                -->
+            </plugin>
+
+            <plugin>
+                <!--
+                Used to copy plugin dependencies to target/plugins.
+
+                For more information on this plugin see:
+                http://maven.apache.org/plugins/maven-dependency-plugin/
+                -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-extra-dependencies</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <!--  These artifacts and their children should not be added to the jar's lib directory -->
+                            <excludeArtifactIds>opoopress-core,junit</excludeArtifactIds>
+                            <!--  because of this setting, transitive resources for added libs may needed to be added manually
+                             or this configuration block will need to be modified -->
+                            <excludeTransitive>true</excludeTransitive>
+                            <outputDirectory>${project.build.directory}/plugins</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- must set classes classifier -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <classifier>classes</classifier>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <properties>
+        <opoopress.version>2.0-beta-1</opoopress.version>
+    </properties>
+</project>

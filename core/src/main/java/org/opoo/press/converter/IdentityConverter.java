@@ -17,7 +17,7 @@ package org.opoo.press.converter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.opoo.press.Converter;
-import org.opoo.press.source.Source;
+import org.opoo.press.Source;
 
 /**
  * @author Alex Lin
@@ -49,7 +49,7 @@ public class IdentityConverter implements Converter {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.source.Source)
+	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
 	 */
 	@Override
 	public String getOutputFileExtension(Source src) {

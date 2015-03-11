@@ -15,15 +15,15 @@
  */
 package org.opoo.press.impl;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opoo.press.Site;
 import org.opoo.press.StaticFile;
-import org.opoo.press.source.SourceEntry;
+import org.opoo.press.SourceEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Alex Lin

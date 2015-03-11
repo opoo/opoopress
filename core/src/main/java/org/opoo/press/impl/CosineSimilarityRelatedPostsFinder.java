@@ -15,21 +15,12 @@
  */
 package org.opoo.press.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.opoo.press.Initializable;
-import org.opoo.press.Post;
-import org.opoo.press.PostsHolder;
-import org.opoo.press.RelatedPostsFinder;
-import org.opoo.press.Site;
+import org.opoo.press.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Cosine similarity related posts algorithm.
@@ -40,13 +31,19 @@ import org.slf4j.LoggerFactory;
  * @author Alex Lin
  * @since 1.0.2
  */
-public class CosineSimilarityRelatedPostsFinder implements RelatedPostsFinder, Initializable {
+public class CosineSimilarityRelatedPostsFinder implements RelatedPostsFinder, ConfigAware {
 	private static final Logger log = LoggerFactory.getLogger(CosineSimilarityRelatedPostsFinder.class);
 	
 	private int size = 5;
 	private double categoriesFactor = 1.0;
 	private double tagsFactor = 1.0;
 	
+	public CosineSimilarityRelatedPostsFinder(){
+	}
+	
+	CosineSimilarityRelatedPostsFinder(Config config){
+		setConfig(config);
+	}
 	/* (non-Javadoc)
 	 * @see org.opoo.press.RelatedPostsFinder#findRelatedPosts(org.opoo.press.Post)
 	 */
@@ -150,28 +147,19 @@ public class CosineSimilarityRelatedPostsFinder implements RelatedPostsFinder, I
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.Initializable#initialize(org.opoo.press.Site)
+	 * @see org.opoo.press.ConfigAware#setConfig(org.opoo.press.Config)
 	 */
 	@Override
-	public void initialize(Site site) {
-		Number num = (Number) site.getConfig().get("related_posts");
-		if(num != null){
-			this.size = num.intValue();
-			log.debug("Set related posts size: {}", size);
-		}
-		
+	public void setConfig(Config config) {
 		String prefix = CosineSimilarityRelatedPostsFinder.class.getName();
 		String categoriesFactorKey = prefix + ".categories.factor";
 		String tagsFactorKey = prefix + ".tags.factor";
-		Number num1 = (Number) site.getConfig().get(categoriesFactorKey);
-		Number num2 = (Number) site.getConfig().get(tagsFactorKey);
-		if(num1 != null){
-			this.categoriesFactor = num1.doubleValue();
-			log.debug("Set {}: {}", categoriesFactorKey, categoriesFactor);
-		}
-		if(num2 != null){
-			this.tagsFactor = num2.doubleValue();
-			log.debug("Set {}: {}", tagsFactorKey, tagsFactor);
-		}
+		
+		this.size = config.get("related_posts", size);
+		this.categoriesFactor = config.get(categoriesFactorKey, this.categoriesFactor);
+		this.tagsFactor = config.get(tagsFactorKey, this.tagsFactor);
+		
+		log.debug("Set {}: {}", categoriesFactorKey, categoriesFactor);
+		log.debug("Set {}: {}", tagsFactorKey, tagsFactor);
 	}
 }

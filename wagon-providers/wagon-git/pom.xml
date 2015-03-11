@@ -24,9 +24,9 @@
   	<groupId>org.opoo.press.maven.wagon</groupId>
 	<artifactId>opoopress-wagon-git</artifactId>
 	<packaging>jar</packaging>
-	<name>OpooPress Blogging Framework :: Wagon Providers :: Git</name>
-	<description>OpooPress Blogging Framework is a java based blog aware static site generator.</description>
-	<url>http://press.opoo.org/</url>
+	<name>OpooPress Framework :: Wagon Providers :: Git</name>
+	<description>OpooPress Framework is a java based blog aware static site generator.</description>
+	<url>http://www.opoopress.com/</url>
 	<inceptionYear>2013</inceptionYear>
 	
     <dependencies>

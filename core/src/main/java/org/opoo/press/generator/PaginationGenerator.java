@@ -15,35 +15,34 @@
  */
 package org.opoo.press.generator;
 
+import org.opoo.press.*;
+import org.opoo.press.impl.PageImpl;
+import org.opoo.press.SourceEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import org.opoo.press.Generator;
-import org.opoo.press.Page;
-import org.opoo.press.Pager;
-import org.opoo.press.Post;
-import org.opoo.press.Site;
-import org.opoo.press.impl.PageImpl;
-import org.opoo.press.source.SourceEntry;
 
 /**
  * @author Alex Lin
  *
  */
 public class PaginationGenerator implements Generator {
-
+	private static final Logger log = LoggerFactory.getLogger(PaginationGenerator.class);
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Generator#generate(org.opoo.press.Site)
 	 */
 	@Override
 	public void generate(Site site) {
+		log.debug("Generating paginate pages...");
+
 		List<Page> pages = site.getPages();
-		Map<String, Object> map = site.getConfig().toMap();
+		Config config = site.getConfig();
 		
 		List<Page> allNewPages = new ArrayList<Page>();
 		for(Page page: pages){
-			if(isPaginationEnabled(map, page)){
+			if(isPaginationEnabled(config, page)){
 				List<Page> list = paginate(site, page, site.getPosts());
 				allNewPages.addAll(list);
 			}
@@ -108,15 +107,15 @@ public class PaginationGenerator implements Generator {
 	
 	
 	public static boolean isPaginationEnabled(Site site, Page page){
-		return isPaginationEnabled(site.getConfig().toMap(), page);
+		return isPaginationEnabled(site.getConfig(), page);
 	}
 
-	public static boolean isPaginationEnabled(Map<String, Object> config, Page page) {
+	public static boolean isPaginationEnabled(Config config, Page page) {
 		SourceEntry entry = page.getSource().getSourceEntry();
 		String name = entry.getName();
 		String path = entry.getPath();
 		// (isIndexPaginationEnabled || isNormalPagePaginationEnabled) && containsPaginatorInContent
-		return (config.containsKey("paginate") && "".equals(path) && "index.html".equals(name)
+		return (config.get("paginate") != null && "".equals(path) && "index.html".equals(name)
 				|| page.get("paginate") != null)
 				&& page.getContent().contains("paginator.");
 	}
@@ -126,7 +125,7 @@ public class PaginationGenerator implements Generator {
 		return totalPages;
 	}
 	
-	public static List<Page> paginate(Site site, Page page, List<Post> posts){
+	public static List<Page> paginate(Site site, Page page, List<? extends Base> posts){
 		Number number = (Number) page.get("paginate");
 		if(number == null){
 			number = (Number) site.getConfig().get("paginate");
@@ -140,7 +139,11 @@ public class PaginationGenerator implements Generator {
 		return paginate(site, page, posts, pageSize);
 	}
 	
-	public static List<Page> paginate(Site site, Page page, List<Post> posts, int pageSize) {
+	public static List<Page> paginate(Site site, Page page, List<? extends Base> posts, int pageSize) {
+		if(posts.isEmpty()){
+			throw new RuntimeException("There is no post in this site.");
+		}
+
 		//only new pages, exclude first page
 		List<Page> newPages = new ArrayList<Page>();
 		int totalPosts = posts.size();
@@ -155,7 +158,7 @@ public class PaginationGenerator implements Generator {
 			if(toIndex > totalPosts){
 				toIndex = totalPosts;
 			}
-			List<Post> pagePosts = posts.subList(fromIndex, toIndex);
+			List<? extends Base> pagePosts = posts.subList(fromIndex, toIndex);
 			
 			Pager pager = new Pager(pageNumber, totalPages, totalPosts, pageSize, pagePosts);
 			if(pageNumber > 1){

@@ -15,17 +15,17 @@
  */
 package org.opoo.press.impl;
 
+import org.apache.commons.io.FileUtils;
+import org.opoo.press.Convertible;
+import org.opoo.press.Renderer;
+import org.opoo.press.Source;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.opoo.press.Convertible;
-import org.opoo.press.Renderer;
-import org.opoo.press.source.Source;
 
 /**
  * @author Alex Lin
@@ -65,14 +65,12 @@ public abstract class AbstractConvertible implements Convertible {
 		boolean isValidLayout = renderer.isValidLayout(getLayout());
 		
 		if(!isValidLayout && !isContentRenderRequired){
-			log.debug("Layout is nil and content is plain text, skip render file: " 
-					+ getSource().getSourceEntry().getFile());
+			log.debug("Layout is nil and content is plain text, skip render file: {}",
+					getSource().getSourceEntry().getFile());
 			//output = content;
 			//do nothing
 			return;
 		}
-
-		log.debug("Rendering '{}'", getUrl());
 		
 		rootMap = new HashMap<String,Object>(rootMap);
 		mergeRootMap(rootMap);
@@ -123,11 +121,11 @@ public abstract class AbstractConvertible implements Convertible {
 //			fw = new FileWriter(file);
 //			IOUtils.write(getContent(), fw);
 //			fw.flush();
-			
-			log.debug("Writing file '{}' to {}", getUrl(), file);
+
+			log.debug("Writing file to {} [{}]", file, getUrl());
 			FileUtils.write(file, getContent(), "UTF-8");
 		} catch (IOException e) {
-			log.error("Write file error: " + file, e);
+			log.error("Write file error: {}", file, e);
 			throw new RuntimeException(e);
 		}finally{
 //			IOUtils.closeQuietly(fw);

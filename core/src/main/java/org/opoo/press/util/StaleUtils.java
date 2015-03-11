@@ -15,17 +15,16 @@
  */
 package org.opoo.press.util;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import org.apache.commons.io.IOUtils;
+import org.opoo.press.Site;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opoo.press.CompassConfig;
-import org.opoo.press.Site;
-import org.opoo.press.Site.BuildInfo;
-import org.opoo.press.SiteConfig;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Alex Lin
@@ -34,120 +33,139 @@ import org.opoo.press.SiteConfig;
 public class StaleUtils {
 	private static final Logger log = LoggerFactory.getLogger(StaleUtils.class);
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-	
-	private static final String DEFAULT_CSS_FILE = "screen.css";
 
-	public static boolean isCompassStale(CompassConfig compassConfig){
-		return isCompassStale(compassConfig, DEFAULT_CSS_FILE);
+	static File getLastBuildInfoFile(Site site){
+		return new File(site.getWorking(), ".lastBuildInfo");
 	}
-	
-	public static boolean isCompassStale(CompassConfig compassConfig, String cssFile){
-		File dir = compassConfig.getCssDirectory();
-		File css = new File(dir, cssFile);
-		
-		if(!css.exists()){
-			if(log.isInfoEnabled()){
-				log.info("Css file not exists, need compile compass: " + css);
-			}
-			return true;
+
+	public static void saveLastBuildInfo(Site site){
+		File file = getLastBuildInfoFile(site);
+
+		File[] configFiles = site.getConfig().getConfigFiles();
+		BuildInfo info = new BuildInfo();
+		info.time = System.currentTimeMillis();
+		info.siteConfigFilesLength = configFiles.length;
+
+		ObjectOutputStream oos = null;
+		try {
+			oos = new ObjectOutputStream(new FileOutputStream(file));
+			oos.writeObject(info);
+			oos.flush();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}finally{
+			IOUtils.closeQuietly(oos);
 		}
-		
-		if(!css.isFile()){
-			throw new IllegalArgumentException("Output css file is directory: " + css);
-		}
-		
-		long lastModified = css.lastModified();
-		
-		File configFile = compassConfig.getConfigFile();
-		if(configFile.lastModified() > lastModified){
-			if(log.isInfoEnabled()){
-				log.info("Compass config is newer than css file, need recompile compass.");
-			}
-			return true;
-		}
-		
-		File sass = compassConfig.getSassDirectory();
-		return isNewer(sass, lastModified, new FileFilter() {
-			@Override
-			public boolean accept(File file) {
-				return file.isDirectory() || file.getName().endsWith(".scss");
-			}
-		});
 	}
-	
-	public static boolean isSourceStale(Site site){
-		BuildInfo buildInfo = site.getLastBuildInfo();
-		if(buildInfo == null){
-			log.info("No last generate info, regenerate site.");
+
+	private static BuildInfo getLastBuildInfo(Site site){
+		File file = getLastBuildInfoFile(site);
+		if(!file.exists()){
+			return null;
+		}
+
+		ObjectInputStream ois = null;
+		try{
+			ois = new ObjectInputStream(new FileInputStream(file));
+			return (BuildInfo) ois.readObject();
+		}catch (IOException e){
+			throw new RuntimeException(e);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		} finally {
+			IOUtils.closeQuietly(ois);
+		}
+	}
+
+	public static boolean isStale(Site site){
+		return isStale(site, false);
+	}
+
+	public static boolean isStale(Site site, boolean checkAssets){
+		BuildInfo info = getLastBuildInfo(site);
+		if(info == null || info.time <= 0) {
+			log.debug("No last build info.");
 			return true;
 		}
-		
-		boolean showDrafts = site.showDrafts();
-		if(showDrafts != buildInfo.showDrafts()){
-			log.info(String.format("Show drafts changed, last: %s, current: %s. regenerate site.", buildInfo.showDrafts(), showDrafts));
+
+		if(site.showDrafts() != info.showDrafts){
+			log.info("Show drafts option changed: {} -> {}", info.showDrafts, site.showDrafts());
 			return true;
 		}
-		
-		long lastBuildTime = buildInfo.getBuildTime();
-		if(lastBuildTime <= 0L){
-			log.info("No last generate time, regenerate site.");
+
+		long lastBuildTime = info.time;
+
+		//theme config
+		if(site.getTheme().getConfigFile().lastModified() > lastBuildTime){
+			log.info("Theme configuration file changed: {}", site.getTheme().getConfigFile());
 			return true;
 		}
-		
-		SiteConfig config = site.getConfig();
-		File configFile = config.getConfigFile();
-		
-		//config file
-		if(configFile.lastModified() > lastBuildTime){
-			if(log.isInfoEnabled()){
-				log.info("Config file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
-			}
+
+		//config
+		File[] configFiles = site.getConfig().getConfigFiles();
+		if(info.siteConfigFilesLength != configFiles.length){
+			log.info("Site configuration files changed.");
 			return true;
 		}
-		
-		FileFilter filter = new FileFilter() {
-			@Override
-			public boolean accept(File file) {
-				String name = file.getName();
-				char firstChar = name.charAt(0);
-				if(firstChar == '.' || firstChar == '#'){
-					return false;
-				}
-				char lastChar = name.charAt(name.length() - 1);
-				if(lastChar == '~'){
-					return false;
-				}
+		for(File file: configFiles){
+			if(file.lastModified() > lastBuildTime){
+				log.info("Site configuration file changed: {}", file);
 				return true;
 			}
-		};
-		
-		//source file
-		File source = site.getSource();
-		boolean newer = isNewer(source, lastBuildTime, filter);
-		if(newer){
-			log.info("Source file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
-			return true;
 		}
-		
+
+		FileFilter filter = new ValidFileFilter();
+
+		//source file
+		List<File> sources = site.getSources();
+		for(File source: sources){
+			if(isNewer(source, lastBuildTime, filter)){
+				log.info("Source file changed.");
+				return true;
+			}
+		}
+
 		//templates
 		File templates = site.getTemplates();
-		newer = isNewer(templates, lastBuildTime, filter);
-		if(newer){
-			log.info("Template file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
+		if(isNewer(templates, lastBuildTime, filter)){
+			log.info("Template file changed.");
 			return true;
 		}
-		
-		//assets
-		File assets = site.getAssets();
-		if(assets != null && assets.exists()){
-			newer = isNewer(assets, lastBuildTime, filter);
-			if(newer){
-				log.info("Asset file has been changed after time '" + format(lastBuildTime) + "', regenerate site.");
-				return true;
+
+		if(checkAssets){
+			//assets
+			List<File> assets = site.getAssets();
+			if(assets != null && !assets.isEmpty()){
+				for(File asset: assets){
+					if(isNewer(asset, lastBuildTime, filter)){
+						log.info("Asset file changed.");
+						return true;
+					}
+				}
 			}
 		}
-		
+
 		return false;
+	}
+
+	public static List<File> getStaleAssets(Site site){
+		BuildInfo info = getLastBuildInfo(site);
+		long lastBuildTime = info.time;
+		FileFilter filter = new ValidFileFilter();
+
+		List<File> list = new ArrayList<File>();
+		List<File> assets = site.getAssets();
+		if(assets != null && !assets.isEmpty()){
+			for(File asset: assets){
+				if(isNewer(asset, lastBuildTime, filter)){
+					list.add(asset);
+				}
+			}
+		}
+		if(list.isEmpty()){
+			return null;
+		}
+		return list;
 	}
 	
     public static boolean isNewer(File dir, long compareTime, FileFilter filter){
@@ -159,9 +177,7 @@ public class StaleUtils {
     		}
     		if(file.isFile()){
     			if(file.lastModified() > compareTime){
-    				if(log.isInfoEnabled()){
-    					log.info(String.format("File '%s' is newer than '%s'", file, format(compareTime)));
-    				}
+					log.info("File {} changed.", file);
     				return true;
     			}
     		}else if(file.isDirectory()){
@@ -176,4 +192,65 @@ public class StaleUtils {
     public static String format(long millis){
     	return SDF.format(new Date(millis));
     }
+
+	private static class ValidFileFilter implements FileFilter{
+		@Override
+		public boolean accept(File file) {
+			String name = file.getName();
+			char firstChar = name.charAt(0);
+			if(firstChar == '.' || firstChar == '#'){
+				return false;
+			}
+			char lastChar = name.charAt(name.length() - 1);
+			if(lastChar == '~'){
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public static class BuildInfo implements Externalizable{
+		private long time;
+		private boolean showDrafts;
+		private int siteConfigFilesLength;
+//		private long siteConfigFilesLastModified;
+//		private long themeConfigFileLastModified;
+//		private int sourcesLength;
+//		private long sourcesLastModified;
+//		private int templatesLength;
+//		private long templatesLastModified;
+//		private int assetsLength;
+//		private long assetsLastModified;
+
+
+		@Override
+		public void writeExternal(ObjectOutput out) throws IOException {
+			out.writeLong(time);
+			out.writeBoolean(showDrafts);
+			out.writeInt(siteConfigFilesLength);
+//			out.writeLong(siteConfigFilesLastModified);
+//			out.writeLong(themeConfigFileLastModified);
+//			out.writeInt(sourcesLength);
+//			out.writeLong(sourcesLastModified);
+//			out.writeInt(templatesLength);
+//			out.writeLong(templatesLastModified);
+//			out.writeInt(assetsLength);
+//			out.writeLong(assetsLastModified);
+		}
+
+		@Override
+		public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+			time = in.readLong();
+			showDrafts = in.readBoolean();
+			siteConfigFilesLength = in.readInt();
+//			siteConfigFilesLastModified = in.readLong();
+//			themeConfigFileLastModified = in.readLong();
+//			sourcesLength = in.readInt();
+//			sourcesLastModified = in.readLong();
+//			templatesLength = in.readInt();
+//			templatesLastModified = in.readLong();
+//			assetsLength = in.readInt();
+//			assetsLastModified = in.readLong();
+		}
+	}
 }

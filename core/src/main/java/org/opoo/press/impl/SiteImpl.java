@@ -15,14 +15,48 @@
  */
 package org.opoo.press.impl;
 
+import freemarker.template.TemplateModel;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang.StringUtils;
+import org.opoo.press.Category;
+import org.opoo.press.Config;
+import org.opoo.press.Converter;
+import org.opoo.press.Factory;
+import org.opoo.press.Generator;
+import org.opoo.press.Observer;
+import org.opoo.press.Page;
+import org.opoo.press.Post;
+import org.opoo.press.Renderer;
+import org.opoo.press.Site;
+import org.opoo.press.SiteBuilder;
+import org.opoo.press.StaticFile;
+import org.opoo.press.Tag;
+import org.opoo.press.Theme;
+import org.opoo.press.ThemeCompiler;
+import org.opoo.press.Writable;
+import org.opoo.press.processor.ProcessorsProcessor;
+import org.opoo.press.NoFrontMatterException;
+import org.opoo.press.Source;
+import org.opoo.press.SourceEntry;
+import org.opoo.press.SourceEntryLoader;
+import org.opoo.press.SourceParser;
+import org.opoo.press.task.RunnableTask;
+import org.opoo.press.task.TaskExecutor;
+import org.opoo.press.util.StaleUtils;
+import org.opoo.util.PathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,50 +65,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Application;
-import org.opoo.press.Category;
-import org.opoo.press.Converter;
-import org.opoo.press.Generator;
-import org.opoo.press.Page;
-import org.opoo.press.Plugin;
-import org.opoo.press.Post;
-import org.opoo.press.RelatedPostsFinder;
-import org.opoo.press.Renderer;
-import org.opoo.press.Site;
-import org.opoo.press.SiteBuilder;
-import org.opoo.press.SiteConfig;
-import org.opoo.press.SlugHelper;
-import org.opoo.press.StaticFile;
-import org.opoo.press.Tag;
-import org.opoo.press.Writable;
-import org.opoo.press.converter.IdentityConverter;
-import org.opoo.press.highlighter.Highlighter;
-import org.opoo.press.plugin.DefaultPlugin;
-import org.opoo.press.slug.DefaultSlugHelper;
-import org.opoo.press.source.NoFrontMatterException;
-import org.opoo.press.source.Source;
-import org.opoo.press.source.SourceEntry;
-import org.opoo.press.source.SourceEntryLoader;
-import org.opoo.press.source.SourceParser;
-import org.opoo.press.source.impl.EHCachedSourceParseImpl;
-import org.opoo.press.source.impl.SourceParserImpl;
-import org.opoo.press.task.RunnableTask;
-import org.opoo.press.task.TaskExecutor;
-import org.opoo.press.template.TitleCaseModel;
-import org.opoo.press.util.ClassUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import freemarker.template.TemplateModel;
 
 /**
  * @author Alex Lin
@@ -82,29 +74,21 @@ import freemarker.template.TemplateModel;
  */
 public class SiteImpl implements Site, SiteBuilder{
 	private static final Logger log = LoggerFactory.getLogger(SiteImpl.class);
-	private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
-	private static final String LAST_BUILD_FILE_SUFFIX = "_lastbuild.properties";
-	
-	private SiteConfigImpl config;
+
+	private ConfigImpl config;
 	private Map<String, Object> data;
-	private File source;
 	private File dest;
 	private File templates;
-	private File assets;
 	private File working;
-	private File site;
-	private List<File> sources;
+	private File basedir;
+	private ValidDirList sources;
+	private ValidDirList assets;
 	
 	private String root;
 	
 	private List<Page> pages;
 	private List<Post> posts;
 	private List<StaticFile> staticFiles;
-	
-//	private Map<String, List<Post>> categories;
-//	private Map<String, List<Post>> tags;
-//	private Map<String, String> categoryNames;
-//	private Map<String, String> tagNames;
 	
 	private Map<String, Category> categories;
 	private List<Tag> tags;
@@ -113,49 +97,49 @@ public class SiteImpl implements Site, SiteBuilder{
 	private boolean showDrafts = false;
 	
 //	private transient List<Generator> generators;
-//	private transient SiteFilter siteFilter;
 	private Renderer renderer;
 //	private List<String> includes;
 //	private List<String> excludes;
-	private RegistryImpl registry;
+//	private RegistryImpl registry;
 	private Locale locale;
-	private Highlighter highlighter;
-	private SlugHelper slugHelper;
+	//private Highlighter highlighter;
+	//private SlugHelper slugHelper;
 	private String permalink;
-	private RelatedPostsFinder relatedPostsFinder;
+	//private RelatedPostsFinder relatedPostsFinder;
 	
-	private File lastBuildInfoFile;
+//	private File lastBuildInfoFile;
 	private TaskExecutor taskExecutor;
+	
+	private Theme theme;
+	//private ThemeManager themeManager;
+	//private PluginManager pluginManager;
+//	private boolean setup = false;
+	private ProcessorsProcessor processors;
 
-	private CacheManager cacheManager;
+	//private Provider provider;
+	private ClassLoader classLoader;
+	private Factory factory;
 
-	SiteImpl(SiteConfigImpl siteConfig) {
-		init(siteConfig);
-		reset();
-		setup();
-		postSetup();
-	}
+	//private SourceEntryLoader sourceEntryLoader;
+	//private SourceParser sourceParser;
 
-	private void postSetup() {
-		registry.getSiteFilter().postSetup(this);
-	}
 
-	private void init(SiteConfigImpl siteConfig){
+	public SiteImpl(ConfigImpl siteConfig) {
+		super();
+		
 		this.config = siteConfig;
 		
-		this.root = (String)config.get("root");
+		this.data = new HashMap<String,Object>(/*config*/);
 		
-		//show drafts
-		showDrafts = config.get("show_drafts", false);
+		this.basedir = config.getBasedir();
+		this.root = config.get("root", "");
+		this.permalink = config.get("permalink");
+		this.showDrafts = config.get("show_drafts", false);
+		boolean debug = config.get("debug", false);
+		
 		if(showDrafts){
 			log.info("+ Show drafts option set 'ON'");
 		}
-		
-		this.permalink = (String) config.get("permalink");
-		this.data = new HashMap<String,Object>(config);
-		
-		//debug option
-		boolean debug = config.get("debug", false);
 		if(debug){
 			for(Map.Entry<String, Object> en: config.entrySet()){
 				String name = en.getKey();
@@ -163,136 +147,139 @@ public class SiteImpl implements Site, SiteBuilder{
 				log.info(name + ": " + en.getValue());
 			}
 		}
+		//theme
+		theme = createTheme();
+
+		//templates
+		templates = theme.getTemplates();
+		log.debug("Template directory: {}", templates);
 		
-		taskExecutor = new TaskExecutor(config);
+		//sources
+		sources = new ValidDirList();
+		sources.addDir(theme.getSource());
+		List<String> sourcesConfig = config.get("source_dirs");
+		sources.addDirs(basedir, sourcesConfig);
+		log.debug("Source directories: {}", sources);
+		
+		//assets
+		assets = new ValidDirList();
+		assets.addDir(theme.getAssets());
+		List<String> assetsConfig = config.get("asset_dirs");
+		assets.addDirs(basedir, assetsConfig);
+		log.debug("Assets directories: {}", assets);
 
-		//cache
-		if(config.get("cache_build", false)){
-			URL url = SiteImpl.class.getClassLoader().getResource("ehcache.xml");
-			log.info("Cache config: {}", url);
-			cacheManager = CacheManager.newInstance(url);
-			set("cacheManager", cacheManager);
-			log.info("Cacheable build...");
+		//target directory
+		String destDir = config.get("dest_dir");
+		this.dest = PathUtils.appendBaseIfNotAbsolute(basedir, destDir);
+		log.debug("Destination directory: {}", dest);
 
-			cacheManager.removeAllCaches();
-			cacheManager.addCache("sourceContentCache");
-			cacheManager.addCache("contentCache");
+		//working directory
+		String workingDir = config.get("work_dir");
+		this.working = PathUtils.appendBaseIfNotAbsolute(basedir, workingDir);
+		log.debug("Working directory: {}", working);
+		
+		reset();
+		setup();
+	}
+
+	private Theme createTheme() {
+		String name = config.get("theme", "default");
+		File themes = new File(config.getBasedir(), "themes");
+		File themeDir = PathUtils.appendBaseIfNotAbsolute(themes, name);
+		if(!themeDir.exists() || !themeDir.isDirectory()){
+			throw new IllegalArgumentException("Theme directory not exists or not valid, please install theme first: "
+					+ themeDir);
+		}
+
+//		PathUtils.checkDir(themeDir, PathUtils.Strategy.THROW_EXCEPTION_IF_NOT_EXISTS);
+		compileTheme(themeDir);
+		return new ThemeImpl(themeDir, this);
+	}
+
+	private void compileTheme(File themeDir){
+		ThemeCompiler themeCompiler = config.get("theme.compiler");
+		if(themeCompiler != null){
+			log.debug("Compile theme by '{}'", themeCompiler.getClass().getName());
+			themeCompiler.compile(themeDir);
+		}else{
+			log.debug("no theme compiler found.");
 		}
 	}
-	
-	private void setupDirs(){
-		//File site = null;
-		Object siteObject = config.get("site");
-		if(siteObject == null){
-			throw new IllegalArgumentException("Site directory not set.");
+
+	public void build(){
+		build(false);
+	}
+
+	public void build(boolean force){
+		if(force){
+			log.info("force build.");
+			buildInternal();
+			return;
 		}
-		if(siteObject instanceof File){
-			site = (File) siteObject;
-		}else{
-			String siteDir = (String) siteObject;
-			site = new File(siteDir);
+
+		if(StaleUtils.isStale(this, false)){
+			buildInternal();
+			return;
 		}
-		
-		if(!site.exists() || !site.isDirectory() || !site.canRead()){
-			throw new IllegalArgumentException("Site directory not exists or not a directory: " + site);
-		}
-		
-		source = new File(site, "source");
-		if(!source.exists() || !source.isDirectory() || !source.canRead()){
-			throw new IllegalArgumentException("Source directory not exists or not a directory.");
-		}
-		
-		@SuppressWarnings("unchecked")
-		List<String> sourceDirs = (List<String>) config.get("sources");
-		if(sourceDirs != null && !sourceDirs.isEmpty()){
-			sources = new ArrayList<File>();
-			for(String src: sourceDirs){
-				File file = new File(site, src);
-				if(file.exists() && file.isDirectory() && file.canRead()){
-					sources.add(file);
-					log.debug("Find extra source directory: {}", file);
-				}else{
-					log.warn("Ignored bad extra source directory: {}", file);
+
+		// only asset file(s) changed.
+		List<File> staleAssets = StaleUtils.getStaleAssets(this);
+		if(staleAssets != null){
+			for(File staleAsset: staleAssets){
+				//copy asset directory to destination directory
+				log.info("Copying stale asset: {}...", staleAsset);
+				try {
+					FileUtils.copyDirectory(staleAsset, dest, buildFilter());
+					StaleUtils.saveLastBuildInfo(this);
+					return;
+				} catch (IOException e) {
+					throw new RuntimeException("Copy stale asset exception: " + staleAsset, e);
 				}
 			}
 		}
-		
-		templates = new File(site, "templates");
-		if(!templates.exists() || !templates.isDirectory()){
-			templates = new File(source, "_templates");
-		}
-		if(!templates.exists() || !templates.isDirectory()){
-			throw new IllegalArgumentException("No valid templates directory in site or source.");
-		}
-		
-		assets = new File(site, "assets");
-		if(!assets.exists() || !assets.isDirectory()){
-			assets = null;
-		}
-		
-		//target directories
-		String destDir = (String) config.get("destination");
-		if(destDir != null){
-			this.dest = new File(destDir);
-		}else{
-			this.dest = new File(site.getParentFile(), "target/public/" + site.getName());
-		}
-//		if(!dest.exists()){
-//			dest.mkdirs();
+
+		log.info("Nothing to build - all site output files are up to date.");
+	}
+
+	@Override
+	public void clean() throws Exception{
+		log.info("Cleaning destination directory " + dest);
+		FileUtils.deleteDirectory(dest);
+
+		log.info("Cleaning working directory " + working);
+		FileUtils.deleteDirectory(working);
+	}
+
+	private void buildInternal(){
+//		if(!setup){
+//			setup = true;
+//			setup();
 //		}
 
-		String workingDir = (String) config.get("working_dir");
-		if(workingDir != null){
-			this.working = new File(workingDir);
-		}else{
-			//String tmpdir = System.getProperty("java.io.tmpdir");
-			//this.working = new File(tmpdir, "opoopress_cache/" + site.getName());
-			this.working = new File(site.getParentFile(), "target/work/" + site.getName());
-		}
-//		if(!working.exists()){
-//			working.mkdirs();
-//		}
-		
-		if(dest.equals(source) || source.getAbsolutePath().startsWith(dest.getAbsolutePath())){
-			throw new IllegalArgumentException("Destination directory cannot be or contain the Source directory.");
-		}
-		
-		this.lastBuildInfoFile = new File(working, site.getName() + LAST_BUILD_FILE_SUFFIX);
-	}
-	
-	public void build(){
 		reset();
 		read();
 		generate();
 		render();
 		cleanup();
 		write();
-		
-		saveLastBuildInfo();
+
+		StaleUtils.saveLastBuildInfo(this);
 	}
 
 	void reset(){
-		this.time = (Date) config.get("time");
-		if(time == null){
-			time = new Date();
-		}
+		this.time = config.get("time", new Date());
 		this.pages = new ArrayList<Page>();
 		this.posts = new ArrayList<Post>();
-		//在多线程中 add
+		//Call #add() in multi-threading
 		this.staticFiles = Collections.synchronizedList(new ArrayList<StaticFile>());
 		
-		resetCategories();
-		resetTags();
-
-		if(cacheManager != null){
-			cacheManager.clearAll();
-		}
+//		resetCategories();
+//		resetTags();
 	}
 	
 	void resetCategories(){
 		this.categories = new LinkedHashMap<String,Category>();
-		@SuppressWarnings("unchecked")
-		Map<String,String> names = (Map<String,String>) config.get("category_names");
+		Map<String,String> names = config.get("category_names");
 		if(names == null || names.isEmpty()){
 			return;
 		}
@@ -324,8 +311,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	void resetTags(){
 		this.tags = new ArrayList<Tag>();
-		@SuppressWarnings("unchecked")
-		Map<String,String> names = (Map<String, String>) config.get("tag_names");
+		Map<String,String> names = config.get("tag_names");
 		if(names == null || names.isEmpty()){
 			return;
 		}
@@ -336,70 +322,121 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 	
 	void setup(){
-		setupDirs();
-		
-		String localeString = (String) config.get("locale");
+		//ensure source not in destination
+		for(File source: sources){
+			source = PathUtils.canonical(source);
+			if(dest.equals(source) || source.getAbsolutePath().startsWith(dest.getAbsolutePath())){
+				throw new IllegalArgumentException("Destination directory cannot be or contain the Source directory.");
+			}
+		}
+
+		//locale
+		String localeString = config.get("locale");
 		if(localeString != null){
 			locale = LocaleUtils.toLocale(localeString);
 			log.debug("Set locale: " + locale);
 		}
-		
-		String highlighterClassName = (String) config.get("highlighter");
-		if(highlighterClassName != null){
-			highlighter = (Highlighter) ClassUtils.newInstance(highlighterClassName, this);
-			log.debug("Set highlighter: " + highlighterClassName);
-		}
-		
-		//slug
-		String slugHelperClassName = (String) config.get("slugHelper");
-		if(slugHelperClassName == null){
-			slugHelper = new DefaultSlugHelper();
-			log.debug("Set SlugHelper: " + DefaultSlugHelper.class.getName());
-		}else{
-			slugHelper = Application.getContext().get(slugHelperClassName, SlugHelper.class);
-			if(slugHelper != null){
-				log.debug("Set SlugHelper from Context object: " + slugHelper);
-			}else{
-				slugHelper = (SlugHelper) ClassUtils.newInstance(slugHelperClassName, this);
-				log.debug("Set SlugHelper: " + slugHelperClassName);
-			}
-		}
-		
-		this.registry = new RegistryImpl(this);
-		//register default converter
-		this.registry.registerConverter(new IdentityConverter());
-		
-		//plugins
-		new DefaultPlugin().initialize(registry);
-		
-		@SuppressWarnings("unchecked")
-		List<String> pluginClassNames = (List<String>) config.get("plugins");
-		if(pluginClassNames != null && !pluginClassNames.isEmpty()){
-			for(String className: pluginClassNames){
-				Plugin p = (Plugin) ClassUtils.newInstance(className);
-				log.debug("Initializing plugin: {}", p.getClass().getName());
-				p.initialize(registry);
-			}
-		}
-		
+
+		//object instances
+		classLoader = createClassLoader(config, theme);
+		taskExecutor = new TaskExecutor(config);
+		factory = FactoryImpl.createInstance(this);
+
+		processors = new ProcessorsProcessor(factory.getPluginManager().getProcessors());
+
 		//Construct RendererImpl after initializing all plugins
-		this.renderer = new RendererImpl(this, registry.getTemplateLoaders());
-		
-		//RelatedPostsFinder 
-		String relatedPostsFinderClassName = (String) config.get("relatedPostsFinder");
-		if(relatedPostsFinderClassName != null){
-			relatedPostsFinder = (RelatedPostsFinder) ClassUtils.newInstance(relatedPostsFinderClassName, this);
-			log.debug("Set relatedPostsFinder: {}", relatedPostsFinderClassName);
-		}else{
-			//Use CosineSililarity
-			relatedPostsFinder = new CosineSimilarityRelatedPostsFinder();
-			((CosineSimilarityRelatedPostsFinder) relatedPostsFinder).initialize(this);
-			log.debug("Set relatedPostsFinder: {}", CosineSimilarityRelatedPostsFinder.class.getName());
+		renderer = factory.createRenderer(this);
+	}
+
+	private ClassLoader createClassLoader(Config config, Theme theme) {
+		log.debug("Create site ClassLoader.");
+
+		ClassLoader parent = SiteImpl.class.getClassLoader();
+		if(parent == null){
+			parent = ClassLoader.getSystemClassLoader();
+		}
+
+
+		String sitePluginDir = config.get("plugin_dir");
+		String themePluginDir = (String) theme.get("plugin_dir");
+
+		List<File> classPathEntries = new ArrayList<File>(2);
+
+		if(StringUtils.isNotBlank(sitePluginDir)){
+			File sitePlugins = PathUtils.canonical(new File(config.getBasedir(), sitePluginDir));
+			addClassPathEntries(classPathEntries, sitePlugins);
+		}
+
+		if(StringUtils.isNotBlank(themePluginDir)){
+			File themePlugins = PathUtils.canonical(new File(theme.getPath(), themePluginDir));
+			addClassPathEntries(classPathEntries, themePlugins);
+		}
+
+		//theme classes
+		File themeClasses = new File(theme.getPath(), "target/classes");
+		File themeSrc = new File(theme.getPath(), "src");
+		if(themeSrc.exists() && themeClasses.exists() && themeClasses.isDirectory()){
+			classPathEntries.add(themeClasses);
+		}
+
+		//theme target/plugins
+		File themeTargetPlugins = new File(theme.getPath(), "target/plugins");
+		if(themeTargetPlugins.exists() && themeTargetPlugins.list().length > 0){
+			addClassPathEntries(classPathEntries, themeTargetPlugins);
+		}
+
+		if(classPathEntries.isEmpty()){
+			log.info("No custom classpath entries.");
+			return parent;
+		}
+
+		URL[] urls = new URL[classPathEntries.size()];
+
+		try {
+			for(int i = 0 ; i < classPathEntries.size() ; i++){
+				urls[i] = classPathEntries.get(i).toURI().toURL();
+			}
+		}catch (MalformedURLException e){
+			throw new RuntimeException(e);
+		}
+
+		return new URLClassLoader(urls, parent);
+	}
+
+	private void addClassPathEntries(List<File> classPathEntries, File dir){
+		if(dir.exists()){
+			File[] files = dir.listFiles(new ValidPluginClassPathEntryFileFilter());
+			if (files != null && files.length > 0) {
+				classPathEntries.addAll(Arrays.asList(files));
+			}
 		}
 	}
 
+//	@Deprecated
+//	public <T> T instantiate(Class<T> clazz){
+//		return instantiate(clazz, null);
+//	}
+//	@Deprecated
+//	public <T> T instantiate(Class<T> clazz, String hint){
+//		String className = provider.getClassName(clazz.getName(), hint);
+//		if(StringUtils.isBlank(className) || "none".equalsIgnoreCase(className)){
+//			return null;
+//		}
+//		return instantiate(className);
+//	}
+//	@Deprecated
+//	public <T> T instantiate(String className){
+//		T t = ClassUtils.newInstance(className, classLoader, this, config);
+//		log.debug("New '{}' instance: {}", className, t);
+//		return t;
+//	}
+
 
 	void read(){
+		//read categories and tags from configuration
+		resetCategories();
+		resetTags();
+		
 		Runnable t1 = new Runnable(){
 			public void run() {
 				readSources();
@@ -419,26 +456,21 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	private void readSources(){
 		log.info("Reading sources ...");
-		
-		final SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
-		//final SourceParser parser = Application.getContext().getSourceParser();
-		final SourceParser parser = cacheManager != null ? new EHCachedSourceParseImpl(cacheManager) : new SourceParserImpl();
+		final SourceEntryLoader sourceEntryLoader = factory.getSourceEntryLoader();
+		final SourceParser sourceParser = factory.getSourceParser();
 
 		//load sources and load static files
-		
 		FileFilter fileFilter = buildFilter();
-		List<SourceEntry> list = loader.loadSourceEntries(source, fileFilter);
-		if(sources != null && !sources.isEmpty()){
-			for(File src: sources){
-				List<SourceEntry> tempList = loader.loadSourceEntries(src, fileFilter);
-				if(tempList != null && !tempList.isEmpty()){
-					list.addAll(tempList);
-				}
+		List<SourceEntry> list = new ArrayList<SourceEntry>();
+		for(File src: sources){
+			List<SourceEntry> tempList = sourceEntryLoader.loadSourceEntries(src, fileFilter);
+			if(tempList != null && !tempList.isEmpty()){
+				list.addAll(tempList);
 			}
 		}
 		
 		for(SourceEntry en: list){
-			read(en, parser);
+			read(en, sourceParser);
 		}
 		
 		Collections.sort(posts);
@@ -478,39 +510,37 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 	
 	private void readStaticFiles(){
-		if(assets != null){
-			log.info("Reading assets ...");
-			SourceEntryLoader loader = Application.getContext().getSourceEntryLoader();
-			FileFilter fileFilter = buildFilter();
-			List<SourceEntry> list = loader.loadSourceEntries(assets, fileFilter);
-			for(SourceEntry se: list){
-				this.staticFiles.add(new StaticFileImpl(this, se));
+		log.info("Reading assets ...");
+		final SourceEntryLoader sourceEntryLoader = factory.getSourceEntryLoader();
+		FileFilter fileFilter = buildFilter();
+		for(File assetDir: assets){
+			List<SourceEntry> tempList = sourceEntryLoader.loadSourceEntries(assetDir, fileFilter);
+			for(SourceEntry se: tempList){
+				log.debug("read static file {}", se.getFile());
+				staticFiles.add(new StaticFileImpl(this, se));
 			}
 		}
 	}
-
 
 	/**
 	 * 
 	 */
 	private void postRead() {
-		registry.getSiteFilter().postRead(this);
+		processors.postRead(this);
 	}
 
-	/**
-	 * @param en
-	 */
+
 	private void read(SourceEntry en, SourceParser parser) {
 		try {
 			Source src = parser.parse(en);
-			log.debug("read source " + src.getSourceEntry().getFile());
+			log.debug("read source {}", src.getSourceEntry().getFile());
 			
 			Map<String, Object> map = src.getMeta();
 			String layout = (String) map.get("layout");
 			if("post".equals(layout)){
 				readPost(src);
 			}else{
-				pages.add(new PageImpl(this, src));
+				pages.add(factory.createPage(this, src));
 			}
 		} catch (NoFrontMatterException e) {
 			this.staticFiles.add(new StaticFileImpl(this, en));
@@ -520,10 +550,10 @@ public class SiteImpl implements Site, SiteBuilder{
 	private void readPost(Source src){
 		if(isDraft(src.getMeta())){
 			if(showDrafts){
-				posts.add(new Draft(this, src));
+				posts.add(factory.createDraft(this, src));
 			}
 		}else{
-			posts.add(new PostImpl(this, src));
+			posts.add(factory.createPost(this, src));
 		}
 	}
 	
@@ -536,10 +566,8 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 	
 	FileFilter buildFilter(){
-		@SuppressWarnings("unchecked")
-		final List<String> includes = (List<String>) config.get("includes");
-		@SuppressWarnings("unchecked")
-		final List<String> excludes = (List<String>) config.get("excludes");
+		final List<String> includes = config.get("includes");
+		final List<String> excludes = config.get("excludes");
 		return new FileFilter(){
 			@Override
 			public boolean accept(File file) {
@@ -568,7 +596,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	
 	void generate(){
-		for(Generator g: registry.getGenerators()){
+		for(Generator g: factory.getPluginManager().getGenerators()){
 			g.generate(this);
 		}
 		postGenerate();
@@ -578,7 +606,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 * 
 	 */
 	private void postGenerate() {
-		registry.getSiteFilter().postGenerate(this);
+		processors.postGenerate(this);
 	}
 
 	void render(){
@@ -622,86 +650,64 @@ public class SiteImpl implements Site, SiteBuilder{
 			}
 		});
 		postRenderPages();
-		
-		postRender();
-		
 	}
 	
 	/**
 	 * @param post
 	 */
 	private void postConvertPost(Post post) {
-		registry.getSiteFilter().postConvertPost(this, post);
+		processors.postConvertPost(this, post);
 	}
 
 	/**
 	 * @param page
 	 */
 	private void postConvertPage(Page page) {
-		registry.getSiteFilter().postConvertPage(this, page);
+		processors.postConvertPage(this, page);
 	}
 
 	/**
 	 * @param post
 	 */
 	private void postRenderPost(Post post) {
-		registry.getSiteFilter().postRenderPost(this, post);
+		processors.postRenderPost(this, post);
 	}
 
 	/**
 	 * 
 	 */
 	private void postRenderPosts() {
-		registry.getSiteFilter().postRenderAllPosts(this);
+		processors.postRenderAllPosts(this);
 	}
 
 	/**
 	 * @param page
 	 */
 	private void postRenderPage(Page page) {
-		registry.getSiteFilter().postRenderPage(this, page);
+		processors.postRenderPage(this, page);
 	}
 
 	/**
 	 * 
 	 */
 	private void postRenderPages() {
-		registry.getSiteFilter().postRenderAllPages(this);
+		processors.postRenderAllPages(this);
 	}
 
-	/**
-	 * @deprecated Will be removed in the next main release.
-	 */
-	private void postRender() {
-		registry.getSiteFilter().postRender(this);
-	}
 
 	Map<String,Object> buildRootMap(){
 		Map<String, Object> map = new HashMap<String,Object>();
 		map.put("site", this);
-		
-//		String rootUrl = (String)config.get("root");
 		map.put("root_url", getRoot());
-		try{
-			String version = Site.class.getPackage().getSpecificationVersion();
-			if(StringUtils.isNotBlank(version)){
-				map.put("version", version);
-			}
-		}catch(Exception e){
-			//map.put("version", "unkown_version");
-		}
-		if(map.get("version") == null){
-			map.put("version", "unkown_version");
-		}
+		map.put("basedir", getRoot());
+		map.put("opoopress", config.get("opoopress"));
 		
-		Map<String, TemplateModel> models = registry.getTemplateModels();
-		if(models != null && !models.isEmpty()){
-			map.putAll(models);
-		}
+//		Map<String, TemplateModel> models = factory.getTemplateModels();
+//		if(models != null && !models.isEmpty()){
+//			map.putAll(models);
+//		}
 		
-		TitleCaseModel model = new TitleCaseModel(this);
-		map.put("titleCase", model);
-		map.put("titlecase", model);
+		map.put("theme", theme);
 		return map;
 	}
 	
@@ -722,19 +728,18 @@ public class SiteImpl implements Site, SiteBuilder{
 		for(StaticFile staticFile: staticFiles){
 			files.add(staticFile.getOutputFile(dest));
 		}
-
+		
 		log.debug("Files in target: {}", destFiles.size());
-		log.debug("Asset files in src: {}", files.size());
+		log.debug("Assets file in src: {}", files.size());
 
+		
 		//find obsolete files
 		for(File file: files){
 			destFiles.remove(file);
 		}
 //		destFiles.removeAll(files);
 		
-		if(log.isDebugEnabled()){
-			log.debug("Files in target will be deleted: " + destFiles.size());
-		}
+		log.debug("Files in target will be deleted: {}", destFiles.size());
 
 		//delete obsolete files
 		if(!destFiles.isEmpty()){
@@ -748,9 +753,7 @@ public class SiteImpl implements Site, SiteBuilder{
 			taskExecutor.run(destFiles, new RunnableTask<File>() {
 				public void run(File file) {
 					FileUtils.deleteQuietly(file);
-					if(IS_DEBUG_ENABLED){
-						log.debug("Delete file " + file);
-					}
+					log.debug("File deleted: {}", file);
 				}
 			});
 		}
@@ -786,8 +789,8 @@ public class SiteImpl implements Site, SiteBuilder{
 	 * 
 	 */
 	private void postCleanup() {
+		processors.postCleanup(this);
 	}
-
 
 	void write(){
 		log.info("Writing {} posts, {} pages, and {} static files ...", 
@@ -845,7 +848,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 * 
 	 */
 	private void postWrite() {
-		registry.getSiteFilter().postWrite(this);
+		processors.postWrite(this);
 	}
 
 	/**
@@ -866,18 +869,10 @@ public class SiteImpl implements Site, SiteBuilder{
 	 * @see org.opoo.press.Site#getConfig()
 	 */
 	@Override
-	public SiteConfig getConfig() {
+	public Config getConfig() {
 		return config;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Site#getSouce()
-	 */
-	@Override
-	public File getSource() {
-		return source;
-	}
-	
 	@Override
 	public List<File> getSources(){
 		return sources;
@@ -904,7 +899,19 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	public Object get(String name){
-		return data.get(name);
+		if(data.containsKey(name)) {
+			return data.get(name);
+		}
+
+		if(config.containsKey(name)){
+			return config.get(name);
+		}
+
+		if(theme != null){
+			return theme.get(name);
+		}
+
+		return null;
 	}
 	
 	public void set(String name, Object value){
@@ -926,7 +933,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	@Override
-	public File getAssets() {
+	public List<File> getAssets() {
 		return assets;
 	}
 
@@ -937,7 +944,7 @@ public class SiteImpl implements Site, SiteBuilder{
 
 	@Override
 	public Converter getConverter(Source source) {
-		return registry.getConverter(source);
+		return factory.getPluginManager().getConverter(source);
 	}
 
 	/* (non-Javadoc)
@@ -956,17 +963,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		return locale;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Site#getHighlighter()
-	 */
-	@Override
-	public Highlighter getHighlighter() {
-		return highlighter;
-	}
-	
-	public RelatedPostsFinder getRelatedPostsFinder(){
-		return relatedPostsFinder;
-	}
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Site#getCategories()
@@ -1008,7 +1004,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 */
 	@Override
 	public String toSlug(String tagName) {
-		return slugHelper.toSlug(tagName);
+		return factory.getSlugHelper().toSlug(tagName);
 	}
 
 	/* (non-Javadoc)
@@ -1016,7 +1012,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	 */
 	@Override
 	public String toNicename(String categoryName) {
-		return slugHelper.toSlug(categoryName);
+		return factory.getSlugHelper().toSlug(categoryName);
 	}
 
 	/* (non-Javadoc)
@@ -1047,7 +1043,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(tags == null || tags.isEmpty()){
 			return null;
 		}
-		for(Tag tag: tags){
+		for(Tag tag: new ArrayList<Tag>(tags)){
 			if(tag.isNameOrSlug(tagNameOrSlug)){
 				return tag;
 			}
@@ -1103,72 +1099,95 @@ public class SiteImpl implements Site, SiteBuilder{
 	/**
 	 * @return the site
 	 */
-	public File getSite() {
-		return site;
+	@Override
+	public File getBasedir() {
+		return basedir;
 	}
-	
+
+	@Override
+	public ClassLoader getClassLoader(){
+		return classLoader;
+	}
+
+	@Override
+	public Factory getFactory(){
+		return factory;
+	}
+
+	@Override
+	public Observer getObserver() {
+		return new SiteObserver(this);
+	}
+
 	/**
 	 * @return the showDrafts
 	 */
 	public boolean showDrafts() {
 		return showDrafts;
 	}
-	
-	private void saveLastBuildInfo(){
-		Properties props = new Properties();
-		props.setProperty("build_time", String.valueOf(System.currentTimeMillis()));
-		props.setProperty("show_drafts", String.valueOf(showDrafts));
-		
-		FileWriter writer = null;
-		try {
-			writer = new FileWriter(lastBuildInfoFile);
-			props.store(writer, "OpooPress last build information for site: " + site.getName());
-		} catch (IOException e) {
-			throw new RuntimeException("Write last build info exception", e);
-		} finally{
-			IOUtils.closeQuietly(writer);
-		}
+
+
+	/* (non-Javadoc)
+	 * @see org.opoo.press.Site#getTheme()
+	 */
+	@Override
+	public Theme getTheme() {
+		return theme;
 	}
 	
-	public BuildInfo getLastBuildInfo(){
-		if(lastBuildInfoFile == null || !lastBuildInfoFile.exists() 
-				|| !lastBuildInfoFile.isFile() || !lastBuildInfoFile.canRead()){
-			log.debug("No build info file.");
-			return null;
-		}
-		FileReader reader = null;
-		try {
-			reader = new FileReader(lastBuildInfoFile);
-			Properties props = new Properties();
-			props.load(reader);
-			
-			String val1 = props.getProperty("show_drafts");
-			String val2 = props.getProperty("build_time");
-			if(StringUtils.isBlank(val2) || StringUtils.isBlank(val1)){
-				log.debug("No show_drafts or build_time in properties file: " + lastBuildInfoFile);
-				return null;
+	ProcessorsProcessor getProcessors(){
+		return processors;
+	}
+	
+	static class ValidDirList extends ArrayList<File>{
+		private static final long serialVersionUID = 6306507738477638252L;
+		public ValidDirList addDir(File dir){
+			if(PathUtils.isValidDirectory(dir)){
+				add(dir);
 			}
-			
-			BuildInfoImpl info = new BuildInfoImpl();
-			info.buildTime = Long.parseLong(val2);
-			info.showDrafts = Boolean.parseBoolean(val1);
-			return info;
-		} catch (IOException e) {
-			throw new RuntimeException("Read last build info exception", e);
-		} finally{
-			IOUtils.closeQuietly(reader);
+			return this;
+		}
+		
+		public ValidDirList addDir(File base, String path){
+			return addDir(new File(base, path));
+		}
+		
+		public ValidDirList addDirs(File base, List<String> paths){
+			for(String path: paths){
+				addDir(base, path);
+			}
+			return this;
 		}
 	}
-	
-	static class BuildInfoImpl implements BuildInfo{
-		private long buildTime;
-		private boolean showDrafts;
-		
-		public long getBuildTime() {
-			return buildTime;
-		}
-		public boolean showDrafts() {
-			return showDrafts;
+
+	static class ValidPluginClassPathEntryFileFilter implements FileFilter {
+		/* (non-Javadoc)
+         * @see java.io.FileFilter#accept(java.io.File)
+         */
+		@Override
+		public boolean accept(File file) {
+			String name = file.getName();
+			char firstChar = name.charAt(0);
+			if (firstChar == '.' || firstChar == '_' || firstChar == '#') {
+				return false;
+			}
+			char lastChar = name.charAt(name.length() - 1);
+			if (lastChar == '~') {
+				return false;
+			}
+			if (file.isHidden()) {
+				return false;
+			}
+			if (file.isDirectory()) {
+				return true;
+			}
+			if (file.isFile()) {
+				name = name.toLowerCase();
+				if (name.endsWith(".jar") || name.endsWith(".zip")) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }

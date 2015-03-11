@@ -1,0 +1,191 @@
+# OpooPress 站点配置文件
+
+# ----------------------- #
+#      基本属性            #
+# ----------------------- #
+
+# 站点标题
+title: 我的 OpooPress 博客
+
+# 站点附标题
+subtitle: 又一个 OpooPress 站点
+
+# 作者，您的姓名
+author: 您的姓名
+
+# 站点描述，通常用作页面的 description 属性值
+description: "OpooPress 博客系统是一个基于 Java 的静态博客（网站）生成器。"
+
+# 站点关键字，通常用作页面的 keywords 属性值
+keywords: "OpooPress, 博客"
+
+# 地区及语言，参考 java.util.Locale
+# http://docs.oracle.com/javase/7/docs/api/java/util/Locale.html
+locale: zh_CN
+
+
+# ----------------------- #
+#      URL                #
+# ----------------------- #
+
+# 站点的 url
+url: http://yoursite.com
+
+# 站点的根目录。
+# 如果要发布站点到子目录，如 'http://yoursite.com/blogs'，则设置 root 的值为 '/blogs'.
+# 注意，不需要在子目录后面加 '/'。
+# 默认值 ''
+# root: ''
+
+# 文章的固定链接格式
+# 概属性支持文章头部 front-matter 所有变量，以及 ${year}, ${month}, ${day}, ${hour},${minute}, ${second},
+# ${name}, ${pathToFile}, ${fileName} 等变量。
+# 默认值 '/article/${year}/${month}/${name}.html'
+# permakink: ‘/article/${year}/${month}/${name}.html’
+
+# 固定链接的符号
+# 默认值 '&infin;'
+# permalink_label: '&infin;'
+
+#
+# permalink_label_feed: "&#9875; 固定链接"
+
+
+# ----------------------- #
+#   目录结构               #
+# ----------------------- #
+# 默认站点目录结构
+#(.)
+# |
+# +- pom.xml
+# |
+# +- config.yml
+# |
+# +- assets/
+# |
+# +- pages/
+# |
+# +- posts/
+# |
+# +- plugins/
+# |
+# +- themes/
+#     |
+#     +- default/
+#     |    |
+#     |    +- theme.yml
+#     |    |
+#     |    +- ...
+#     |
+#     +- another-theme/
+
+# 静态资源所在的目录，用于放置网站的静态资源（图片、css、js文件等）。
+# 默认值 [assets]
+# asset_dirs: [assets]
+
+# 站点源文件(文章，页面等)目录，用于放置内容。
+# 默认值 [pages, posts]
+# source_dirs: [pages, posts]
+
+# 插件所在的目录
+# 默认值 'plugins'
+# plugin_dir: plugins
+
+# 生成的站点的输出目录
+# 默认值 'target/public'
+# dest_dir: target/public
+
+# 工作目录，站点生成过程使用的目录
+# 默认值 'target/work'
+# work_dir: target/work
+
+
+# ----------------------- #
+#    内容                  #
+# ----------------------- #
+
+# 新文章文件路径及文件名。
+# 支持变量: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
+# 其中 format 默认值  'markdown'
+#
+# 该属性默认值 'posts/${year}-${month}-${day}-${name}.${format}'
+# new_post: 'posts/${year}-${month}-${day}-${name}.${format}'
+
+# 新页面文件路径及文件名。
+# 支持变量: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
+# 其中 format 默认值  'markdown'
+#
+# 该属性默认值 'pages/${name}.${format}'
+# new_page: 'pages/${name}.${format}'
+
+# 是否将标题单词首字母大写
+# 默认值 false
+# titlecase: false
+
+# 摘要在文章中的分隔标识
+# 默认值 ‘<!--more-->’
+# excerpt_separator: '<!--more-->'
+
+
+# ----------------------- #
+#   分类和标签             #
+# ----------------------- #
+
+# 生成的站点的分类目录，默认值 '/category'
+# category_dir: /category
+
+# 分类的 nicename 和 name 的对照关系，Map 类型。
+# nicename 相当于 slug，通常用于组成 URL，小写且不含空格，name 用于显示。
+# OpooPress 会自行处理未在此处指明的的分类目录，所以不必定义所有的分类。
+# 无默认值，非必要属性。
+# category_names: {"opoopress": "OpooPress", "blog": "博客"}
+
+# 生成的站点的标签目录，默认值 '/tag'
+# tag_dir: /tag
+
+# 标签的 slug 与 name 的对照关系，Map 类型。
+# slug 用于组成 URL，小写且不含空格，name 用于显示。
+# OpooPress 会自行处理未在此处指明的的标签，所以不必定义所有的标签。
+# 无默认值，非必要属性。
+# tag_names: {"opensource":"开源项目"}
+
+
+# ----------------------- #
+#   分页和限制             #
+# ----------------------- #
+
+# 首页及索引页面每页显示的文章数，默认值 10
+# paginate: 10
+
+# 最近文章数量，默认值 5
+# recent_posts: 5
+
+# 相关文章数量，默认值 5
+# related_posts: 5
+
+
+# ----------------------- #
+#   日期格式                #
+# ----------------------- #
+
+# 默认格式 'yyyy-MM-dd'(参考java日期格式)
+# 可指定特殊值 ‘ordinal’，相当于 'MMM d yyyy'格式，输出如 ‘四月 15 2013’。
+# 可指定 "yyyy年MM月dd日"，参考 http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html.
+# date_format: "ordinal"
+
+# 时间格式，参考 http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html.
+# time_format: 'HH:mm:ss'
+
+
+# ----------------------- #
+#   Deployment Settings   #
+# ----------------------- #
+
+# 发布信息。
+# 可将站点同时发布到多个库(服务器)。
+# 每个库的属性可参考 Maven pom 中的 distributionManagement 配置和 settings 的 server 配置。
+# 参考 http://maven.apache.org/pom.html#Distribution_Management
+# deploy:
+# - {id: server1, url: 'scp://server1.com/var/www/html'}
+# - {id: server2, url: 'scp://server2.com/var/www/html'}
+# - {id: local, url: 'file://D:/www'}

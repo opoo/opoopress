@@ -15,28 +15,6 @@
  */
 package org.opoo.press.impl;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.opoo.press.Renderer;
-import org.opoo.press.Site;
-import org.opoo.press.SiteConfig;
-import org.opoo.press.source.SourceEntry;
-
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
@@ -45,11 +23,30 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.opoo.press.Config;
+import org.opoo.press.Renderer;
+import org.opoo.press.Site;
+import org.opoo.press.SourceEntry;
+import org.opoo.util.PathUtils;
+import org.opoo.util.PathUtils.Strategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Alex Lin
  *
  */
+@Deprecated
 public class RendererImpl implements Renderer {
 	private static final Logger log = LoggerFactory.getLogger(RendererImpl.class);
 	
@@ -59,11 +56,6 @@ public class RendererImpl implements Renderer {
 	private File workingTemplateDir;
 	private long start = System.currentTimeMillis();
 	
-	/**
-	 * @param site 
-	 * @param templateLoaders
-	 */
-	@SuppressWarnings("unchecked")
 	public RendererImpl(Site site, List<TemplateLoader> templateLoaders) {
 		super();
 		this.site = site;
@@ -72,10 +64,8 @@ public class RendererImpl implements Renderer {
 		
 		//Working directory
 		workingTemplateDir = new File( site.getWorking(), "templates");
-		if(!workingTemplateDir.exists()){
-			workingTemplateDir.mkdirs();
-		}
-		log.debug("Working template directory: " + workingTemplateDir.getAbsolutePath());
+		PathUtils.checkDir(workingTemplateDir, Strategy.CREATE_IF_NOT_EXISTS);
+		log.debug("Working template directory: {}", workingTemplateDir.getAbsolutePath());
 		
 		//configuration
 		configuration = new Configuration();
@@ -90,8 +80,8 @@ public class RendererImpl implements Renderer {
 		//Add import i18n messages template.
 		configuration.addAutoImport("i18n", "i18n/messages.ftl");
 		
-		SiteConfig config = site.getConfig();
-		List<String> autoIncludeTemplates = (List<String>) config.get("auto_include_templates");
+		Config config = site.getConfig();
+		List<String> autoIncludeTemplates = config.get("auto_include_templates");
 		if(autoIncludeTemplates != null && !autoIncludeTemplates.isEmpty()){
 			for(String template: autoIncludeTemplates){
 				configuration.addAutoInclude(template);
@@ -99,7 +89,7 @@ public class RendererImpl implements Renderer {
 			}
 		}
 		
-		Map<String,String> autoImportTemplates = (Map<String, String>) config.get("auto_import_templates");
+		Map<String,String> autoImportTemplates = config.get("auto_import_templates");
 		if(autoImportTemplates != null && !autoImportTemplates.isEmpty()){
 			for(Map.Entry<String, String> en: autoImportTemplates.entrySet()){
 				configuration.addAutoImport(en.getKey(), en.getValue());
@@ -108,24 +98,22 @@ public class RendererImpl implements Renderer {
 		}
 	}
 	
-	private TemplateLoader buildTemplateLoader(List<TemplateLoader> loaders){
+	private TemplateLoader buildTemplateLoader(List<TemplateLoader> templateLoaders){
 		try {
 			FileTemplateLoader loader1 = new FileTemplateLoader(workingTemplateDir);
 			FileTemplateLoader loader2 = new FileTemplateLoader(templateDir);
 			ClassTemplateLoader loader3 = new ClassTemplateLoader(RendererImpl.class, "/org/opoo/press/templates");
-				
-			if(loaders == null){
-				loaders = new ArrayList<TemplateLoader>();
-			}
-			if(loaders != null){
-				loaders.add(0, loader3);
-				loaders.add(0, loader2);
-				loaders.add(0, loader1);
-			}
+
+			List<TemplateLoader> loaders = (templateLoaders == null) ? new ArrayList<TemplateLoader>()
+					: new ArrayList<TemplateLoader>(templateLoaders);
+
+			loaders.add(0, loader3);
+			loaders.add(0, loader2);
+			loaders.add(0, loader1);
+
 			TemplateLoader[] loaders2 = loaders.toArray(new TemplateLoader[loaders.size()]);
 			//TemplateLoader loader = new MultiTemplateLoader(new TemplateLoader[]{loader1, loader2});
-			TemplateLoader loader = new MultiTemplateLoader(loaders2);
-			return loader;
+			return new MultiTemplateLoader(loaders2);
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -149,49 +137,48 @@ public class RendererImpl implements Renderer {
 	
 	@Override
 	public void render(String templateName, Map<String, Object> rootMap, Writer out){
-		Template template = null;
+		log.debug("Rendering template {}", templateName);
 		try {
-			template = configuration.getTemplate(templateName, "UTF-8");
+			Template template = configuration.getTemplate(templateName, "UTF-8");
+			process(template, rootMap, out);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} catch (TemplateException e) {
+			throw new RuntimeException(e);
 		}
-		
-		process(template, rootMap, out);
 	}
 	
-	private void process(Template template, Map<String,Object> rootMap, Writer out){
+	private void process(Template template, Map<String,Object> rootMap, Writer out) throws IOException, TemplateException {
 		//if(log.isDebugEnabled()){
 			//log.debug("Template " + template);
 		//}
 				
-		try {
+//		try {
 			template.process(rootMap, out);
 			out.flush();
-		} catch (TemplateException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+//		} catch (TemplateException e) {
+//			throw new RuntimeException(e);
+//		} catch (IOException e) {
+//			throw new RuntimeException(e);
+//		}
 	}
 	
 	public String prepareWorkingTemplate(String layout, boolean isValidLayout, 
 			String content, boolean isContentRenderRequired, SourceEntry entry) {
-		log.debug("Prepare template for " + entry.getFile());
+		log.debug("Prepare template for {}", entry.getFile());
 
 		String name = isContentRenderRequired ? buildTemplateName(layout, entry) : getLayoutWorkingTemplate(layout);
 		File targetTemplateFile = new File(this.workingTemplateDir, name);
 		
 		if(targetTemplateFile.exists() && targetTemplateFile.lastModified() >= entry.getLastModified()){
-			log.debug("Working template exists and newer than source file: " + targetTemplateFile);
+			log.debug("Working template exists and newer than source file: {}", targetTemplateFile);
 		}else{
 			StringBuffer templateContent = buildTemplateContent(layout, isValidLayout, 
 					content, isContentRenderRequired);
 			try {
 				FileUtils.write(targetTemplateFile, templateContent, "UTF-8");
 				//targetTemplateFile.setLastModified(sourceEntry.getLastModified());
-				if(log.isDebugEnabled()){
-					log.debug("Create working template: " + targetTemplateFile);
-				}
+				log.debug("Create working template: {}", targetTemplateFile);
 			} catch (IOException e) {
 				throw new RuntimeException("Write working template error: " + targetTemplateFile, e);
 			}
@@ -243,13 +230,15 @@ public class RendererImpl implements Renderer {
 	
 	@Override
 	public void renderContent(String templateContent, Map<String, Object> rootMap, Writer out){
-		Template template = null;
+		log.debug("Rendering content...");
 		try {
-			template = new Template("CT" + (start++), new StringReader(templateContent), configuration, "UTF-8");
+			Template template = new Template("CT" + (start++), new StringReader(templateContent), configuration, "UTF-8");
+			process(template, rootMap, out);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} catch (TemplateException e) {
+			throw new RuntimeException(e);
 		}
-		process(template, rootMap, out);
 	}
 
 	@Override
@@ -301,15 +290,13 @@ public class RendererImpl implements Renderer {
 			
 			File targetTemplateFile = new File(this.workingTemplateDir, name);
 			if(targetTemplateFile.exists() && targetTemplateFile.lastModified() >= layoutFile.lastModified()){
-				log.debug("Layout template exists and newer than source file: " + targetTemplateFile);
+				log.debug("Layout template exists and newer than source file: {}", targetTemplateFile);
 			}else{
 				StringBuffer templateContent = buildTemplateContent(layout, true, null, false);
 				try {
 					FileUtils.write(targetTemplateFile, templateContent, "UTF-8");
 					//targetTemplateFile.setLastModified(sourceEntry.getLastModified());
-					if(log.isDebugEnabled()){
-						log.debug("Create layout template: " + targetTemplateFile);
-					}
+					log.debug("Create layout template: {}", targetTemplateFile);
 				} catch (IOException e) {
 					throw new RuntimeException("Write layout template error: " + targetTemplateFile, e);
 				}

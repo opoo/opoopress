@@ -15,13 +15,13 @@
  */
 package org.opoo.press.converter;
 
-import java.io.StringWriter;
-
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
 import org.opoo.press.Converter;
-import org.opoo.press.source.Source;
+import org.opoo.press.Source;
+
+import java.io.StringWriter;
 
 /**
  * WikiText converter.
@@ -69,7 +69,7 @@ public abstract class AbstractWikiTextConverter implements Converter{
 	
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.source.Source)
+	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
 	 */
 	@Override
 	public String getOutputFileExtension(Source src) {
@@ -77,7 +77,7 @@ public abstract class AbstractWikiTextConverter implements Converter{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#matches(org.opoo.press.source.Source)
+	 * @see org.opoo.press.Converter#matches(org.opoo.press.Source)
 	 */
 	@Override
 	public boolean matches(Source src) {

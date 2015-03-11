@@ -15,13 +15,13 @@
  */
 package org.opoo.press.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opoo.press.Category;
 import org.opoo.press.Post;
 import org.opoo.press.Site;
 import org.opoo.util.URLUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alex Lin
@@ -33,8 +33,7 @@ public class CategoryImpl implements Category{
 	private String nicename;
 	private String name;
 	private List<Post> posts = new ArrayList<Post>();
-	private Site site;
-	
+
 	private String path;
 	private String title;
 	private String url;
@@ -47,11 +46,18 @@ public class CategoryImpl implements Category{
 		this.parent = parent;
 		this.nicename = nicename;
 		this.name = name;
-		this.site = site;
-		init();
+		init(site);
+	}
+	public CategoryImpl(String url, String path, String title, String nicename, String name, Category parent){
+		this.parent = parent;
+		this.nicename = nicename;
+		this.name = name;
+		this.url = url;
+		this.path = path;
+		this.title = title;
 	}
 
-	private void init(){
+	private void init(Site site){
 		if(parent != null){
 			parent.getChildren().add(this);
 		}
@@ -114,7 +120,7 @@ public class CategoryImpl implements Category{
 	}
 
 	public boolean isNameOrNicename(String nameOrNicename){
-		if(nameOrNicename.equals(getNicename())){
+		if(nameOrNicename.equalsIgnoreCase(getNicename())){
 			return true;
 		}
 		
@@ -149,5 +155,12 @@ public class CategoryImpl implements Category{
 	public String getPath() {
 		return path;
 	}
-
+	/**
+	 * The size of posts.
+	 * for sort.
+	 * @return
+	 */
+	public int getPostSize(){
+		return posts.size();
+	}
 }
