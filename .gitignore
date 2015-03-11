@@ -1,17 +1,18 @@
+DeployToGitHubMojo2.java
+changelog.txt
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# IDEA
 .idea
 *.iml
-target/
-.DS_Store
-core/src/test/
-exec/
-samples/
-maven-plugins/opoopress-maven-plugin/src/test
-DeployToGitHubMojo2.java
-support/src/test
-mailet/src/test
-changelog.txt
-wagon-providers/wagon-git/src/test
-wagon-providers/wagon-github/src/test
+*.ipr
 
 #################
 ## Eclipse
