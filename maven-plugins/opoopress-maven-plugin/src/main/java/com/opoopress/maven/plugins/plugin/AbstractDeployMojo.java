@@ -59,9 +59,11 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Alex Lin
@@ -158,9 +160,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
             throw new MojoFailureException("Deploy configuration must contains 'id' and 'url': " + repo);
         }
 
-        if(url.startsWith("${") && url.endsWith("}")){
-            url = resolveRepositoryURL(id, url.substring(2, url.length() - 1));
-        }
+        url = resolveRepositoryURL(id, url);
 
         Properties props = new Properties();
         for (String key : repo.keySet()) {
@@ -178,6 +178,45 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
     }
 
     private String resolveRepositoryURL(String repositoryId, String repositoryURL) throws MojoFailureException {
+        //1. starts with '${' and ends with '}'
+        //if(repositoryURL.startsWith("${") && repositoryURL.endsWith("}")){
+        //    return resolveRepositoryURL(repositoryId, repositoryURL.substring(2, repositoryURL.length() - 1));
+        //}
+
+        //2. more properties holder
+        if(repositoryURL.contains("${") && repositoryURL.contains("}")){
+            Set<String> propertyNames = getPropertyNames(repositoryURL);
+            for(String propertyName: propertyNames){
+                String value = getPropertyValue(propertyName);
+                repositoryURL = repositoryURL.replace("${" + propertyName + "}", value);
+            }
+        }
+        return repositoryURL;
+    }
+
+    private Set<String> getPropertyNames(String url) throws MojoFailureException {
+        Set<String> set = new HashSet<String>();
+        int fromIndex = 0;
+        while(true) {
+            int start = url.indexOf("${", fromIndex);
+            if(start == -1){
+                break;
+            }
+
+            int end = url.indexOf("}", start + 2);
+            if(end == -1){
+                throw new MojoFailureException("Invalid deploy repository url: " + url);
+            }
+
+            fromIndex = end + 2;
+
+            String prop = url.substring(start + 2,  end);
+            set.add(prop);
+        }
+        return set;
+    }
+
+    private String getPropertyValue(String propertyName) throws MojoFailureException {
         Map<String, Profile> profiles = settings.getProfilesAsMap();
         List<String> activeProfiles = settings.getActiveProfiles();
         for(String id: activeProfiles){
@@ -185,9 +224,9 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
             if(profile != null){
                 Properties properties = profile.getProperties();
                 if(properties != null){
-                    String property = properties.getProperty(repositoryURL);
+                    String property = properties.getProperty(propertyName);
                     if(property != null){
-                        getLog().info("Resolve deploy repository url: " + repositoryURL + " => " + property);
+                        getLog().info("Resolve deploy repository url: " + propertyName + " => " + property);
                         return property;
                     }
                 }
@@ -198,16 +237,16 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
             if(profile.getActivation().isActiveByDefault()){
                 Properties properties = profile.getProperties();
                 if(properties != null){
-                    String property = properties.getProperty(repositoryURL);
+                    String property = properties.getProperty(propertyName);
                     if(property != null){
-                        getLog().info("Resolve deploy repository url: " + repositoryURL + " => " + property);
+                        getLog().info("Resolve deploy repository url: " + propertyName + " => " + property);
                         return property;
                     }
                 }
             }
         }
 
-        throw new MojoFailureException("Can not resolve deploy repository url: " + repositoryURL);
+        throw new MojoFailureException("Can not resolve deploy repository url: " + propertyName);
     }
 
     static String appendSlash(final String url) {
