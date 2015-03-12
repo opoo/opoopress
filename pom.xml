@@ -23,7 +23,7 @@
         <relativePath>parent</relativePath>
     </parent>
     <artifactId>opoopress</artifactId>
-    <version>2.0-beta-1</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>OpooPress Framework</name>
     <description>OpooPress Framework is a java based blog aware static site generator.</description>
@@ -77,7 +77,7 @@
         <connection>scm:git:git://github.com/opoo/opoopress.git</connection>
         <developerConnection>scm:git:git@github.com:opoo/opoopress.git</developerConnection>
         <url>https://github.com/opoo/opoopress</url>
-        <tag>opoopress-2.0-beta-1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
