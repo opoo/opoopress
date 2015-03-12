@@ -22,6 +22,7 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.CommandExecutionException;
@@ -65,9 +66,8 @@ import java.util.Properties;
 /**
  * @author Alex Lin
  * @author <a href="mailto:michal@org.codehaus.org">Michal Maczka</a>
- *
  */
-public class AbstractDeployMojo extends AbstractBuildMojo implements Contextualizable{
+public class AbstractDeployMojo extends AbstractBuildMojo implements Contextualizable {
     /**
      * Set this to 'true' to skip deploy.
      *
@@ -120,7 +120,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
 
     @Override
     protected void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException {
-        if(skipDeploy){
+        if (skipDeploy) {
             getLog().info("Skipping deploy.");
             return;
         }
@@ -132,44 +132,82 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
     protected void executeInternal(ConfigImpl config, SiteImpl site) throws MojoExecutionException, MojoFailureException {
         File destination = site.getDestination();
         getLog().info("Destination [" + destination + "]");
-        getLog().info("Site root [" + site.getRoot() + "]" );
+        getLog().info("Site root [" + site.getRoot() + "]");
 
-        if ( !destination.exists()) {
-            throw new MojoFailureException( "The site output folder does not exist, please run mvn op:build first" );
+        if (!destination.exists()) {
+            throw new MojoFailureException("The site output folder does not exist, please run mvn op:build first");
         }
 
-        List<Map<String,String>> deployList = config.get("deploy");
-        if(deployList == null || deployList.isEmpty()){
+        List<Map<String, String>> deployList = config.get("deploy");
+        if (deployList == null || deployList.isEmpty()) {
             throw new MojoFailureException("Deploy configuration not found in config.yml");
         }
 
-        for(Map<String,String> deployRepo: deployList){
+        for (Map<String, String> deployRepo : deployList) {
             Repository repository = createRepository(deployRepo);
-            deploy(site, destination, repository );
+            deploy(site, destination, repository);
         }
     }
 
 
-    private Repository createRepository(Map<String,String> repo) throws MojoExecutionException, MojoFailureException {
+    private Repository createRepository(Map<String, String> repo) throws MojoExecutionException, MojoFailureException {
         String id = repo.get("id");
         String url = repo.get("url");
-        if(id == null || url == null){
+
+        if (id == null || url == null) {
             throw new MojoFailureException("Deploy configuration must contains 'id' and 'url': " + repo);
         }
 
+        if(url.startsWith("${") && url.endsWith("}")){
+            url = resolveRepositoryURL(id, url.substring(2, url.length() - 1));
+        }
+
         Properties props = new Properties();
-        for(String key: repo.keySet()){
-            if("id".equals(key) || "url".equals(key)){
+        for (String key : repo.keySet()) {
+            if ("id".equals(key) || "url".equals(key)) {
                 continue;
             }
             props.setProperty(key, repo.get(key));
         }
 
         Repository repository = new Repository(id, appendSlash(url));
-        if(!props.isEmpty()){
+        if (!props.isEmpty()) {
             repository.setParameters(props);
         }
         return repository;
+    }
+
+    private String resolveRepositoryURL(String repositoryId, String repositoryURL) throws MojoFailureException {
+        Map<String, Profile> profiles = settings.getProfilesAsMap();
+        List<String> activeProfiles = settings.getActiveProfiles();
+        for(String id: activeProfiles){
+            Profile profile = profiles.get(id);
+            if(profile != null){
+                Properties properties = profile.getProperties();
+                if(properties != null){
+                    String property = properties.getProperty(repositoryURL);
+                    if(property != null){
+                        getLog().info("Resolve deploy repository url: " + repositoryURL + " => " + property);
+                        return property;
+                    }
+                }
+            }
+        }
+
+        for(Profile profile: settings.getProfiles()){
+            if(profile.getActivation().isActiveByDefault()){
+                Properties properties = profile.getProperties();
+                if(properties != null){
+                    String property = properties.getProperty(repositoryURL);
+                    if(property != null){
+                        getLog().info("Resolve deploy repository url: " + repositoryURL + " => " + property);
+                        return property;
+                    }
+                }
+            }
+        }
+
+        throw new MojoFailureException("Can not resolve deploy repository url: " + repositoryURL);
     }
 
     static String appendSlash(final String url) {
@@ -180,7 +218,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
         }
     }
 
-    private void deploy(SiteImpl site, File directory, Repository repository) throws MojoExecutionException, MojoFailureException  {
+    private void deploy(SiteImpl site, File directory, Repository repository) throws MojoExecutionException, MojoFailureException {
         // TODO: work on moving this into the deployer like the other deploy
         // methods
         final Wagon wagon = getWagon(repository, wagonManager);
@@ -194,7 +232,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
         String relativeDir = site.getRoot();
         if ("".equals(relativeDir)) {
             relativeDir = "./";
-        }else if(relativeDir.startsWith("/")){
+        } else if (relativeDir.startsWith("/")) {
             relativeDir = relativeDir.substring(1);
         }
 
@@ -217,7 +255,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
     private static void configureScpWagonIfRequired(Wagon wagon, Log log) {
         log.debug("configureScpWagonIfRequired: " + wagon.getClass().getName());
 
-        if(System.console() == null){
+        if (System.console() == null) {
             log.debug("No System.console(), skip configure Wagon");
             return;
         }
@@ -239,7 +277,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
         }
 
         //is ScpWagon
-        if(scpWagonClass.isInstance(wagon)){
+        if (scpWagonClass.isInstance(wagon)) {
             try {
                 Class<?> userInfoClass = ClassUtils.getClass(loader, "com.opoopress.maven.plugins.plugin.ssh.SystemConsoleInteractiveUserInfo");
                 Object userInfo = userInfoClass.newInstance();
@@ -256,27 +294,25 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
             } catch (InvocationTargetException e) {
                 log.debug(e.getMessage(), e);
             }
-        }else{
+        } else {
             log.debug("Not a ScpWagon.");
         }
     }
 
-    private static Wagon getWagon( final Repository repository, final WagonManager manager )
-            throws MojoExecutionException{
+    private static Wagon getWagon(final Repository repository, final WagonManager manager)
+            throws MojoExecutionException {
         final Wagon wagon;
 
-        try{
-            wagon = manager.getWagon( repository );
-        }
-        catch ( UnsupportedProtocolException e ){
-            throw new MojoExecutionException( "Unsupported protocol: '" + repository.getProtocol() + "'", e );
-        }
-        catch ( WagonConfigurationException e ){
-            throw new MojoExecutionException( "Unable to configure Wagon: '" + repository.getProtocol() + "'", e );
+        try {
+            wagon = manager.getWagon(repository);
+        } catch (UnsupportedProtocolException e) {
+            throw new MojoExecutionException("Unsupported protocol: '" + repository.getProtocol() + "'", e);
+        } catch (WagonConfigurationException e) {
+            throw new MojoExecutionException("Unable to configure Wagon: '" + repository.getProtocol() + "'", e);
         }
 
-        if ( !wagon.supportsDirectoryCopy() ) {
-            throw new MojoExecutionException("Wagon protocol '" + repository.getProtocol() + "' doesn't support directory copying" );
+        if (!wagon.supportsDirectoryCopy()) {
+            throw new MojoExecutionException("Wagon protocol '" + repository.getProtocol() + "' doesn't support directory copying");
         }
 
         return wagon;
@@ -287,9 +323,9 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
                              final Wagon wagon, final ProxyInfo proxyInfo,
                              final String relativeDir,
                              final Log log) throws MojoExecutionException {
-        AuthenticationInfo authenticationInfo = manager.getAuthenticationInfo( repository.getId() );
-        log.debug( "authenticationInfo with id '" + repository.getId() + "': "
-                + ( ( authenticationInfo == null ) ? "-" : authenticationInfo.getUserName() ) );
+        AuthenticationInfo authenticationInfo = manager.getAuthenticationInfo(repository.getId());
+        log.debug("authenticationInfo with id '" + repository.getId() + "': "
+                + ((authenticationInfo == null) ? "-" : authenticationInfo.getUserName()));
 
         try {
             Debug debug = new Debug();
@@ -298,17 +334,15 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
 
             wagon.addTransferListener(debug);
 
-            if ( proxyInfo != null ) {
-                log.debug( "connect with proxyInfo" );
-                wagon.connect( repository, authenticationInfo, proxyInfo );
-            }
-            else if ( proxyInfo == null && authenticationInfo != null ){
-                log.debug( "connect with authenticationInfo and without proxyInfo" );
-                wagon.connect( repository, authenticationInfo );
-            }
-            else  {
-                log.debug( "connect without authenticationInfo and without proxyInfo" );
-                wagon.connect( repository );
+            if (proxyInfo != null) {
+                log.debug("connect with proxyInfo");
+                wagon.connect(repository, authenticationInfo, proxyInfo);
+            } else if (proxyInfo == null && authenticationInfo != null) {
+                log.debug("connect with authenticationInfo and without proxyInfo");
+                wagon.connect(repository, authenticationInfo);
+            } else {
+                log.debug("connect without authenticationInfo and without proxyInfo");
+                wagon.connect(repository);
             }
 
             log.info("Pushing " + inputDirectory);
@@ -348,17 +382,17 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
     /**
      * Configure the Wagon with the information from serverConfigurationMap ( which comes from settings.xml )
      *
-     * @todo Remove when {@link WagonManager#getWagon(Repository) is available}. It's available in Maven 2.0.5.
      * @param wagon
      * @param repositoryId
      * @param settings
      * @param container
      * @param log
      * @throws WagonConfigurationException
+     * @todo Remove when {@link WagonManager#getWagon(Repository) is available}. It's available in Maven 2.0.5.
      */
-    private static void configureWagon( Wagon wagon, String repositoryId, Settings settings, PlexusContainer container, Log log )
-            throws WagonConfigurationException{
-        log.debug( " configureWagon " );
+    private static void configureWagon(Wagon wagon, String repositoryId, Settings settings, PlexusContainer container, Log log)
+            throws WagonConfigurationException {
+        log.debug(" configureWagon ");
 
         //config log
         configureLog(wagon, log);
@@ -366,25 +400,24 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
         configureScpWagonIfRequired(wagon, log);
 
         // MSITE-25: Make sure that the server settings are inserted
-        for ( Object o : settings.getServers() ) {
-            Server server = (Server) o;
+        for (Server server : settings.getServers()) {
             String id = server.getId();
 
-            log.debug( "configureWagon server " + id );
+            log.debug("configureWagon server " + id);
 
-            if ( id != null && id.equals( repositoryId ) && ( server.getConfiguration() != null ) ) {
+            if (id != null && id.equals(repositoryId) && (server.getConfiguration() != null)) {
                 final PlexusConfiguration plexusConf =
-                        new XmlPlexusConfiguration( (Xpp3Dom) server.getConfiguration() );
+                        new XmlPlexusConfiguration((Xpp3Dom) server.getConfiguration());
 
                 ComponentConfigurator componentConfigurator = null;
-                try{
-                    componentConfigurator = (ComponentConfigurator) container.lookup( ComponentConfigurator.ROLE );
-                    componentConfigurator.configureComponent( wagon, plexusConf, container.getContainerRealm() );
-                } catch ( final ComponentLookupException e ) {
-                    throw new WagonConfigurationException( repositoryId, "Unable to lookup wagon configurator."
-                            + " Wagon configuration cannot be applied.", e );
-                } catch ( ComponentConfigurationException e ){
-                    throw new WagonConfigurationException( repositoryId, "Unable to apply wagon configuration.", e );
+                try {
+                    componentConfigurator = (ComponentConfigurator) container.lookup(ComponentConfigurator.ROLE);
+                    componentConfigurator.configureComponent(wagon, plexusConf, container.getContainerRealm());
+                } catch (final ComponentLookupException e) {
+                    throw new WagonConfigurationException(repositoryId, "Unable to lookup wagon configurator."
+                            + " Wagon configuration cannot be applied.", e);
+                } catch (ComponentConfigurationException e) {
+                    throw new WagonConfigurationException(repositoryId, "Unable to apply wagon configuration.", e);
                 } finally {
                     if (componentConfigurator != null) {
                         try {
@@ -422,28 +455,28 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
 
         String host = repository.getHost();
         String nonProxyHostsAsString = proxyInfo.getNonProxyHosts();
-        for ( String nonProxyHost : StringUtils.split( nonProxyHostsAsString, ",;|" ) ){
-            if ( org.apache.commons.lang.StringUtils.contains( nonProxyHost, "*" ) ) {
+        for (String nonProxyHost : StringUtils.split(nonProxyHostsAsString, ",;|")) {
+            if (org.apache.commons.lang.StringUtils.contains(nonProxyHost, "*")) {
                 // Handle wildcard at the end, beginning or middle of the nonProxyHost
-                final int pos = nonProxyHost.indexOf( '*' );
-                String nonProxyHostPrefix = nonProxyHost.substring( 0, pos );
-                String nonProxyHostSuffix = nonProxyHost.substring( pos + 1 );
+                final int pos = nonProxyHost.indexOf('*');
+                String nonProxyHostPrefix = nonProxyHost.substring(0, pos);
+                String nonProxyHostSuffix = nonProxyHost.substring(pos + 1);
                 // prefix*
-                if ( StringUtils.isNotEmpty( nonProxyHostPrefix ) && host.startsWith( nonProxyHostPrefix )
-                        && StringUtils.isEmpty( nonProxyHostSuffix ) ) {
+                if (StringUtils.isNotEmpty(nonProxyHostPrefix) && host.startsWith(nonProxyHostPrefix)
+                        && StringUtils.isEmpty(nonProxyHostSuffix)) {
                     return null;
                 }
                 // *suffix
-                if ( StringUtils.isEmpty( nonProxyHostPrefix )
-                        && StringUtils.isNotEmpty( nonProxyHostSuffix ) && host.endsWith( nonProxyHostSuffix ) ) {
+                if (StringUtils.isEmpty(nonProxyHostPrefix)
+                        && StringUtils.isNotEmpty(nonProxyHostSuffix) && host.endsWith(nonProxyHostSuffix)) {
                     return null;
                 }
                 // prefix*suffix
-                if ( StringUtils.isNotEmpty( nonProxyHostPrefix ) && host.startsWith( nonProxyHostPrefix )
-                        && StringUtils.isNotEmpty( nonProxyHostSuffix ) && host.endsWith( nonProxyHostSuffix ) ){
+                if (StringUtils.isNotEmpty(nonProxyHostPrefix) && host.startsWith(nonProxyHostPrefix)
+                        && StringUtils.isNotEmpty(nonProxyHostSuffix) && host.endsWith(nonProxyHostSuffix)) {
                     return null;
                 }
-            }else if ( host.equals( nonProxyHost ) ){
+            } else if (host.equals(nonProxyHost)) {
                 return null;
             }
         }
@@ -452,6 +485,6 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
 
     @Override
     public void contextualize(Context context) throws ContextException {
-        container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
+        container = (PlexusContainer) context.get(PlexusConstants.PLEXUS_KEY);
     }
 }

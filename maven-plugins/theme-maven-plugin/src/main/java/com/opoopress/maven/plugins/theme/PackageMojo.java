@@ -16,14 +16,12 @@
 package com.opoopress.maven.plugins.theme;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.archiver.MavenArchiveConfiguration;
-import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
-import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.archiver.zip.ZipArchiver;
 
 import java.io.File;
 
@@ -50,6 +48,7 @@ public class PackageMojo extends AbstractMojo {
             // "*.iml", "*.ipr", ".idea/**",
             // etc
             ".*",
+            ".*/**",
 
             // idea
             "*.iml",
@@ -110,12 +109,12 @@ public class PackageMojo extends AbstractMojo {
     private String[] excludes;
 
     /**
-     * The Jar archiver.
+     * The zip archiver.
      *
-     * @component role="org.codehaus.plexus.archiver.Archiver" roleHint="jar"
+     * @component role="org.codehaus.plexus.archiver.Archiver" roleHint="zip"
      * @required
      */
-    private JarArchiver jarArchiver;
+    private ZipArchiver zipArchiver;
 
     /**
      * The name of the generated module.
@@ -160,11 +159,6 @@ public class PackageMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * @parameter
-     */
-    private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
-
-    /**
      * @component
      */
     private MavenProjectHelper projectHelper;
@@ -180,38 +174,19 @@ public class PackageMojo extends AbstractMojo {
     private String classesClassifier;
 
     /**
+     * @parameter expression="${op.theme.type}" default-value="zip"
+     */
+    private String type;
+
+    /**
      * Whether creating the archive should be forced.
      *
      * @parameter expression="${op.theme.forceCreation}" default-value="false"
      */
     private boolean forceCreation;
 
-    /**
-     * @parameter expression="${op.theme.type}" default-value="zip"
-     */
-    private String type;
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().debug("Final name: " + finalName);
-        getLog().debug("jar archiver: " + jarArchiver);
-        getLog().debug("basedir: " + basedir);
-        getLog().debug("build dir: " + buildDirectory);
-        getLog().debug("output dir: " + outputDirectory);
-
-//        String[] includes = {"**/*"};
-//        String[] excludes = {"**/Thumbs.db", "src/**", "target/**", ".config.rb.cache"};
-//
-//        File outputFile = getOutputFile(buildDirectory, finalName, classifier);// new File(buildDirectory, finalName + "-" + classifier + ".jar");
-//        File jarFile = new File(buildDirectory, finalName + ".jar");
-//
-//        try {
-//            FileUtils.write(outputFile, "sample jar");
-//        } catch (IOException e) {
-//            throw new MojoExecutionException(e.getMessage(), e);
-//        }
-
-
         File outputFile = createArchive();
 
         String classifier = getClassifier();
@@ -242,7 +217,6 @@ public class PackageMojo extends AbstractMojo {
     }
 
     private File createArchive() throws MojoExecutionException {
-
         File outputFile = getOutputFile(buildDirectory, finalName, getClassifier());
 
         File classesDirectory = getClassesDirectory();
@@ -251,6 +225,33 @@ public class PackageMojo extends AbstractMojo {
         //must copy all dependencies to 'target/plugins' directory
         File targetPluginsDir = new File(buildDirectory, "plugins");
 
+        try {
+            zipArchiver.setDestFile(outputFile);
+            zipArchiver.setForced(forceCreation);
+
+            zipArchiver.addDirectory(basedir, getIncludes(), getExcludes());
+//            zipArchiver.addDirectory(basedir, buildIncludes(basedir), null);
+
+            //classes jar
+            if (classesDirectory.exists() && classesJarFile.exists()) {
+                targetPluginsDir.mkdirs();
+                FileUtils.copyFileToDirectory(classesJarFile, targetPluginsDir);
+            } else {
+                getLog().warn("No theme classes add to theme package.");
+            }
+
+            //archive classes jar file and all dependencies
+            if (targetPluginsDir.exists() && targetPluginsDir.list().length > 0) {
+                zipArchiver.addDirectory(buildDirectory, new String[]{"plugins/**"}, null);
+            }
+
+            zipArchiver.createArchive();
+
+        } catch (Exception e) {
+            throw new MojoExecutionException("Error assembling OpooPress theme package", e);
+        }
+
+        /*
         MavenArchiver archiver = new MavenArchiver();
 
         archiver.setArchiver(jarArchiver);
@@ -266,9 +267,7 @@ public class PackageMojo extends AbstractMojo {
 
             //classes jar
             if (classesDirectory.exists() && classesJarFile.exists()) {
-                if (!targetPluginsDir.exists()) {
-                    targetPluginsDir.mkdirs();
-                }
+                targetPluginsDir.mkdirs();
                 FileUtils.copyFileToDirectory(classesJarFile, targetPluginsDir);
             } else {
                 getLog().warn("No theme classes add to theme package.");
@@ -282,10 +281,37 @@ public class PackageMojo extends AbstractMojo {
             archiver.createArchive(project, archive);
         } catch (Exception e) {
             throw new MojoExecutionException("Error assembling OpooPress theme package", e);
-        }
+        }*/
 
         return outputFile;
     }
+
+    /*
+    private String[] buildIncludes(File basedir){
+        File[] files = basedir.listFiles();
+        List<String> list = new ArrayList<String>();
+        for(File file: files){
+            String filename = file.getName();
+            if(filename.startsWith(".") || filename.startsWith("#") || filename.endsWith("~")){
+                continue;
+            }
+
+            if(file.isDirectory()){
+                if(filename.equals("src") || filename.equals("target")){
+                    continue;
+                }else{
+                    list.add(filename + "/**");
+                }
+            }else{
+                if(filename.equals("pom.xml") || filename.startsWith("pom") && filename.endsWith(".xml")){
+                    continue;
+                }
+                list.add(filename);
+            }
+        }
+        getLog().info("Includes: " + list);
+        return list.toArray(new String[list.size()]);
+    }*/
 
     protected String getClassifier() {
         return classifier;
