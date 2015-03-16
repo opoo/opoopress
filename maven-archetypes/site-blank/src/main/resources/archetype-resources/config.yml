@@ -147,7 +147,7 @@ url: http://yoursite.com
 # Please keep slug lower case, no space and special characters.
 #
 # This is optional, no default value.
-# tag_names: {"opensource":"Open Source"}
+# tag_names: {"opensource": "Open Source"}
 
 
 # ----------------------- #

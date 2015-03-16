@@ -41,7 +41,7 @@ url: http://yoursite.com
 # 概属性支持文章头部 front-matter 所有变量，以及 ${year}, ${month}, ${day}, ${hour},${minute}, ${second},
 # ${name}, ${pathToFile}, ${fileName} 等变量。
 # 默认值 '/article/${year}/${month}/${name}.html'
-# permakink: ‘/article/${year}/${month}/${name}.html’
+# permakink: '/article/${year}/${month}/${name}.html'
 
 # 固定链接的符号
 # 默认值 '&infin;'
@@ -147,7 +147,7 @@ url: http://yoursite.com
 # slug 用于组成 URL，小写且不含空格，name 用于显示。
 # OpooPress 会自行处理未在此处指明的的标签，所以不必定义所有的标签。
 # 无默认值，非必要属性。
-# tag_names: {"opensource":"开源项目"}
+# tag_names: {"opensource": "开源项目"}
 
 
 # ----------------------- #
