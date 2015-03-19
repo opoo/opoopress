@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.text.SimpleDateFormat;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,6 +124,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	//private SourceEntryLoader sourceEntryLoader;
 	//private SourceParser sourceParser;
 
+	private String dateFormatPattern;
 
 	public SiteImpl(ConfigImpl siteConfig) {
 		super();
@@ -335,6 +337,14 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(localeString != null){
 			locale = LocaleUtils.toLocale(localeString);
 			log.debug("Set locale: " + locale);
+		}
+
+		//date_format
+		dateFormatPattern =  config.get("date_format");
+		if(dateFormatPattern == null){
+			dateFormatPattern = "yyyy-MM-dd";
+		}else if("ordinal".equals(dateFormatPattern)){
+			dateFormatPattern = "MMM d yyyy";
 		}
 
 		//object instances
@@ -611,7 +621,7 @@ public class SiteImpl implements Site, SiteBuilder{
 
 	void render(){
 		final Map<String, Object> rootMap = buildRootMap();
-		renderer.prepareLayoutWorkingTemplates();
+		renderer.prepare();
 		
 //		for(Post post: posts){
 //			post.convert();
@@ -1138,7 +1148,20 @@ public class SiteImpl implements Site, SiteBuilder{
 	ProcessorsProcessor getProcessors(){
 		return processors;
 	}
-	
+
+	@Override
+	public String formatDate(Date date) {
+		if(date != null){
+			if(locale != null){
+				return new SimpleDateFormat(dateFormatPattern, locale).format(date);
+			}else{
+				return new SimpleDateFormat(dateFormatPattern).format(date);
+			}
+		}
+		return null;
+	}
+
+
 	static class ValidDirList extends ArrayList<File>{
 		private static final long serialVersionUID = 6306507738477638252L;
 		public ValidDirList addDir(File dir){

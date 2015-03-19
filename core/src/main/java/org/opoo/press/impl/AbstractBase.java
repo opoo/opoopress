@@ -18,12 +18,11 @@ package org.opoo.press.impl;
 
 import org.opoo.press.Base;
 import org.opoo.press.Converter;
-import org.opoo.press.Renderer;
-import org.opoo.press.Site;
+import org.opoo.press.Convertible;
 import org.opoo.press.Highlighter;
+import org.opoo.press.Site;
 import org.opoo.press.Source;
 import org.opoo.press.SourceEntry;
-import org.opoo.util.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,253 +35,147 @@ import java.util.Map;
 
 /**
  * @author Alex Lin
- *
  */
-public abstract class AbstractBase extends AbstractConvertible implements Base{
-	protected Logger log = LoggerFactory.getLogger(getClass());
-	
-	private DateFormat f1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	private DateFormat f2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private final Map<String, Object> data;
-	
-	private Source source;
-	private Site site;
+public abstract class AbstractBase extends BasicBase implements Base, Convertible {
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
-	private String title;
-	private String content;
-	private String url;
-	private String path;
-	private String layout;
-	private String permalink;
-	private Date date;
-	private Date updated;
-	private String dateFormatted;
-	private String updatedFormatted;
-	
-	private String outputFileExtension;
-	private Converter converter;
-	
-	AbstractBase(Site site, Source source){
-		this.source = source;
-		this.site = site;
-		this.data = new HashMap<String,Object>(source.getMeta()); 
-		title = (String) data.get("title");
-		if(title != null){
-			log = LoggerFactory.getLogger(getClass().getName() + "[" + title + "]");
-		}
-		init();
-	}
-	
-	public void set(String name, Object value){
-		MapUtils.put(data, name, value);
-		//log.debug("Url {} set variable: {} -> {}", getUrl(), name, value);
-	}
-	
-	public Object get(String name){
-		//log.debug("Url {} get variable: {}", getUrl(), name);
-		return data.get(name);
-	}
-	
-	private void init() {
-		this.converter = site.getConverter(source);
-		this.outputFileExtension = this.converter.getOutputFileExtension(source);
-		
-		this.content = source.getContent();
-		this.layout = (String) source.getMeta().get("layout");
-		this.permalink = (String) source.getMeta().get("permalink");
+    private DateFormat f1 = new SimpleDateFormat(DATE_FORMAT_PATTERN_1);
+    private DateFormat f2 = new SimpleDateFormat(DATE_FORMAT_PATTERN_1);
 
-		path = (String) source.getMeta().get("path");
-		if(path == null){
-			SourceEntry sourceEntry = source.getSourceEntry();
-			path = sourceEntry.getPath() + "/" + sourceEntry.getName();
-		}
-		
-		//date, updated
-		date = lookup(source.getMeta(), "date");
-		updated = lookup(source.getMeta(), "updated");
-		
-		//date_formatted, update_formatted
-		String dateStyle = getDateFormat();
-		dateFormatted = formatDate(date, dateStyle);
-		updatedFormatted = formatDate(updated, dateStyle);
-	}
-	
-	private String getDateFormat(){
-		String dateStyle = site.getConfig().get("date_format");
-		if(dateStyle == null){
-			dateStyle = "yyyy-MM-dd";
-		}else if("ordinal".equals(dateStyle)){
-			dateStyle = "MMM d yyyy";
-		}
-		return dateStyle;
-	}
-	
-	private String formatDate(Date date, String style){
-		if(date != null){
-			if(site.getLocale() != null){
-				return new SimpleDateFormat(style, site.getLocale()).format(date);
-			}else{
-				return new SimpleDateFormat(style).format(date);
-			}
-		}
-		return null;
-	}
-	
-	private Date lookup(Map<String, Object> frontMatter, String dateName){
-		Object date = frontMatter.get(dateName);
-		if(date != null && !(date instanceof Date)){
-			String string = date.toString();
-			//try parse from yyyy-MM-dd HH:mm
-			try {
-				date = f1.parse(string);
-			} catch (ParseException e) {
-				//ignore
-			}
-			if(date == null){
-				try {
-					date = f2.parse(string);
-				} catch (ParseException e) {
-					//ignore
-				}
-			}
-//			if(date == null){
-//				frontMatter.remove(dateName);
-//			}else{
-//				frontMatter.put(dateName, date);
-//			}
-		}
-		return (Date)date;
-	}
+    private String outputFileExtension;
+    private Converter converter;
 
-	@Override
-	public String getTitle(){
-		return title;
-	}
+    AbstractBase(Site site, Source source) {
+        super(site);
+        init(source);
+    }
 
-	public String getOutputFileExtension(){
-		return this.outputFileExtension;
-	}
-	
-	public Site getSite(){
-		return site;
-	}
-	
-	public Source getSource(){
-		return source;
-	}
-	
-	/**
-	 * @return the converter
-	 */
-	protected Converter getConverter() {
-		return converter;
-	}
+    private void init(Source source) {
+        if (source == null) {
+            log.warn("Source is null, skip initialize.");
+        }
 
-	protected Renderer getRenderer(){
-		return site.getRenderer();
-	}
-	
-	/**
-	 * @return the content
-	 */
-	public String getContent() {
-		return content;
-	}
-	public void setContent(String content){
-		this.content = content;
-	}
+        setSource(source);
 
-	public void convert(){
-		this.content = this.converter.convert(content);
-	}
-	
-	protected void mergeRootMap(Map<String,Object> rootMap){
-		String canonical = site.buildCanonical(getUrl());
-		rootMap.put("canonical", canonical);
-		mergeHighlighterParam(rootMap);
-	}
+        this.converter = getSite().getConverter(source);
+        this.outputFileExtension = this.converter.getOutputFileExtension(source);
 
-	/**
-	 * @param rootMap
-	 */
-	private void mergeHighlighterParam(Map<String, Object> rootMap) {
-		Highlighter highlighter = site.getFactory().getHighlighter();
-		if(highlighter != null && ".html".equals(outputFileExtension)
-				&& containsHighlightCodeBlock(highlighter)){
-			log.debug("The content contains highlight code block.");
-			rootMap.put("highlighter", highlighter.getHighlighterName());
-		}
-	}
-	
-	/**
-	 * @param highlighter
-	 */
-	protected boolean containsHighlightCodeBlock(Highlighter highlighter) {
-		return highlighter.containsHighlightCodeBlock(getContent());
-	}
+        String title = (String) source.getMeta().get("title");
+        String content = source.getContent();
+        String layout = (String) source.getMeta().get("layout");
+        String permalink = (String) source.getMeta().get("permalink");
 
-	public String getUrl() {
-		return url;
-	}
+        String path = (String) source.getMeta().get("path");
+        if (path == null) {
+            SourceEntry sourceEntry = source.getSourceEntry();
+            path = sourceEntry.getPath() + "/" + sourceEntry.getName();
+        }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
+        //date, updated
+        Date date = lookup(source.getMeta(), "date");
+        Date updated = lookup(source.getMeta(), "updated");
 
-	public String getPath() {
-		return path;
-	}
+        setTitle(title);
+        setContent(content);
+        setLayout(layout);
+        setPermalink(permalink);
+        setPath(path);
+        setDate(date);
+        setUpdated(updated);
 
-	public String getLayout() {
-		return layout;
-	}
+        if (title != null) {
+            log = LoggerFactory.getLogger(getClass().getName() + "[" + title + "]");
+        }
+    }
 
-	public String getPermalink() {
-		return permalink;
-	}
+    protected Date lookup(Map<String, Object> frontMatter, String dateName) {
+        Object date = frontMatter.get(dateName);
+        if (date != null && !(date instanceof Date)) {
+            String string = date.toString();
+            //try parse from yyyy-MM-dd HH:mm
+            try {
+                date = f1.parse(string);
+            } catch (ParseException e) {
+                //ignore
+            }
+            if (date == null) {
+                try {
+                    date = f2.parse(string);
+                } catch (ParseException e) {
+                    //ignore
+                }
+            }
+        }
+        return (Date) date;
+    }
 
-	public Date getDate() {
-		return date;
-	}
+    @Override
+    protected String getOutputFileExtension() {
+        return this.outputFileExtension;
+    }
 
-	public Date getUpdated() {
-		return updated;
-	}
-
-	public String getDateFormatted() {
-		return dateFormatted;
-	}
-
-	public String getUpdatedFormatted() {
-		return updatedFormatted;
-	}
-	
-	/**
-	 * For freemarker template.
-	 * @return the date formatted string
-	 */
-	public String getDate_formatted(){
-		return getDateFormatted();
-	}
-	
-	/**
-	 * For freemarker template.
-	 * @return the update date formatted string
-	 */
-	public String getUpdated_formatted(){
-		return getUpdatedFormatted();
-	}
+    /**
+     * @return the converter
+     */
+    protected Converter getConverter() {
+        return converter;
+    }
 
 
-	protected String getUrlForOutputFile(){
-		String url = getUrl();
-		if(site.get("urldecode_for_output_file") != null){
-			try{
-				url = java.net.URLDecoder.decode(url, "UTF-8");
-			}catch(Exception e){
-				log.warn("url decode error", e);
-			}
-		}
-		return url;
-	}
+    @Override
+    public void convert() {
+        setContent(getConverter().convert(getContent()));
+    }
+
+
+    /**
+     * For freemarker template.
+     *
+     * @return the date formatted string
+     */
+    public String getDate_formatted() {
+        return getDateFormatted();
+    }
+
+    /**
+     * For freemarker template.
+     *
+     * @return the update date formatted string
+     */
+    public String getUpdated_formatted() {
+        return getUpdatedFormatted();
+    }
+
+
+    @Override
+    public void render(Map<String, Object> rootMap) {
+        rootMap = new HashMap<String, Object>(rootMap);
+        mergeRootMap(rootMap);
+        getSite().getRenderer().render(this, rootMap);
+    }
+
+    protected void mergeRootMap(Map<String, Object> rootMap) {
+        String canonical = getSite().buildCanonical(getUrl());
+        rootMap.put("canonical", canonical);
+        mergeHighlighterParam(rootMap);
+    }
+
+    /**
+     * @param rootMap
+     */
+    private void mergeHighlighterParam(Map<String, Object> rootMap) {
+        Highlighter highlighter = getSite().getFactory().getHighlighter();
+        if (highlighter != null && ".html".equals(outputFileExtension)
+                && containsHighlightCodeBlock(highlighter)) {
+            log.debug("The content contains highlight code block.");
+            rootMap.put("highlighter", highlighter.getHighlighterName());
+        }
+    }
+
+    /**
+     * @param highlighter
+     */
+    protected boolean containsHighlightCodeBlock(Highlighter highlighter) {
+        return highlighter.containsHighlightCodeBlock(getContent());
+    }
 }

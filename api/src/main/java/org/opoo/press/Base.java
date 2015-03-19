@@ -23,7 +23,9 @@ import java.util.Date;
  *
  * @author Alex Lin
  */
-public interface Base {
+public interface Base extends Convertible{
+    String DATE_FORMAT_PATTERN_1 = "yyyy-MM-dd HH:mm";
+    String DATE_FORMAT_PATTERN_2 = "yyyy-MM-dd HH:mm:ss";
 
     /**
      * The file source.
@@ -39,6 +41,12 @@ public interface Base {
      * @return the content text of post or page
      */
     String getContent();
+
+    /**
+     * Set new content.
+     * @param content new content
+     */
+    void setContent(String content);
 
     /**
      * Page title.

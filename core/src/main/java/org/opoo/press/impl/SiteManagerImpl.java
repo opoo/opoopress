@@ -186,7 +186,7 @@ public class SiteManagerImpl implements SiteManager {
 
         //render file path and name
 //        String filename = site.getRenderer().renderContent(newFilePattern, map);
-        String filename = renderFilename(newFilePattern, map);
+        String filename = LinkUtils.renderUrl(newFilePattern, map);
         File file = new File(site.getBasedir(), filename);
 
         //render
@@ -222,14 +222,5 @@ public class SiteManagerImpl implements SiteManager {
         name = site.toSlug(name);
 
         return name;
-    }
-
-    private String renderFilename(String filenamePattern, Map<String,Object> rootMap) throws Exception {
-        Configuration configuration = new Configuration();
-        Template template = new Template("filename", new StringReader(filenamePattern), configuration, "UTF-8");
-        StringWriter writer = new StringWriter();
-        template.process(rootMap, writer);
-        writer.flush();
-        return writer.toString();
     }
 }

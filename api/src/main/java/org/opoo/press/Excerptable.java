@@ -19,8 +19,20 @@ package org.opoo.press;
  * @author Alex Lin
  */
 public interface Excerptable {
-
+    /**
+     * Return the excerpt of article.
+     * @return
+     */
     String getExcerpt();
 
+    /**
+     * @return return true if article has excerpt.
+     */
     boolean isExcerpted();
+
+    /**
+     * Set new excerpt to article.
+     * @param excerpt new excerpt
+     */
+    void setExcerpt(String excerpt);
 }

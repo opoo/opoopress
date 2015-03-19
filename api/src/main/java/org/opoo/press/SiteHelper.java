@@ -16,6 +16,8 @@
 package org.opoo.press;
 
 
+import java.util.Date;
+
 /**
  * @author Alex Lin
  */
@@ -30,4 +32,6 @@ public interface SiteHelper {
     Category getCategory(String categoryNameOrNicename);
 
     Tag getTag(String tagNameOrSlug);
+
+    String formatDate(Date date);
 }

@@ -33,11 +33,11 @@ public interface Convertible extends Writable {
      */
     void render(Map<String, Object> rootMap);
 
-    /**
-     * @param dest
-     * @return output file
-     */
-    File getOutputFile(File dest);
+//    /**
+//     * @param dest
+//     * @return output file
+//     */
+//    File getOutputFile(File dest);
 
     /**
      * @param dest

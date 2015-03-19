@@ -16,29 +16,31 @@
 package org.opoo.press;
 
 import java.io.Writer;
-import java.util.Map;
 
 /**
  * @author Alex Lin
  */
 public interface Renderer {
 
-    String render(String templateName, Map<String, Object> rootMap);
+    /**
+     * Prepare process before render.
+     */
+    void prepare();
 
-    void render(String templateName, Map<String, Object> rootMap, Writer out);
+    /**
+     * Render the content.
+     *
+     * @param base    page or post etc.
+     * @param rootMap root map, context
+     */
+    void render(Base base, Object rootMap);
 
-    String renderContent(String templateContent, Map<String, Object> rootMap);
 
-    void renderContent(String templateContent, Map<String, Object> rootMap, Writer out);
+    void render(String templateName, Object rootMap, Writer out);
 
-    String prepareWorkingTemplate(String layout, boolean isValidLayout,
-                                  String content, boolean isContentRenderRequired, SourceEntry entry);
+    String render(String templateName, Object rootMap);
 
-    void prepareLayoutWorkingTemplates();
+    void renderContent(String templateContent, Object rootMap, Writer out);
 
-    String getLayoutWorkingTemplate(String layout);
-
-    boolean isRenderRequired(String content);
-
-    boolean isValidLayout(String layout);
+    String renderContent(String templateContent, Object rootMap);
 }

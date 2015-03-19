@@ -15,279 +15,152 @@
  */
 package org.opoo.press.generator;
 
-import org.opoo.press.*;
-import org.opoo.press.impl.AbstractConvertible;
-import org.opoo.press.Source;
-import org.opoo.util.I18NUtills;
+import org.opoo.press.Category;
+import org.opoo.press.Generator;
+import org.opoo.press.Page;
+import org.opoo.press.Pager;
+import org.opoo.press.Post;
+import org.opoo.press.Site;
+import org.opoo.press.impl.BasicBase;
+import org.opoo.util.I18NUtils;
 import org.opoo.util.URLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alex Lin
- *
  */
 public class CategoryGenerator implements Generator {
-	private static final Logger log = LoggerFactory.getLogger(CategoryGenerator.class);
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 200;
-	}
+    private static final Logger log = LoggerFactory.getLogger(CategoryGenerator.class);
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Generator#generate(org.opoo.press.Site)
-	 */
-	@Override
-	public void generate(Site site) {
-		log.debug("Generating category pages...");
-		List<Category> categories = site.getCategories();
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 200;
+    }
 
-		String categoryPageTitlePrefix = getCategoryPageTitlePrefix(site);
-		String template = getCategoryPageTemplate(site);
+    /* (non-Javadoc)
+     * @see org.opoo.press.Generator#generate(org.opoo.press.Site)
+     */
+    @Override
+    public void generate(Site site) {
+        log.debug("Generating category pages...");
+        List<Category> categories = site.getCategories();
 
-		for(Category category: categories){
-			List<Post> posts = category.getPosts();
-			if(posts.isEmpty()){
-				continue;
-			}
-			Collections.sort(posts);
-			Collections.reverse(posts);
-			
-			CategoryPage page = new CategoryPage(site, template);
-			page.setTitle(categoryPageTitlePrefix + category.getTitle());
-			page.setUrl(category.getUrl());
-			page.setPosts(posts);
-			
-			site.getPages().add(page);
-		}
-	}
+        String categoryPageTitlePrefix = getCategoryPageTitlePrefix(site);
+        String template = getCategoryPageTemplate(site);
 
-	private String getCategoryPageTitlePrefix(Site site){
-		String prefix = I18NUtills.getString("messages", site.getLocale(), "category.page.title.prefix");
-		if(prefix == null){
-			prefix = site.getConfig().get("category_page_title_prefix", "");
-		}
-		return prefix;
-	}
+        for (Category category : categories) {
+            List<Post> posts = category.getPosts();
+            if (posts.isEmpty()) {
+                continue;
+            }
+            Collections.sort(posts);
+            Collections.reverse(posts);
 
-	private String getCategoryPageTemplate(Site site) {
-		return site.getConfig().get("category_page_template", "category.ftl");
-	}
+            CategoryPage page = new CategoryPage(site, template);
+            page.setTitle(categoryPageTitlePrefix + category.getTitle());
+            page.setUrl(category.getUrl());
+            page.setPosts(posts);
+
+            site.getPages().add(page);
+        }
+    }
+
+    private String getCategoryPageTitlePrefix(Site site) {
+        String prefix = I18NUtils.getString("messages", site.getLocale(), "category.page.title.prefix");
+        if (prefix == null) {
+            prefix = site.getConfig().get("category_page_title_prefix", "");
+        }
+        return prefix;
+    }
+
+    private String getCategoryPageTemplate(Site site) {
+        return site.getConfig().get("category_page_template", "category.ftl");
+    }
 
 
-	public static class CategoryPage extends AbstractConvertible implements Page{
-//		public static final String TEMPLATE = "category.ftl";
-		private String url;
-		private Renderer renderer;
-		private Site site;
-		private String content;// = "<#include \"category_index.ftl\">";
-		private String title;
-		private List<Post> posts;
-		private String template;
-		
-		public CategoryPage(Site site, String template) {
-			super();
-			this.site = site;
-			this.renderer = site.getRenderer();
-			this.template = template;
-		}
+    public static class CategoryPage extends BasicBase implements Page {
+        private List<Post> posts;
+        private String template;
 
-		@Override
-		public void render(Map<String, Object> rootMap) {
-			rootMap = new HashMap<String,Object>(rootMap);
-			mergeRootMap(rootMap);
+        public CategoryPage(Site site, String template) {
+            super(site);
+            this.template = template;
+        }
 
-			String output = getRenderer().render(template, rootMap);
-			setContent(output);
-		}
+        @Override
+        public void render(Map<String, Object> rootMap) {
+            rootMap = new HashMap<String, Object>(rootMap);
+            rootMap.put("canonical", getSite().buildCanonical(getUrl()));
+            rootMap.put("page", this);
 
-		public String getUrl() {
-			return url;
-		}
+            String output = getSite().getRenderer().render(template, rootMap);
+            setContent(output);
+        }
 
-		public void setUrl(String url) {
-			this.url = url;
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getSource()
-		 */
-		@Override
-		public Source getSource() {
-			return null;
-		}
+        /* (non-Javadoc)
+         * @see org.opoo.press.Base#getLayout()
+         */
+        @Override
+        public String getLayout() {
+            return "nil";
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getContent()
-		 */
-		@Override
-		public String getContent() {
-			return content;
-		}
+        /* (non-Javadoc)
+         * @see org.opoo.press.Page#getPager()
+         */
+        @Override
+        public Pager getPager() {
+            return null;
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getPath()
-		 */
-		@Override
-		public String getPath() {
-			return null;
-		}
+        /* (non-Javadoc)
+         * @see org.opoo.press.Page#setPager(org.opoo.press.Pager)
+         */
+        @Override
+        public void setPager(Pager pager) {
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getLayout()
-		 */
-		@Override
-		public String getLayout() {
-			return "nil";
-		}
+        @Override
+        public String getOutputFileExtension() {
+            return ".html";
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getPermalink()
-		 */
-		@Override
-		public String getPermalink() {
-			return null;
-		}
+        public List<Post> getPosts() {
+            return posts;
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getDate()
-		 */
-		@Override
-		public Date getDate() {
-			return null;
-		}
+        public void setPosts(List<Post> posts) {
+            this.posts = posts;
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getUpdated()
-		 */
-		@Override
-		public Date getUpdated() {
-			return null;
-		}
+        public boolean isFooter() {
+            return false;
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getDateFormatted()
-		 */
-		@Override
-		public String getDateFormatted() {
-			return null;
-		}
+        public boolean isSidebar() {
+            return true;
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#getUpdatedFormatted()
-		 */
-		@Override
-		public String getUpdatedFormatted() {
-			return null;
-		}
+        @Override
+        public File getOutputFile(File dest) {
+            String url = getUrl() + "index.html";
+            url = URLUtils.decodeURL(url);
+            File target = new File(dest, url);
+            return target;
+        }
 
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Page#getPager()
-		 */
-		@Override
-		public Pager getPager() {
-			return null;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Page#setPager(org.opoo.press.Pager)
-		 */
-		@Override
-		public void setPager(Pager pager) {
-		}
-
-		/* (non-Javadoc)
-		 * @see org.opoo.press.impl.AbstractConvertible#setContent(java.lang.String)
-		 */
-		@Override
-		public void setContent(String content) {
-			this.content = content;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.opoo.press.impl.AbstractConvertible#getOutputFileExtension()
-		 */
-		@Override
-		public String getOutputFileExtension() {
-			return ".html";
-		}
-
-		/* (non-Javadoc)
-		 * @see org.opoo.press.impl.AbstractConvertible#getRenderer()
-		 */
-		@Override
-		protected Renderer getRenderer() {
-			return renderer;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.opoo.press.impl.AbstractConvertible#convert()
-		 */
-		@Override
-		public void convert() {
-			//do nothing
-		}
-
-		/* (non-Javadoc)
-		 * @see org.opoo.press.impl.AbstractConvertible#mergeRootMap(java.util.Map)
-		 */
-		@Override
-		protected void mergeRootMap(Map<String, Object> rootMap) {
-			rootMap.put("canonical", site.buildCanonical(getUrl()));
-			rootMap.put("page", this);
-		}
-
-		public String getTitle() {
-			return title;
-		}
-
-		public void setTitle(String title) {
-			this.title = title;
-		}
-
-		public List<Post> getPosts() {
-			return posts;
-		}
-
-		public void setPosts(List<Post> posts) {
-			this.posts = posts;
-		}
-		
-		public boolean isFooter(){
-			return false;
-		}
-		
-		public boolean isSidebar(){
-			return true;
-		}
-		
-		public Object get(String string){
-			return null;
-		}
-
-		@Override
-		public File getOutputFile(File dest) {
-			String url = getUrl() + "index.html";
-			url = URLUtils.decodeURL(url);
-			File target = new File(dest, url);
-			return target;
-		}
-		
-		public boolean isComments(){
-			return false;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.opoo.press.Base#set(java.lang.String, java.lang.Object)
-		 */
-		@Override
-		public void set(String name, Object value) {
-		}
-	}
+        public boolean isComments() {
+            return false;
+        }
+    }
 }

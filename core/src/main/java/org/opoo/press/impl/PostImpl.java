@@ -17,12 +17,7 @@ package org.opoo.press.impl;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Category;
-import org.opoo.press.Post;
-import org.opoo.press.Site;
-import org.opoo.press.Tag;
-import org.opoo.press.Source;
-import org.opoo.press.SourceEntry;
+import org.opoo.press.*;
 import org.opoo.press.util.LinkUtils;
 
 import java.util.*;
@@ -213,6 +208,11 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		return excerpted;
 	}
 
+	@Override
+	public void setExcerpt(String excerpt) {
+		this.excerpt = excerpt;
+	}
+
 	public boolean isPublished(){
 		return published;
 	}
@@ -253,11 +253,11 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 	}
 	
 	
-	@Override
-	public void render(Map<String, Object> rootMap) {
-		super.render(rootMap);
-		renderExcerpt(rootMap);
-	}
+//	@Override
+//	public void render(Map<String, Object> rootMap) {
+//		super.render(rootMap);
+//		renderExcerpt(rootMap);
+//	}
 	
 	
 	
@@ -275,17 +275,18 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		set("related_posts", relatedPosts);
 	}
 
-	private void renderExcerpt(Map<String,Object> rootMap){
-//		rootMap = new HashMap<String,Object>(rootMap);
-//		rootMap.put("page", this);
-//		populateRootMap(rootMap);
-//		excerpt = getRenderer().render("nil", excerpt, rootMap);
-		
-		boolean isExcerptRenderRequired =  getRenderer().isRenderRequired(excerpt);
-		if(isExcerptRenderRequired){
-			excerpt = getRenderer().renderContent(excerpt, rootMap);
-		}
-	}
+//	private void renderExcerpt(Map<String,Object> rootMap){
+////		rootMap = new HashMap<String,Object>(rootMap);
+////		rootMap.put("page", this);
+////		populateRootMap(rootMap);
+////		excerpt = getRenderer().render("nil", excerpt, rootMap);
+//		Renderer renderer = site.getRenderer();
+//
+//		boolean isExcerptRenderRequired =  getRenderer().isRenderRequired(excerpt);
+//		if(isExcerptRenderRequired){
+//			excerpt = getRenderer().renderContent(excerpt, rootMap);
+//		}
+//	}
 
 	/**
 	 * @return the categories
@@ -349,6 +350,6 @@ public class PostImpl extends AbstractBase implements Post, Comparable<Post>{
 		params.put("name", name);
 		LinkUtils.addDateParams(params, date);
 
-		return getRenderer().renderContent(permalinkStyle, params);
+		return LinkUtils.renderUrl(permalinkStyle, params);
 	}
 }
