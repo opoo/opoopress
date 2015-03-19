@@ -15,6 +15,7 @@
  */
 package com.opoopress.maven.plugins.plugin;
 
+import freemarker.template.utility.StringUtil;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.reflect.MethodUtils;
 import org.apache.maven.artifact.manager.WagonConfigurationException;
@@ -58,12 +59,7 @@ import org.opoo.util.ChainingClassLoader;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Alex Lin
@@ -76,6 +72,14 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
      * @parameter expression="${op.deploy.skip}" default-value="false"
      */
     private boolean skipDeploy;
+
+
+    /**
+     * Extra deploy repository configurations. format: <code>id::url[,id::url]</code>.
+     *
+     * @parameter expression="${op.deploy.repos}"
+     */
+    private String deployRepositories;
 
     /**
      * Whether to run the "chmod" command on the remote site after the deploy.
@@ -140,7 +144,8 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
             throw new MojoFailureException("The site output folder does not exist, please run mvn op:build first");
         }
 
-        List<Map<String, String>> deployList = config.get("deploy");
+        List<Map<String, String>> deployList = getDeployRepositoryList(config); //config.get("deploy");
+
         if (deployList == null || deployList.isEmpty()) {
             throw new MojoFailureException("Deploy configuration not found in config.yml");
         }
@@ -149,6 +154,29 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
             Repository repository = createRepository(deployRepo);
             deploy(site, destination, repository);
         }
+    }
+
+    private List<Map<String,String>> getDeployRepositoryList(ConfigImpl config){
+        List<Map<String, String>> deployList = config.get("deploy");
+
+        if(deployRepositories != null){
+            String[] split = StringUtil.split(deployRepositories, ',');
+            for (String str: split){
+                String[] strings = str.split("::");
+                if(strings.length == 2){
+                    Map<String,String> map = new HashMap<String, String>();
+                    map.put("id", strings[0]);
+                    map.put("url", strings[1]);
+
+                    if(deployList == null){
+                        deployList = new ArrayList<Map<String, String>>();
+                    }
+                    deployList.add(map);
+                }
+            }
+        }
+
+        return deployList;
     }
 
 

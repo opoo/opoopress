@@ -218,6 +218,36 @@ public class ThemeMojo extends AbstractOpooPressMojo {
             updateThemeConfigurationFile(config, themeDir);
         }
 
+        updateSiteConfigurationFile(config, currentThemeName, name);
+    }
+
+    private void updateSiteConfigurationFile(ConfigImpl config, String currentThemeName, String newThemeName)
+            throws MojoFailureException {
+
+        if(currentThemeName != null){
+            File file = new File(config.getBasedir(), "config.yml");
+            if(file.exists()) {
+                try {
+                    List<String> lines = FileUtils.readLines(file, "UTF-8");
+                    int lineNumber = -1;
+                    for(int i = 0 ; i < lines.size() ; i++){
+                        if(lines.get(i).startsWith("theme: ")){
+                            lineNumber = i;
+                            break;
+                        }
+                    }
+                    if(lineNumber != -1){
+                        getLog().debug("Change theme to '" + newThemeName + "' in file:" + file);
+                        lines.set(lineNumber, "theme: '" + newThemeName + "'");
+                        FileUtils.writeLines(file, "UTF-8", lines);
+                        return;
+                    }
+                } catch (IOException e) {
+                    throw new MojoFailureException("Update configuration file failed: " + e.getMessage(), e);
+                }
+            }
+        }
+
         getLog().debug("Changing config file 'config-theme.yml'.");
         File themeConfigFile = new File(config.getBasedir(), "config-theme.yml");
         try {
