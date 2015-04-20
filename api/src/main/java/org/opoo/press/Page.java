@@ -16,6 +16,8 @@
 package org.opoo.press;
 
 
+import java.util.List;
+
 /**
  * @author Alex Lin
  */
@@ -25,4 +27,15 @@ public interface Page extends Convertible, Base {
 
     void setPager(Pager pager);
 
+    Page getNext();
+
+    void setNext(Page next);
+
+    Page getPrevious();
+
+    void setPrevious(Page previous);
+
+    ListHolder<Tag> getTagsHolder();
+
+    ListHolder<Category> getCategoriesHolder();
 }

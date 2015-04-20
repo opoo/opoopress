@@ -18,13 +18,6 @@ package org.opoo.press;
 /**
  * @author Alex Lin
  */
-public interface Tag extends PostsHolder {
+public interface Tag extends MetaTag{
 
-    String getSlug();
-
-    String getName();
-
-    boolean isNameOrSlug(String nameOrSlug);
-
-    String getUrl();
 }

@@ -32,7 +32,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.StringUtils;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -188,7 +188,7 @@ public class ThemeMojo extends AbstractOpooPressMojo {
     private URL url;
 
     @Override
-    protected void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config) throws MojoExecutionException, MojoFailureException {
         processParameters();
 
         if (name == null) {
@@ -221,7 +221,7 @@ public class ThemeMojo extends AbstractOpooPressMojo {
         updateSiteConfigurationFile(config, currentThemeName, name);
     }
 
-    private void updateSiteConfigurationFile(ConfigImpl config, String currentThemeName, String newThemeName)
+    private void updateSiteConfigurationFile(SiteConfigImpl config, String currentThemeName, String newThemeName)
             throws MojoFailureException {
 
         if(currentThemeName != null){
@@ -353,7 +353,7 @@ public class ThemeMojo extends AbstractOpooPressMojo {
         }
     }
 
-    private void updateThemeConfigurationFile(ConfigImpl siteConfig, File themeDir) throws MojoFailureException{
+    private void updateThemeConfigurationFile(SiteConfigImpl siteConfig, File themeDir) throws MojoFailureException{
         File config = new File(themeDir, "theme.yml");
         if (!config.exists()) {
             throw new MojoFailureException("Config file '" + config + "' not exists.");

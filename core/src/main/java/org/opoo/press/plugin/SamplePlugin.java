@@ -1,9 +1,9 @@
 package org.opoo.press.plugin;
 
 import org.opoo.press.Plugin;
+import org.opoo.press.ProcessorAdapter;
 import org.opoo.press.Registry;
 import org.opoo.press.Site;
-import org.opoo.press.processor.ProcessorAdapter;
 
 
 /**

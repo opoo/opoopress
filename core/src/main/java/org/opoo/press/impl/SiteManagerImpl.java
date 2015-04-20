@@ -15,20 +15,21 @@
  */
 package org.opoo.press.impl;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Config;
 import org.opoo.press.Site;
 import org.opoo.press.SiteManager;
+import org.opoo.press.renderer.AbstractFreeMarkerRenderer;
 import org.opoo.press.util.LinkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -80,7 +81,7 @@ public class SiteManagerImpl implements SiteManager {
 
     private void checkDirectories(File baseDirectory) throws Exception {
         Map<String, Object> override = new HashMap<String, Object>();
-        ConfigImpl config = new ConfigImpl(baseDirectory, override);
+        SiteConfigImpl config = new SiteConfigImpl(baseDirectory, override);
 
         File[] configFiles = config.getConfigFiles();
         if (configFiles.length == 0) {
@@ -133,27 +134,29 @@ public class SiteManagerImpl implements SiteManager {
             format = "markdown";
         }
 
-        Config config = site.getConfig();
-
         if (StringUtils.isBlank(newFilePattern)) {
             //new_page, new_page, new_pic
-            newFilePattern = config.get("new_" + layout);
+            newFilePattern = (String) site.get("new_" + layout);
             if(StringUtils.isBlank(newFilePattern)){
                 if("post".equals(layout)){
-                    newFilePattern = ConfigImpl.DEFAULT_NEW_POST_FILE;
+                    newFilePattern = SiteConfigImpl.DEFAULT_NEW_POST_FILE;
                 }else if("page".equals(layout)){
-                    newFilePattern = ConfigImpl.DEFAULT_NEW_PAGE_FILE;
+                    newFilePattern = SiteConfigImpl.DEFAULT_NEW_PAGE_FILE;
+                }else{
+                    throw new IllegalStateException("'new_" + layout + "' not defined.");
                 }
             }
         }
 
         if(StringUtils.isBlank(template)){
-            template = config.get("new_" + layout + "_template");
+            template = (String) site.get("new_" + layout + "_template");
             if(StringUtils.isBlank(template)){
                 if("post".equals(layout)){
-                    template = ConfigImpl.DEFAULT_NEW_POST_TEMPLATE;
+                    template = SiteConfigImpl.DEFAULT_NEW_POST_TEMPLATE;
                 }else if("page".equals(layout)){
-                    template = ConfigImpl.DEFAULT_NEW_PAGE_TEMPLATE;
+                    template = SiteConfigImpl.DEFAULT_NEW_PAGE_TEMPLATE;
+                }else{
+                    throw new IllegalStateException("'new_" + layout + "_template' not defined.");
                 }
             }
         }
@@ -165,6 +168,10 @@ public class SiteManagerImpl implements SiteManager {
                             String newFilePattern, String template, Map<String, Object> meta) throws Exception {
 
         Map<String, Object> map = new HashMap<String, Object>();
+
+        //put all system properties
+        ImmutableMap<String, String> systemProperties = Maps.fromProperties(System.getProperties());
+        map.putAll(systemProperties);
 
         if(meta != null){
             map.putAll(meta);
@@ -186,7 +193,7 @@ public class SiteManagerImpl implements SiteManager {
 
         //render file path and name
 //        String filename = site.getRenderer().renderContent(newFilePattern, map);
-        String filename = LinkUtils.renderUrl(newFilePattern, map);
+        String filename = AbstractFreeMarkerRenderer.process(newFilePattern, map);
         File file = new File(site.getBasedir(), filename);
 
         //render

@@ -15,99 +15,15 @@
  */
 package org.opoo.press.impl;
 
-import org.opoo.press.Post;
-import org.opoo.press.Site;
 import org.opoo.press.Tag;
-import org.opoo.util.URLUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Alex Lin
  *
  */
-public class TagImpl implements Tag {
-	private String slug;
-	private String name;
-	private List<Post> posts = new ArrayList<Post>();
-	
-	private String url;
-	/**
-	 * @param slug
-	 * @param name
-	 */
-	public TagImpl(String slug, String name, Site site) {
-		this(buildDefaultUrl(site, slug), slug, name);
-	}
+public class TagImpl extends AbstractMetaTag implements Tag {
 
-	public TagImpl(String url, String slug, String name){
-		this.url = url;
-		this.slug = slug;
-		this.name = name;
-	}
-
-	private static String buildDefaultUrl(Site site, String slug){
-		String tagDir = site.getConfig().get("tag_dir", "");
-		return /*rootUrl + */ tagDir + "/" + URLUtils.encodeURL(slug) + "/";
-	}
-
-	/**
-	 * @return the slug
-	 */
-	public String getSlug() {
-		return slug;
-	}
-
-	/**
-	 * @param slug the slug to set
-	 */
-	public void setSlug(String slug) {
-		this.slug = slug;
-	}
-	
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Tag#isNameOrSlug(java.lang.String)
-	 */
-	@Override
-	public boolean isNameOrSlug(String nameOrSlug) {
-		if(nameOrSlug.equals(getSlug())){
-			return true;
-		}
-		
-		if(nameOrSlug.equals(getName())){
-			return true;
-		}
-		return false;
-	}
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Tag#getUrl()
-	 */
-	@Override
-	public String getUrl() {
-		return url;
-	}
-	/* (non-Javadoc)
-	 * @see org.opoo.press.PostsHolder#getPosts()
-	 */
-	@Override
-	public List<Post> getPosts() {
-		return posts;
-	}
-	
-	public int getPostSize(){
-		return posts.size();
+	public TagImpl(String slug, String name){
+		super(slug, name);
 	}
 }

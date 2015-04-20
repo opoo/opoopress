@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Alex Lin.
+ * Copyright 2013-2015 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,10 @@
  */
 package org.opoo.press;
 
-import java.io.File;
-
 /**
  * @author Alex Lin
- * @since 1.2
  */
 public interface Config {
-
-    boolean useDefaultConfigFiles();
-
-    File[] getConfigFiles();
-
-    File getBasedir();
-
     <T> T get(String name);
-
     <T> T get(String name, T defaultValue);
 }

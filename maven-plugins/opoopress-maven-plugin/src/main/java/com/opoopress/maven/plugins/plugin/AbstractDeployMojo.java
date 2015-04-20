@@ -15,7 +15,6 @@
  */
 package com.opoopress.maven.plugins.plugin;
 
-import freemarker.template.utility.StringUtil;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.reflect.MethodUtils;
 import org.apache.maven.artifact.manager.WagonConfigurationException;
@@ -52,7 +51,7 @@ import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 import org.opoo.press.impl.SiteImpl;
 import org.opoo.util.ChainingClassLoader;
 
@@ -125,7 +124,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
     private PlexusContainer container;
 
     @Override
-    protected void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config) throws MojoExecutionException, MojoFailureException {
         if (skipDeploy) {
             getLog().info("Skipping deploy.");
             return;
@@ -135,7 +134,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
     }
 
     @Override
-    protected void executeInternal(ConfigImpl config, SiteImpl site) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config, SiteImpl site) throws MojoExecutionException, MojoFailureException {
         File destination = site.getDestination();
         getLog().info("Destination [" + destination + "]");
         getLog().info("Site root [" + site.getRoot() + "]");
@@ -156,11 +155,11 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
         }
     }
 
-    private List<Map<String,String>> getDeployRepositoryList(ConfigImpl config){
+    private List<Map<String,String>> getDeployRepositoryList(SiteConfigImpl config){
         List<Map<String, String>> deployList = config.get("deploy");
 
         if(deployRepositories != null){
-            String[] split = StringUtil.split(deployRepositories, ',');
+            String[] split = StringUtils.split(deployRepositories, ",");
             for (String str: split){
                 String[] strings = str.split("::");
                 if(strings.length == 2){

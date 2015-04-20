@@ -1,0 +1,85 @@
+# collection: a container that contains a set of pages, tags, categories.
+# Only one collection defined here for blog-aware website.
+collections:
+  post:
+    filter: {type: layout, args: [post]}
+    tags:
+      tag:
+        # metaForCollection: tag
+        alias: [tags]
+        # separator: ","
+        names: {blog: Blog, website: Website}
+        title_prefix: "Tag: "
+        # permalink: "/tag/${slug}/"
+        output_dir: "/tag"
+        # paginate: 10
+    categories:
+      category:
+        # metaForCollection: category
+        alias: [categories]
+        # separator: ","
+        names: {}
+        title_prefix: "Category: "
+        # permalink: "/category/${slug}/"
+        output_dir: "/category"
+    #sortable: true
+
+########################################################################################################################
+# 以上配置了一个博客系统基本的post集合，下面对各个属性进行解释
+
+# collections>post: 定义一个名为 post 的集合
+
+# collections>post>filter: 该集合使用的过滤器，用于从整个站点的页面中过滤出属于 post 的页面
+
+# collections>post>filter>type: 过滤器的类型，一个预定义（在factory.yml中定义过）的名称或者过滤器类的全名，
+#                               例如 type 的值为 layout 表示在factory.yml 定义了
+#                                 org.opoo.press.collection.Filter-layout: org.opoo.press.collection.filter.LayoutFilter
+#                               或者直接指定 type 的值为 'org.opoo.press.collection.filter.LayoutFilter'
+
+# collections>post>filter>args: 过滤器构造函数的参数列表，数组类型
+
+# collections>post>tags: 定义当前集合的所有标签
+
+# collections>post>tags>tag: 定义一个名为 tag 的标签，即在源文件的头部，该标签使用 tag 作为变量名
+
+# collections>post>tags>tag>metaForCollection: 该标签在集合中的标签名称，默认同标签名。
+#                                              例如，在页面中有“演员”和“导演”两个自定义标签，最终在集合中输出的时候
+#                                              我们希望都合并到一个叫做“人物”的标签，那么在定义“演员”和“导演”标签
+#                                              时，需要指定 `metaForCollection` 属性为“人物”。
+
+# collections>post>tags>tag>alias: 标签的别名，例如通常 tag 和 tags 都指同样的标签，可以将 tags 设置为 tag 的别名。
+#                                   可以设置多个别名，数组类型。
+
+# collections>post>tags>tag>separator: 标签内容的分割符。如果标签的内容不是数组，而是使用特殊符号分割的字符串，可以在这
+#                                      里指定字符串的分隔符，例如“/”或者“,”。如无需分析，请勿指定该属性。
+
+# collections>post>tags>tag>names: 标签的 slug 与 name 的对照关系，Map 类型。主要用于定义一些默认的标签名称。
+
+# collections>post>tags>tag>title_prefix: 生成的标签页面的前缀
+
+# collections>post>tags>tag>permalink: 生成的标签页面的固定链接格式，例如：'/tag/${slug}/'。通常与 'output_dir' 属性二者
+#                                      指定其一即可。
+
+# collections>post>tags>tag>output_dir: 生成的标签页面的目录，例如：'/tag'。通常与 'permalink' 属性二者指定其一即可。
+
+# collections>post>tags>tag>paginate: 一个标签中包含的页面过多时，可能需要分页。设置该属性表示需要分页，并指定页大小。
+
+# collections>post>tags>tag>*: 该标签的其它属性，可自行扩展。
+
+# collections>post>tags>*: 其它自定义标签，例如“演员”，“导演”等，内部属性同 collections>post>tags>tag。
+
+
+# collections>post>categories: 定义当前集合的所有分类
+
+# collections>post>categories>category: 定义一个名为 category 的分类，即在源文件的头部，该分类使用 category 作为变量名
+#                                       自定义分类的各个属性与标签定义的属性基本类型，意义也基本相同，唯一不同的在于
+#                                       names 属性的定义，category 的 names 可定义树形结构，包含有上下级关系。
+#                                       例如： names: {tech: 技术, tech/java: Java, tech/java/JVM: JVM}
+#                                       Java 的父级是技术，JVM 的父级是 Java。
+
+# collections>post>sortable: 集合中的页面是否需要排序，post 集合默认为 true，其它 layout 默认为 false。
+
+# collections>post>*: post 集合的其它属性
+
+# collections>* 其它 collection 的配置
+

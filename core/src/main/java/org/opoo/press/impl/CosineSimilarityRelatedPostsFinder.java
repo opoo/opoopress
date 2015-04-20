@@ -15,11 +15,22 @@
  */
 package org.opoo.press.impl;
 
-import org.opoo.press.*;
+import org.opoo.press.Config;
+import org.opoo.press.ConfigAware;
+import org.opoo.press.MetaTag;
+import org.opoo.press.Page;
+import org.opoo.press.Post;
+import org.opoo.press.RelatedPostsFinder;
+import org.opoo.press.SiteConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -41,7 +52,7 @@ public class CosineSimilarityRelatedPostsFinder implements RelatedPostsFinder, C
 	public CosineSimilarityRelatedPostsFinder(){
 	}
 	
-	CosineSimilarityRelatedPostsFinder(Config config){
+	CosineSimilarityRelatedPostsFinder(SiteConfig config){
 		setConfig(config);
 	}
 	/* (non-Javadoc)
@@ -121,19 +132,21 @@ public class CosineSimilarityRelatedPostsFinder implements RelatedPostsFinder, C
 	}
 	
 	
-	static Map<Post, Integer> calculatePostsCount(Post post, List<? extends PostsHolder> holders){
+	static Map<Post, Integer> calculatePostsCount(Post post, List<? extends MetaTag> tags){
 		Map<Post, Integer> countMap = new HashMap<Post, Integer>();
-		for(PostsHolder holder: holders){
-			List<Post> posts = holder.getPosts();
-			for_01: for(Post p: posts){
-				if(p.equals(post)){
-					continue for_01;
-				}
-				Integer count = countMap.get(p);
-				if(count == null){
-					countMap.put(p, 1);
-				}else{
-					countMap.put(p, count.intValue() + 1);
+		for(MetaTag tag: tags){
+			List<Page> posts = tag.getPages();
+			for_01: for(Page p: posts){
+				if(p instanceof Post) {
+					if (p.equals(post)) {
+						continue for_01;
+					}
+					Integer count = countMap.get(p);
+					if (count == null) {
+						countMap.put((Post) p, 1);
+					} else {
+						countMap.put((Post) p, count.intValue() + 1);
+					}
 				}
 			}
 		}

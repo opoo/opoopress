@@ -16,36 +16,21 @@
 package org.opoo.press;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 
 /**
  * @author Alex Lin
  */
-public interface Post extends Convertible, Comparable<Post>, Base, Excerptable {
+public interface Post extends Comparable<Post>, Page, Excerptable {
+
+    String DEFAULT_EXCERPT_SEPARATOR = "<!--more-->";
+
+    Pattern FILENAME_PATTERN = Pattern.compile("[1-9][0-9]{3}[-][0-1][0-9][-][0-3][0-9][-](.*)");
 
     List<Category> getCategories();
 
     List<Tag> getTags();
 
     String getId();
-
-//	String getTitle();
-
-//	String getExcerpt();
-
-//	boolean isExcerpted();
-
-    Post getNext();
-
-    Post getPrevious();
-
-    /**
-     * @param post
-     */
-    void setPrevious(Post post);
-
-    /**
-     * @param post
-     */
-    void setNext(Post post);
 }

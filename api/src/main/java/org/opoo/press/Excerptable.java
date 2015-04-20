@@ -35,4 +35,9 @@ public interface Excerptable {
      * @param excerpt new excerpt
      */
     void setExcerpt(String excerpt);
+
+    /**
+     * @return return true if excerpt extracted from content
+     */
+    boolean isExcerptExtracted();
 }

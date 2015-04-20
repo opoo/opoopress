@@ -23,15 +23,7 @@ import java.util.Date;
  */
 public interface SiteHelper {
 
-    String buildCanonical(String url);
-
     String toSlug(String tagName);
-
-    String toNicename(String categoryName);
-
-    Category getCategory(String categoryNameOrNicename);
-
-    Tag getTag(String tagNameOrSlug);
 
     String formatDate(Date date);
 }

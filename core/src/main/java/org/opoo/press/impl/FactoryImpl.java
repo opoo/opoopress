@@ -17,28 +17,29 @@ package org.opoo.press.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.ConfigAware;
-import org.opoo.press.Converter;
+import org.opoo.press.Category;
 import org.opoo.press.Factory;
-import org.opoo.press.Generator;
 import org.opoo.press.Highlighter;
 import org.opoo.press.Named;
-import org.opoo.press.Ordered;
+import org.opoo.press.ObjectFactory;
+import org.opoo.press.Page;
+import org.opoo.press.PaginationUpdater;
 import org.opoo.press.Plugin;
 import org.opoo.press.PluginManager;
-import org.opoo.press.Processor;
-import org.opoo.press.Registry;
 import org.opoo.press.RelatedPostsFinder;
 import org.opoo.press.Renderer;
 import org.opoo.press.ResourceBuilder;
 import org.opoo.press.Site;
-import org.opoo.press.SiteAware;
 import org.opoo.press.SlugHelper;
 import org.opoo.press.Source;
 import org.opoo.press.SourceEntryLoader;
 import org.opoo.press.SourceManager;
 import org.opoo.press.SourceParser;
+import org.opoo.press.Tag;
 import org.opoo.press.highlighter.SyntaxHighlighter;
+import org.opoo.press.pagination.ConfigurablePaginationUpdater;
+import org.opoo.press.plugin.PluginManagerImpl;
+import org.opoo.press.renderer.FreeMarkerRenderer;
 import org.opoo.press.slug.DefaultSlugHelper;
 import org.opoo.press.source.SourceEntryLoaderImpl;
 import org.opoo.press.source.SourceManagerImpl;
@@ -54,8 +55,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -66,11 +65,10 @@ import java.util.ServiceLoader;
 /**
  * @author Alex Lin
  */
-public class FactoryImpl extends AbstractFactory implements Factory, PluginManager, SiteAware{
+public class FactoryImpl extends PluginManagerImpl implements Factory, PluginManager, ObjectFactory {
     private static final Logger log = LoggerFactory.getLogger(FactoryImpl.class);
 
     private Site site;
-//    private ProviderImpl provider;
     private Map<String,Object> configuration = new LinkedHashMap<String, Object>();;
 
     private SourceEntryLoader sourceEntryLoader;
@@ -79,20 +77,14 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
     private Highlighter highlighter;
     private SlugHelper slugHelper;
     private RelatedPostsFinder relatedPostsFinder;
-
-    private List<Converter> converters;
-    private List<Generator> generators;
-    private List<Processor> processors;
-//    private List<TemplateLoader> templateLoaders;
+    private PaginationUpdater paginationUpdater;
     private List<Plugin> plugins;
-//    private Map<String,TemplateModel> templateModels;
-    private Map<String,String> resourceBuilderClassNames;
 
-    private Map<Class,List> listMap = new HashMap<Class, List>();
-    private Map<Class,Map> mapMap = new HashMap<Class, Map>();
+    private Map<String,Object> instances = new HashMap<String,Object>();
 
-    @Override
-    public void setSite(Site site){
+
+    public FactoryImpl(Site site){
+        super(site);
         this.site = site;
 
         //default factory configuration
@@ -130,10 +122,11 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
         }
     }
 
+
     @Override
     public SourceEntryLoader getSourceEntryLoader() {
         if(sourceEntryLoader == null){
-            sourceEntryLoader = instantiate(SourceEntryLoader.class);
+            sourceEntryLoader = getInstance(SourceEntryLoader.class);
             if(sourceEntryLoader == null){
                 sourceEntryLoader = new SourceEntryLoaderImpl();
             }
@@ -144,7 +137,7 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
     @Override
     public SourceParser getSourceParser() {
         if(sourceParser == null){
-            sourceParser = instantiate(SourceParser.class);
+            sourceParser = getInstance(SourceParser.class);
             if(sourceParser == null){
                 sourceParser = new SourceParserImpl();
             }
@@ -155,7 +148,7 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
     @Override
     public SourceManager getSourceManager() {
         if(sourceManager == null){
-            sourceManager = instantiate(SourceManager.class);
+            sourceManager = getInstance(SourceManager.class);
             if(sourceManager == null){
                 sourceManager = new SourceManagerImpl();
             }
@@ -166,7 +159,7 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
     @Override
     public Highlighter getHighlighter() {
         if(highlighter == null){
-            highlighter = instantiate(Highlighter.class);
+            highlighter = getInstance(Highlighter.class);
             if(highlighter == null){
                 highlighter = new SyntaxHighlighter();
             }
@@ -187,7 +180,7 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
             }
 
             if(slugHelper == null){
-                slugHelper = instantiate(SlugHelper.class);
+                slugHelper = createInstance(SlugHelper.class);
             }
 
             if(slugHelper == null){
@@ -200,7 +193,7 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
     @Override
     public RelatedPostsFinder getRelatedPostsFinder() {
         if(relatedPostsFinder == null){
-            relatedPostsFinder = instantiate(RelatedPostsFinder.class);
+            relatedPostsFinder = getInstance(RelatedPostsFinder.class);
             if(relatedPostsFinder == null){
                 relatedPostsFinder = new NoOpRelatedPostsFinder();
             }
@@ -208,39 +201,34 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
         return relatedPostsFinder;
     }
 
-    public List<Converter> getConverters() {
-        if(converters == null){
-            converters = instantiateList(Converter.class);
-            sort(converters);
-        }
-        return converters;
+    @Override
+    public Page createPage(Site site, Source source) {
+        return createPage(site, source, (String) source.getMeta().get("layout"));
     }
 
     @Override
-    public List<Generator> getGenerators() {
-        if(generators == null){
-            generators = instantiateList(Generator.class);
-            sort(generators);
+    public Page createPage(Site site, Source source, String layout) {
+        Page page = constructInstance(Page.class, layout,
+                new Class[]{Site.class, Source.class},
+                new Object[]{site, source});
+
+        if(page != null){
+            return page;
         }
-        return generators;
+
+        if("post".equalsIgnoreCase(layout)){
+            if(log.isDebugEnabled()){
+                log.debug("Create post using PostImpl as default: {}", source.getSourceEntry().getFile());
+            }
+            return new SourcePost(site, source);
+        }
+
+        if(log.isDebugEnabled()){
+            log.debug("Create page using PageImpl class as default: {}", source.getSourceEntry().getFile());
+        }
+        return new SourcePage(site, source);
     }
 
-    @Override
-    public List<Processor> getProcessors() {
-        if(processors == null){
-            processors = instantiateList(Processor.class);
-            sort(processors);
-        }
-        return processors;
-    }
-
-//    @Override
-//    public List<TemplateLoader> getTemplateLoaders() {
-//        if(templateLoaders == null){
-//            templateLoaders = instantiateList(TemplateLoader.class);
-//        }
-//        return templateLoaders;
-//    }
 
     private void initializePlugins(){
         if(plugins == null){
@@ -258,22 +246,18 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
         return plugins;
     }
 
-//    @Override
-//    public Map<String, TemplateModel> getTemplateModels() {
-//        if(templateModels == null){
-//            templateModels = instantiateMap(TemplateModel.class, null);
-//        }
-//        return templateModels;
-//    }
-
     @Override
     public PluginManager getPluginManager() {
         return this;
     }
 
     @Override
-    public Renderer createRenderer(Site site) {
-        //return new RendererImpl(site, getTemplateLoaders());
+    public Renderer getRenderer() {
+        ServiceLoader<Renderer> loader = ServiceLoader.load(Renderer.class, site.getClassLoader());
+        Iterator<Renderer> iterator = loader.iterator();
+        if(iterator.hasNext()){
+            return iterator.next();
+        }
 
         String className = (String) site.getTheme().get("renderer");
         if(className != null){
@@ -284,14 +268,11 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
                 throw new RuntimeException(e.getMessage());
             }
 
-            Constructor<?>[] constructors = clazz.getConstructors();
             Constructor<?> theConstructor = null;
-            for(Constructor<?> constructor: constructors){
-                Class<?>[] types = constructor.getParameterTypes();
-                if(types.length == 1 && types[0].equals(Site.class)){
-                    theConstructor = constructor;
-                    break;
-                }
+            try {
+                theConstructor = clazz.getConstructor(Site.class);
+            } catch (NoSuchMethodException e) {
+                //ignore
             }
 
             try {
@@ -299,13 +280,7 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
                     return (Renderer) theConstructor.newInstance(site);
                 } else {
                     Renderer renderer = clazz.newInstance();
-                    if(renderer instanceof SiteAware){
-                        ((SiteAware) renderer).setSite(site);
-                    }
-                    if(renderer instanceof ConfigAware){
-                        ((ConfigAware) renderer).setConfig(site.getConfig());
-                    }
-                    return renderer;
+                    return apply(renderer);
                 }
 
             } catch (InstantiationException e) {
@@ -313,72 +288,172 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("error instance: " + e.getMessage(), e);
             } catch (InvocationTargetException e) {
-                throw new RuntimeException("error instance: " + e.getTargetException(), e.getTargetException());
+                throw new RuntimeException("error instance: " + e.getTargetException().getMessage(),
+                        e.getTargetException());
             }
         }
-
+        //if custom render not specified
         //default: freemarker
         return new FreeMarkerRenderer(site);
     }
 
-    private Renderer newInstance(Class<Renderer> clazz, Site site) {
-        try {
-            Renderer renderer = clazz.newInstance();
-            if(renderer instanceof SiteAware){
-                ((SiteAware) renderer).setSite(site);
+    @Override
+    public PaginationUpdater getPaginationUpdater() {
+        if(paginationUpdater == null){
+            paginationUpdater = getInstance(PaginationUpdater.class);
+            if(paginationUpdater == null){
+                paginationUpdater = new ConfigurablePaginationUpdater();
             }
-            if(renderer instanceof ConfigAware){
-                ((ConfigAware) renderer).setConfig(site.getConfig());
-            }
-
-            return renderer;
-        } catch (InstantiationException e) {
-            throw new RuntimeException("error instance" + e.getMessage(), e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("error instance" + e.getMessage(), e);
         }
+        return paginationUpdater;
     }
 
     @Override
     public ResourceBuilder createResourceBuilder(String type) {
-        if(resourceBuilderClassNames == null){
-            resourceBuilderClassNames = (Map<String, String>) configuration.get(ResourceBuilder.class.getName());
-            if(resourceBuilderClassNames == null){
-                resourceBuilderClassNames = Collections.emptyMap();
+        ResourceBuilder builder = createInstance(ResourceBuilder.class, type);
+        if(builder == null){
+            builder = ClassUtils.newInstance(type, site.getClassLoader(), site, site.getConfig());
+        }
+        return builder;
+   }
+
+    @Override
+    public Category createCategory(String categoryMeta, String slug, String categoryName, Category parent) {
+        Category category = constructInstance(Category.class, categoryMeta,
+                new Class[]{String.class, String.class, Category.class},
+                new Object[]{slug, categoryName, parent});
+
+        if(category != null){
+            return category;
+        }
+
+        return new CategoryImpl(slug, categoryName, parent);
+    }
+
+    @Override
+    public Category createCategory(String categoryMeta, String slug, String categoryName) {
+        Category category = constructInstance(Category.class, categoryMeta,
+                new Class[]{String.class, String.class},
+                new Object[]{slug, categoryName});
+
+        if(category != null){
+            return category;
+        }
+
+        return new CategoryImpl(slug, categoryName);
+    }
+
+
+
+    @Override
+    public Category createCategory(String categoryMeta, String slugOrName) {
+        String slug = getSlugHelper().toSlug(slugOrName);
+        return createCategory(categoryMeta, slug, slugOrName);
+    }
+
+    @Override
+    public Tag createTag(String tagMeta, String slug, String name) {
+        Tag tag = constructInstance(Tag.class, tagMeta,
+                new Class[]{String.class, String.class},
+                new Object[]{slug, name});
+
+        if(tag != null){
+            return tag;
+        }
+
+
+        return new TagImpl(slug, name);
+    }
+
+    @Override
+    public Tag createTag(String tagMeta, String slugOrName) {
+        log.debug("Create tag: {} {}", tagMeta, slugOrName);
+        String slug = getSlugHelper().toSlug(slugOrName);
+        return createTag(tagMeta, slug, slugOrName);
+    }
+
+
+    @Override
+    public <T> T getInstance(Class<T> clazz, String name) {
+        String cacheKey = clazz.getName();
+        if(name != null){
+            cacheKey += "-" + name;
+        }
+
+        if(instances.containsKey(cacheKey)){
+            return (T) instances.get(cacheKey);
+        }else{
+            T o = createInstance(clazz, name);
+            instances.put(cacheKey, o);
+            return o;
+        }
+    }
+
+    @Override
+    public <T> T getInstance(Class<T> clazz){
+        return getInstance(clazz, null);
+    }
+
+    @Override
+    public <T> T createInstance(Class<T> clazz, final String hint) {
+        ServiceLoader<T> loader = ServiceLoader.load(clazz, site.getClassLoader());
+        if(hint == null){
+            Iterator<T> iterator = loader.iterator();
+            if(iterator.hasNext()){
+                return apply(iterator.next());
+            }
+        }else{
+            T t = null;
+            for(T tt: loader){
+                if(t instanceof Named && hint.equals(((Named) t).getName())){
+                    t = tt;
+                    break;
+                }
+            }
+
+            if(t != null){
+                log.debug("Find instance in ServiceLoader: {}", clazz.getName());
+                return apply(t);
             }
         }
 
-        String className = resourceBuilderClassNames.get(type);
-        if(className == null){
-            className = type;
+        String classKey = clazz.getName();
+        if(hint != null){
+            classKey += "-" + hint;
         }
 
-        return ClassUtils.newInstance(className, site.getClassLoader(), site, site.getConfig());
-    }
-
-    public <T> T instantiate(Class<T> clazz){
-        ServiceLoader<T> loader = ServiceLoader.load(clazz, site.getClassLoader());
-        Iterator<T> iterator = loader.iterator();
-        if(iterator.hasNext()){
-            return apply(iterator.next());
-        }
-
-        String className = (String) configuration.get(clazz.getName());
+        String className = (String) configuration.get(classKey);
         if(StringUtils.isBlank(className) || "none".equalsIgnoreCase(className)){
             return null;
         }
         return newInstance(className);
     }
 
-    private <T> T apply(T t) {
-        if(t instanceof SiteAware){
-            ((SiteAware) t).setSite(site);
-        }
-        if(t instanceof ConfigAware){
-            ((ConfigAware) t).setConfig(site.getConfig());
-        }
-        return t;
+    @Override
+    public <T> T createInstance(Class<T> clazz) {
+        return createInstance(clazz, null);
     }
+
+    @Override
+    public <T> T constructInstance(Class<T> clazz, String hint, Object... args) {
+        return constructInstance(clazz, hint, null, args);
+    }
+
+
+    public <T> T constructInstance(Class<T> clazz, String hint, Class<?>[] parameterTypes, Object[] args) {
+        String classKey = clazz.getName();
+        if(hint != null){
+            classKey += "-" + hint;
+        }
+
+        String className = (String) configuration.get(classKey);
+        if(StringUtils.isBlank(className) || "none".equalsIgnoreCase(className)){
+            return null;
+        }
+
+        return ClassUtils.constructInstance(className, site.getClassLoader(), parameterTypes, args);
+    }
+
 
     public <T> T newInstance(String className){
         T t = ClassUtils.newInstance(className, site.getClassLoader(), site, site.getConfig());
@@ -386,14 +461,9 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
         return t;
     }
 
+    @Override
     public <T> List<T> instantiateList(Class<T> clazz){
-        List<T> list = new ArrayList<T>();
-        ServiceLoader<T> loader = ServiceLoader.load(clazz, site.getClassLoader());
-        for(T t: loader){
-            t = apply(t);
-            log.debug("Load instance: {} => {}", clazz.getName(), t.getClass().getName());
-            list.add(t);
-        }
+        List<T> list = super.instantiateList(clazz);
 
         Object o = configuration.get(clazz.getName());
         if(o instanceof List){
@@ -423,16 +493,9 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
         return list;
     }
 
+    @Override
     public <T> Map<String,T> instantiateMap(Class<T> clazz){
-        Map<String,T> map = new HashMap<String, T>();
-        ServiceLoader<T> loader = ServiceLoader.load(clazz, site.getClassLoader());
-        for(T t: loader){
-            if(t instanceof Named) {
-                t = apply(t);
-                log.debug("Load instance for '{}': {} => {}", ((Named) t).getName(), clazz.getName(), t.getClass().getName());
-                map.put(((Named) t).getName(), t);
-            }
-        }
+        Map<String,T> map = super.instantiateMap(clazz);
 
         Object o = configuration.get(clazz.getName());
         if(o instanceof List){
@@ -465,97 +528,6 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
         return map;
     }
 
-    private <T extends Ordered> void sort(List<T> list){
-        if(!list.isEmpty()){
-            Collections.sort(list, Ordered.COMPARATOR);
-        }
-    }
-
-    @Override
-    public Registry registerConverter(Converter c) {
-        getConverters();
-        converters.add(c);
-        sort(converters);
-        return this;
-    }
-
-    @Override
-    public Registry registerGenerator(Generator g) {
-        getGenerators();
-        generators.add(g);
-        sort(generators);
-        return this;
-    }
-
-    @Override
-    public Registry registerProcessor(Processor processor) {
-        getProcessors();
-        processors.add(processor);
-        sort(processors);
-        return this;
-    }
-
-//    @Override
-//    public void registerTemplateModel(String name, TemplateModel model) {
-//        getTemplateModels();
-//        templateModels.put(name, model);
-//    }
-//
-//    @Override
-//    public void registerTemplateLoader(TemplateLoader loader) {
-//        getTemplateLoaders();
-//        templateLoaders.add(loader);
-//    }
-
-    @Override
-    public Converter getConverter(Source source) throws RuntimeException {
-        getConverters();
-        for(Converter c: converters){
-            if(c.matches(source)){
-                return c;
-            }
-        }
-        throw new RuntimeException("No matched converter: " + source.getSourceEntry().getFile());
-    }
-
-
-    @Override
-    public <T> List<T> getObjectList(Class<T> clazz) {
-        List<T> list = listMap.get(clazz);
-        if(list == null){
-            list = instantiateList(clazz);
-            listMap.put(clazz, list);
-        }
-
-        return list;
-    }
-
-    @Override
-    public <T> Registry register(Class<T> clazz, T instance) {
-        getObjectList(clazz).add(instance);
-        return this;
-    }
-
-    @Override
-    public <T> Map<String,T> getObjectMap(Class<T> clazz){
-        Map<String,T> map = mapMap.get(clazz);
-        if(map == null){
-            map = instantiateMap(clazz);
-            mapMap.put(clazz, map);
-        }
-        return map;
-    }
-
-    @Override
-    public <T> Registry register(Class<T> clazz, String name, T instance){
-        getObjectMap(clazz).put(name, instance);
-        return this;
-    }
-
-    @Override
-    public <T> Registry register(Class<T> clazz, Named named){
-        return register(clazz, named.getName(), (T)named);
-    }
 
     public static Factory createInstance(Site site){
         String factoryClassName = site.getConfig().get("factory");
@@ -563,8 +535,7 @@ public class FactoryImpl extends AbstractFactory implements Factory, PluginManag
             return ClassUtils.newInstance(factoryClassName, site.getClassLoader(), site, site.getConfig());
         }
 
-        FactoryImpl factory = new FactoryImpl();
-        factory.setSite(site);
-        return factory;
+        //default factory
+        return new FactoryImpl(site);
     }
 }

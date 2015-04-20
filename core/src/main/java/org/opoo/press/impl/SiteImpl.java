@@ -15,32 +15,30 @@
  */
 package org.opoo.press.impl;
 
-import freemarker.template.TemplateModel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Category;
-import org.opoo.press.Config;
+import org.opoo.press.Collection;
 import org.opoo.press.Converter;
 import org.opoo.press.Factory;
 import org.opoo.press.Generator;
+import org.opoo.press.NoFrontMatterException;
 import org.opoo.press.Observer;
 import org.opoo.press.Page;
 import org.opoo.press.Post;
+import org.opoo.press.ProcessorsProcessor;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.SiteBuilder;
-import org.opoo.press.StaticFile;
-import org.opoo.press.Tag;
-import org.opoo.press.Theme;
-import org.opoo.press.ThemeCompiler;
-import org.opoo.press.Writable;
-import org.opoo.press.processor.ProcessorsProcessor;
-import org.opoo.press.NoFrontMatterException;
+import org.opoo.press.SiteConfig;
 import org.opoo.press.Source;
 import org.opoo.press.SourceEntry;
 import org.opoo.press.SourceEntryLoader;
 import org.opoo.press.SourceParser;
+import org.opoo.press.StaticFile;
+import org.opoo.press.Theme;
+import org.opoo.press.ThemeCompiler;
+import org.opoo.press.Writable;
 import org.opoo.press.task.RunnableTask;
 import org.opoo.press.task.TaskExecutor;
 import org.opoo.press.util.StaleUtils;
@@ -55,18 +53,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 
 
 /**
@@ -76,7 +71,7 @@ import java.util.TreeMap;
 public class SiteImpl implements Site, SiteBuilder{
 	private static final Logger log = LoggerFactory.getLogger(SiteImpl.class);
 
-	private ConfigImpl config;
+	private SiteConfigImpl config;
 	private Map<String, Object> data;
 	private File dest;
 	private File templates;
@@ -84,49 +79,24 @@ public class SiteImpl implements Site, SiteBuilder{
 	private File basedir;
 	private ValidDirList sources;
 	private ValidDirList assets;
-	
 	private String root;
-	
-	private List<Page> pages;
-	private List<Post> posts;
 	private List<StaticFile> staticFiles;
-	
-	private Map<String, Category> categories;
-	private List<Tag> tags;
-	
 	private Date time;
 	private boolean showDrafts = false;
-	
-//	private transient List<Generator> generators;
 	private Renderer renderer;
-//	private List<String> includes;
-//	private List<String> excludes;
-//	private RegistryImpl registry;
 	private Locale locale;
-	//private Highlighter highlighter;
-	//private SlugHelper slugHelper;
-	private String permalink;
-	//private RelatedPostsFinder relatedPostsFinder;
-	
-//	private File lastBuildInfoFile;
 	private TaskExecutor taskExecutor;
-	
 	private Theme theme;
-	//private ThemeManager themeManager;
-	//private PluginManager pluginManager;
 //	private boolean setup = false;
 	private ProcessorsProcessor processors;
-
-	//private Provider provider;
 	private ClassLoader classLoader;
 	private Factory factory;
-
-	//private SourceEntryLoader sourceEntryLoader;
-	//private SourceParser sourceParser;
-
 	private String dateFormatPattern;
+	private Map<String,Collection> collections;
+	private List<Page> allPages;
 
-	public SiteImpl(ConfigImpl siteConfig) {
+
+	public SiteImpl(SiteConfigImpl siteConfig) {
 		super();
 		
 		this.config = siteConfig;
@@ -135,7 +105,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		
 		this.basedir = config.getBasedir();
 		this.root = config.get("root", "");
-		this.permalink = config.get("permalink");
+//		this.permalink = config.get("permalink");
 		this.showDrafts = config.get("show_drafts", false);
 		boolean debug = config.get("debug", false);
 		
@@ -261,6 +231,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		reset();
 		read();
 		generate();
+		convert();
 		render();
 		cleanup();
 		write();
@@ -270,59 +241,16 @@ public class SiteImpl implements Site, SiteBuilder{
 
 	void reset(){
 		this.time = config.get("time", new Date());
-		this.pages = new ArrayList<Page>();
-		this.posts = new ArrayList<Post>();
+		//Call #add() in multi-threading
+		this.allPages = Collections.synchronizedList(new ArrayList<Page>());
+
+		this.collections = new LinkedHashMap<String, Collection>();
+
 		//Call #add() in multi-threading
 		this.staticFiles = Collections.synchronizedList(new ArrayList<StaticFile>());
-		
-//		resetCategories();
-//		resetTags();
 	}
 	
-	void resetCategories(){
-		this.categories = new LinkedHashMap<String,Category>();
-		Map<String,String> names = config.get("category_names");
-		if(names == null || names.isEmpty()){
-			return;
-		}
-		//sort name
-		names = new TreeMap<String,String>(names);
-		for(Map.Entry<String, String> en: names.entrySet()){
-			String path = en.getKey();
-			String name = en.getValue();
-			
-			String nicename = path;
-			String parentPath = null;
-			int index = path.lastIndexOf('.');
-			if(index != -1){
-				nicename = path.substring(index + 1);
-				parentPath = path.substring(0, index);
-			}
-			
-			Category parent = null;
-			if(parentPath != null){
-				parent = categories.get(parentPath);
-				if(parent == null){
-					throw new IllegalArgumentException("Parent category not found: " + parentPath);
-				}
-			}
-			CategoryImpl category = new CategoryImpl(nicename, name, parent, this);
-			categories.put(path, category);
-		}
-	}
-	
-	void resetTags(){
-		this.tags = new ArrayList<Tag>();
-		Map<String,String> names = config.get("tag_names");
-		if(names == null || names.isEmpty()){
-			return;
-		}
-		
-		for(Map.Entry<String, String> en: names.entrySet()){
-			 tags.add(new TagImpl(en.getKey(), en.getValue(), this));
-		 }
-	}
-	
+
 	void setup(){
 		//ensure source not in destination
 		for(File source: sources){
@@ -355,10 +283,10 @@ public class SiteImpl implements Site, SiteBuilder{
 		processors = new ProcessorsProcessor(factory.getPluginManager().getProcessors());
 
 		//Construct RendererImpl after initializing all plugins
-		renderer = factory.createRenderer(this);
+		renderer = factory.getRenderer();
 	}
 
-	private ClassLoader createClassLoader(Config config, Theme theme) {
+	private ClassLoader createClassLoader(SiteConfig config, Theme theme) {
 		log.debug("Create site ClassLoader.");
 
 		ClassLoader parent = SiteImpl.class.getClassLoader();
@@ -422,31 +350,10 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 	}
 
-//	@Deprecated
-//	public <T> T instantiate(Class<T> clazz){
-//		return instantiate(clazz, null);
-//	}
-//	@Deprecated
-//	public <T> T instantiate(Class<T> clazz, String hint){
-//		String className = provider.getClassName(clazz.getName(), hint);
-//		if(StringUtils.isBlank(className) || "none".equalsIgnoreCase(className)){
-//			return null;
-//		}
-//		return instantiate(className);
-//	}
-//	@Deprecated
-//	public <T> T instantiate(String className){
-//		T t = ClassUtils.newInstance(className, classLoader, this, config);
-//		log.debug("New '{}' instance: {}", className, t);
-//		return t;
-//	}
 
 
 	void read(){
-		//read categories and tags from configuration
-		resetCategories();
-		resetTags();
-		
+
 		Runnable t1 = new Runnable(){
 			public void run() {
 				readSources();
@@ -471,52 +378,13 @@ public class SiteImpl implements Site, SiteBuilder{
 
 		//load sources and load static files
 		FileFilter fileFilter = buildFilter();
-		List<SourceEntry> list = new ArrayList<SourceEntry>();
 		for(File src: sources){
 			List<SourceEntry> tempList = sourceEntryLoader.loadSourceEntries(src, fileFilter);
-			if(tempList != null && !tempList.isEmpty()){
-				list.addAll(tempList);
+			for(SourceEntry en: tempList){
+				read(en, sourceParser);
 			}
 		}
-		
-		for(SourceEntry en: list){
-			read(en, sourceParser);
-		}
-		
-		Collections.sort(posts);
-		Collections.reverse(posts);
-		setPostNextOrPrevious(posts);
-		
-//		sort(categories);
-//		sort(tags);
-	}
-	
-	
-	/**
-	 * @param posts
-	 */
-	private void setPostNextOrPrevious(List<Post> posts) {
-		/*
-		for(int i = 0 ; i < posts.size() ; i++){
-			Post post = posts.get(i);
-			if(i > 0){
-				post.setNext(posts.get(i - 1));
-			}
-			if(i < posts.size() - 1){
-				post.setPrevious(posts.get(i + 1));
-			}
-		}*/
-		Iterator<Post> it = posts.iterator();
-		Post prev = null;
-		Post curr = null;
-		while(it.hasNext()){
-			curr = it.next();
-			if(prev != null){
-				prev.setPrevious(curr);
-				curr.setNext(prev);
-			}
-			prev = curr;
-		}
+
 	}
 	
 	private void readStaticFiles(){
@@ -532,41 +400,28 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private void postRead() {
 		processors.postRead(this);
 	}
-
 
 	private void read(SourceEntry en, SourceParser parser) {
 		try {
 			Source src = parser.parse(en);
 			log.debug("read source {}", src.getSourceEntry().getFile());
-			
+
 			Map<String, Object> map = src.getMeta();
 			String layout = (String) map.get("layout");
-			if("post".equals(layout)){
-				readPost(src);
-			}else{
-				pages.add(factory.createPage(this, src));
+			boolean draft = isDraft(map);
+			if(!draft || (draft && showDrafts)) {
+				Page page = factory.createPage(this, src, layout);
+				allPages.add(page);
 			}
 		} catch (NoFrontMatterException e) {
 			this.staticFiles.add(new StaticFileImpl(this, en));
 		}
 	}
-	
-	private void readPost(Source src){
-		if(isDraft(src.getMeta())){
-			if(showDrafts){
-				posts.add(factory.createDraft(this, src));
-			}
-		}else{
-			posts.add(factory.createPost(this, src));
-		}
-	}
-	
+
+
 	private boolean isDraft(Map<String, Object> meta){
 		if(!meta.containsKey("published")){
 			return false;
@@ -619,55 +474,39 @@ public class SiteImpl implements Site, SiteBuilder{
 		processors.postGenerate(this);
 	}
 
+	void convert(){
+		log.info("Converting {} pages...", allPages.size());
+		taskExecutor.run(allPages, new RunnableTask<Page>(){
+			public void run(Page page) {
+				log.debug("Converting page: {}", page.getUrl());
+				page.convert();
+				postConvertPage(page);
+			}
+		});
+		postConvertPages();
+	}
+
 	void render(){
+		preRenderPages();
 		final Map<String, Object> rootMap = buildRootMap();
 		renderer.prepare();
 		
-//		for(Post post: posts){
-//			post.convert();
-//			postConvertPost(post);
-//			
-//			post.render(rootMap);
-//			postRenderPost(post);
-//		}
-		log.info("Rendering {} posts...", posts.size());
-		taskExecutor.run(posts, new RunnableTask<Post>(){
-			public void run(Post post) {
-				post.convert();
-				postConvertPost(post);
-//				
-				post.render(rootMap);
-				postRenderPost(post);
-			}});
-		postRenderPosts();
-		
-//		for(Page page: pages){
-//			page.convert();
-//			postConvertPage(page);
-//			
-//			page.render(rootMap);
-//			postRenderPage(page);
-//		}
-		
-		log.info("Rendering {} pages...", pages.size());
-		taskExecutor.run(pages, new RunnableTask<Page>(){
+		log.info("Rendering {} pages...", allPages.size());
+		taskExecutor.run(allPages, new RunnableTask<Page>(){
 			public void run(Page page) {
-				page.convert();
-				postConvertPage(page);
-				
+				log.debug("Rendering page: {}", page.getUrl());
+
 				page.render(rootMap);
 				postRenderPage(page);
 			}
 		});
 		postRenderPages();
 	}
-	
-	/**
-	 * @param post
-	 */
-	private void postConvertPost(Post post) {
-		processors.postConvertPost(this, post);
+
+	private void preRenderPages() {
+		processors.preRenderAllPages(this);
 	}
+
 
 	/**
 	 * @param page
@@ -676,18 +515,8 @@ public class SiteImpl implements Site, SiteBuilder{
 		processors.postConvertPage(this, page);
 	}
 
-	/**
-	 * @param post
-	 */
-	private void postRenderPost(Post post) {
-		processors.postRenderPost(this, post);
-	}
-
-	/**
-	 * 
-	 */
-	private void postRenderPosts() {
-		processors.postRenderAllPosts(this);
+	private void postConvertPages(){
+		processors.postConvertAllPages(this);
 	}
 
 	/**
@@ -712,11 +541,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		map.put("basedir", getRoot());
 		map.put("opoopress", config.get("opoopress"));
 		
-//		Map<String, TemplateModel> models = factory.getTemplateModels();
-//		if(models != null && !models.isEmpty()){
-//			map.putAll(models);
-//		}
-		
 		map.put("theme", theme);
 		return map;
 	}
@@ -728,13 +552,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		log.info("cleanup...");
 		final List<File> destFiles = getAllDestFiles(dest);
 		List<File> files = new ArrayList<File>();
-		
-//		for(Post post: posts){
-//			files.add(post.getOutputFile(dest));
-//		}
-//		for(Page page: pages){
-//			files.add(page.getOutputFile(dest));
-//		}
+
 		for(StaticFile staticFile: staticFiles){
 			files.add(staticFile.getOutputFile(dest));
 		}
@@ -803,33 +621,10 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 	void write(){
-		log.info("Writing {} posts, {} pages, and {} static files ...", 
-				posts.size(), pages.size(), staticFiles.size());
-		
-		if(!dest.exists()){
-			dest.mkdirs();
-		}
-		
-//		log.info("Writing " + posts.size() + " posts");
-//		for(Post post: posts){
-//			post.write(dest);
-//		}
-//		
-//		log.info("Writing " + pages.size() + " pages");
-//		for(Page page: pages){
-//			page.write(dest);
-//		}
-//		
-//		if(!staticFiles.isEmpty()){
-//			log.info("Copying " + staticFiles.size() + " static files");
-//			for(StaticFile sf: staticFiles){
-//				sf.write(dest);
-//			}
-//		}
+		dest.mkdirs();
 		
 		List<Writable> list = new ArrayList<Writable>();
-		list.addAll(posts);
-		list.addAll(pages);
+		list.addAll(allPages);
 		if(!staticFiles.isEmpty()){
 			list.addAll(staticFiles);
 		}
@@ -839,18 +634,7 @@ public class SiteImpl implements Site, SiteBuilder{
 				o.write(dest);
 			}
 		});
-		
-//		if(assets != null){
-//			try {
-//				log.info("Copying 1 assets directory");
-//				log.debug("Copying assets...");
-//				FileUtils.copyDirectory(assets, dest, buildFilter());
-//				
-//				log.debug("All asset files copied.");
-//			} catch (IOException e) {
-//				log.error("Copy assets error", e);
-//			}
-//		}
+
 		postWrite();
 	}
 
@@ -865,21 +649,29 @@ public class SiteImpl implements Site, SiteBuilder{
 	 * @return the pages
 	 */
 	public List<Page> getPages() {
-		return pages;
+		Collection collection = collections.get("page");
+		if(collection != null){
+			return (List<Page>) collection.getPages();
+		}
+		return Collections.emptyList();
 	}
 
 	/**
 	 * @return the posts
 	 */
 	public List<Post> getPosts() {
-		return posts;
+		Collection collection = collections.get("post");
+		if(collection != null){
+			return (List<Post>) collection.getPages();
+		}
+		return Collections.emptyList();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Site#getConfig()
 	 */
 	@Override
-	public Config getConfig() {
+	public SiteConfig getConfig() {
 		return config;
 	}
 
@@ -898,6 +690,11 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	public List<StaticFile> getStaticFiles(){
 		return staticFiles;
+	}
+
+	@Override
+	public List<Page> getAllPages() {
+		return allPages;
 	}
 
 	/* (non-Javadoc)
@@ -973,41 +770,14 @@ public class SiteImpl implements Site, SiteBuilder{
 		return locale;
 	}
 
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Site#getCategories()
-	 */
 	@Override
-	public List<Category> getCategories() {
-		return new CategoriesList(categories);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Site#getTags()
-	 */
-	@Override
-	public List<Tag> getTags() {
-		return tags;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteHelper#buildCanonical(java.lang.String)
-	 */
-	@Override
-	public String buildCanonical(String url) {
-		/*
-		String canonical = (String) config.get("url");
-		String permalink = (String) config.get("permalink");
-		String pageUrl = url;
-		if(permalink != null && permalink.endsWith(".html")){
-			canonical += pageUrl;
-		}else{
-			canonical += StringUtils.removeEnd(pageUrl, "index.html");
+	public String getPermalink(String layout) {
+		if(layout == null){
+			return null;
 		}
-		return canonical;
-		*/
-		return url;
+		return config.get("permalink_" + layout);
 	}
+
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.SiteHelper#toSlug(java.lang.String)
@@ -1017,94 +787,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		return factory.getSlugHelper().toSlug(tagName);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteHelper#toNicename(java.lang.String)
-	 */
-	@Override
-	public String toNicename(String categoryName) {
-		return factory.getSlugHelper().toSlug(categoryName);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteHelper#getCategory(java.lang.String)
-	 */
-	@Override
-	public Category getCategory(String categoryNameOrNicename) {
-		if(categories == null || categories.isEmpty()){
-			return null;
-		}
-		//If path equals
-		if(categories.containsKey(categoryNameOrNicename)){
-			return categories.get(categoryNameOrNicename);
-		}
-		for(Category category: new ArrayList<Category>(categories.values())){
-			if(category.isNameOrNicename(categoryNameOrNicename)){
-				return category;
-			}
-		}
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SiteHelper#getTag(java.lang.String)
-	 */
-	@Override
-	public Tag getTag(String tagNameOrSlug) {
-		if(tags == null || tags.isEmpty()){
-			return null;
-		}
-		for(Tag tag: new ArrayList<Tag>(tags)){
-			if(tag.isNameOrSlug(tagNameOrSlug)){
-				return tag;
-			}
-		}
-		return null;
-	}
-	
-	private static class CategoriesList extends AbstractList<Category>{
-		private final List<Category> list = new ArrayList<Category>();
-		private final Map<String, Category> categories;
-		
-		private CategoriesList(Map<String, Category> categories) {
-			this.categories = categories;
-			//this.list = new ArrayList<Category>(categories.values());
-			for(Category category: categories.values()){
-				if(!category.getPosts().isEmpty()){
-					list.add(category);
-				}
-			}
-		}
-
-		@Override
-		public boolean add(Category category){
-			categories.put(category.getPath(), category);
-			return list.add(category);
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.util.AbstractList#get(int)
-		 */
-		@Override
-		public Category get(int index) {
-			return list.get(index);
-		}
-
-		/* (non-Javadoc)
-		 * @see java.util.AbstractCollection#size()
-		 */
-		@Override
-		public int size() {
-			return list.size();
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Site#getPermalink()
-	 */
-	@Override
-	public String getPermalink() {
-		return permalink;
-	}
 
 	/**
 	 * @return the site
@@ -1129,6 +811,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		return new SiteObserver(this);
 	}
 
+
 	/**
 	 * @return the showDrafts
 	 */
@@ -1147,6 +830,11 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	ProcessorsProcessor getProcessors(){
 		return processors;
+	}
+
+	@Override
+	public Map<String,Collection> getCollections(){
+		return collections;
 	}
 
 	@Override

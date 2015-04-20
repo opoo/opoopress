@@ -16,21 +16,22 @@
 package org.opoo.press.generator;
 
 import org.opoo.press.Generator;
+import org.opoo.press.Ordered;
 import org.opoo.press.Site;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Alex Lin
- *
  */
 public class GeneratorsGenerator implements Generator {
 	private final List<Generator> generators;
 	public GeneratorsGenerator(List<Generator> generators){
 		this.generators = generators;
-//		if(this.generators != null){
-//			Collections.sort(generators, Ordered.COMPARATOR);
-//		}
+		if(this.generators != null){
+			Collections.sort(generators, Ordered.COMPARATOR);
+		}
 	}
  
 	/* (non-Javadoc)

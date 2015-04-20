@@ -19,7 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 
 import java.io.File;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ abstract class AbstractOpooPressMojo extends AbstractMojo{
     @Override
     public final void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            ConfigImpl configImpl = new ConfigImpl(baseDirectory, getOverrideConfiguration());
+            SiteConfigImpl configImpl = new SiteConfigImpl(baseDirectory, getOverrideConfiguration());
 
             if(configImpl.getConfigFiles().length == 0){
                 getLog().info("No OpooPress site to generate.");
@@ -78,5 +78,5 @@ abstract class AbstractOpooPressMojo extends AbstractMojo{
         return override;
     }
 
-    protected abstract void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException;
+    protected abstract void executeInternal(SiteConfigImpl config) throws MojoExecutionException, MojoFailureException;
 }

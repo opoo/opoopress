@@ -5,7 +5,7 @@
 # ----------------------- #
 
 # The title of your site
-title: My OpooPress Blog
+title: My OpooPress Site
 
 # The subtitle of your site
 subtitle: Just another OpooPress site
@@ -14,10 +14,10 @@ subtitle: Just another OpooPress site
 author: Your Name
 
 # The description of your site. Use as web page description meta value normaly.
-description: "OpooPress Blogging Framework is a java based static site generator."
+description: "OpooPress Framework is a java based static site generator."
 
 # The keywords of your site.
-keywords: "OpooPress, Blog"
+keywords: "OpooPress, Static site generator, Blog"
 
 # The locale(region and language) of your site.
 # check java.util.Locale at http://docs.oracle.com/javase/7/docs/api/java/util/Locale.html
@@ -37,18 +37,29 @@ url: http://yoursite.com
 # Default value is ''.
 # root: ''
 
+# Encode URL.
+#
+# Default value is false
+# url_encode: false
+
+# Decode URL
+#
+# Default value is false
+# url_decode: false
+
 # The permalink format of posts.
 # Supported variables: All front-matter meta properties, and ${year}, ${month}, ${day}, ${hour},${minute}, ${second},
 # ${name}, ${pathToFile}, ${fileName} etc.
 # Default value is '/article/${year}/${month}/${name}.html'.
-# permakink: ‘/article/${year}/${month}/${name}.html’
+# permalink_post: '/article/${year}/${month}/${name}.html'
 
-# The label of permalink.
-# Default value is '&infin;'.
-# permalink_label: '&infin;'
-
-#
-# permalink_label_feed: "&#9875; Permalink"
+# The permalink format of other LAYOUT.
+# Supported variables: All front-matter meta properties, and ${year}, ${month}, ${day}, ${hour},${minute}, ${second},
+# ${name}, ${pathToFile}, ${fileName} etc.
+# No default value.
+# permalink_<LAYOUT>: <YOUR PERMALINK FORMAT>
+# Sample: permalink for custom layout 'doc':
+# permalink_doc: '/docs/${version}/${name}.html'
 
 
 # ----------------------- #
@@ -105,6 +116,8 @@ url: http://yoursite.com
 # ----------------------- #
 
 # The full path and filename of the new post.
+# Commonly, we also need define property 'new_post_template' in theme configuration file(theme.yml).
+#
 # Supported variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
 # The default value of format is 'markdown'.
 #
@@ -112,11 +125,22 @@ url: http://yoursite.com
 # new_post: 'posts/${year}-${month}-${day}-${name}.${format}'
 
 # The full path and filename of the new page.
-# Supported: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
+# Commonly, we also need define property 'new_page_template' in theme configuration file(theme.yml).
+#
+# Supported variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
 # The default value of format is 'markdown'.
 #
 # The default value of new_post is 'pages/${name}.${format}'
 # new_page: 'pages/${name}.${format}'
+
+# The new file full path and filename for other custom layout..
+# new_<LAYOUT>: <FORMAT>
+# Commonly, we also need define property 'new_<LAYOUT>_template' in theme configuration file(theme.yml).
+#
+# Supported variables: ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second}, ${name}, ${title}, ${date}, ${format}
+# The default value of format is 'markdown'.
+#
+# Sample: new_doc: 'pages/docs/${name}.md'
 
 # Transform title into proper title case.
 # Default value is false.
@@ -128,29 +152,6 @@ url: http://yoursite.com
 
 
 # ----------------------- #
-#  Category & Tag         #
-# ----------------------- #
-
-# The directory of generated category pages. Default value is '/category'.
-# category_dir: /category
-
-# The mapping of category nicename and name.
-# Please keep nicename lower case, no space and special characters.
-#
-# This is optional, no default value.
-# category_names: {"opoopress": "OpooPress", "blog": "Blog"}
-
-# The directory of generated tag pages. Default value is '/tag'.
-# tag_dir: /tag
-
-# The mapping of tag slug and name.
-# Please keep slug lower case, no space and special characters.
-#
-# This is optional, no default value.
-# tag_names: {"opensource": "Open Source"}
-
-
-# ----------------------- #
 # Pagination & Limitation #
 # ----------------------- #
 
@@ -158,9 +159,11 @@ url: http://yoursite.com
 # paginate: 10
 
 # Recent posts limit. Default value is 5.
+# For blog-aware website only.
 # recent_posts: 5
 
 # Related post count of a single post. Default value is 5.
+# For blog-aware website only.
 # related_posts: 5
 
 
@@ -169,7 +172,7 @@ url: http://yoursite.com
 # ----------------------- #
 
 # The default value of date format is 'yyyy-MM-dd'(ref java.util.Date).
-# The special value ‘ordinal’ equals to 'MMM d yyyy', eg. ‘SEP 15 2013’
+# The special value 'ordinal' equals to 'MMM d yyyy', eg. 'SEP 15 2013'
 # http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html.
 # date_format: "ordinal"
 

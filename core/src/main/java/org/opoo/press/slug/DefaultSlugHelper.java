@@ -38,6 +38,10 @@ public class DefaultSlugHelper implements SlugHelper {
 		for(char c: chars){
 			toSlug(sb, c);
 		}
+		if(sb.length() == 0){
+			throw new UnsupportedOperationException("Cannot process text '"
+					+ text + "' to slug, try configure another SlugHelper instead.");
+		}
 		trimDot(sb);
 		return sb.toString();
 	}

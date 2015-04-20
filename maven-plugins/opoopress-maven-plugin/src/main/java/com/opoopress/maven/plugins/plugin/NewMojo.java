@@ -19,7 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.opoo.press.SiteManager;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 import org.opoo.press.impl.SiteImpl;
 import org.opoo.press.impl.SiteManagerImpl;
 
@@ -82,7 +82,7 @@ public class NewMojo extends AbstractOpooPressMojo{
     private SiteManager siteManager = new SiteManagerImpl();
 
     @Override
-    protected void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config) throws MojoExecutionException, MojoFailureException {
         if (skipNew) {
             getLog().info("Skiping create new file.");
             return;

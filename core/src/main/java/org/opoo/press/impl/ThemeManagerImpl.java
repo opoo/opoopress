@@ -23,5 +23,4 @@ import org.opoo.press.ThemeManager;
  */
 public class ThemeManagerImpl implements ThemeManager {
 
-
 }

@@ -23,23 +23,21 @@ public interface Processor extends Ordered {
 
     void postSetup(Site site);
 
+    void postRead(Site site, Page page);
+
     void postRead(Site site);
 
     void postGenerate(Site site);
 
-    void postConvertPost(Site site, Post post);
-
     void postConvertPage(Site site, Page page);
 
-    void preRenderPost(Site site, Post post);
+    void postConvertAllPages(Site site);
 
-    void postRenderPost(Site site, Post post);
+    void preRenderAllPages(Site site);
 
     void preRenderPage(Site site, Page page);
 
     void postRenderPage(Site site, Page page);
-
-    void postRenderAllPosts(Site site);
 
     void postRenderAllPages(Site site);
 

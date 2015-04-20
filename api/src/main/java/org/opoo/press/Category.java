@@ -20,21 +20,11 @@ import java.util.List;
 /**
  * @author Alex Lin
  */
-public interface Category extends PostsHolder {
-
-    String getNicename();
-
-    String getName();
+public interface Category extends MetaTag{
 
     Category getParent();
 
     List<Category> getChildren();
-
-    boolean isNameOrNicename(String nameOrNicename);
-
-    String getTitle();
-
-    String getUrl();
 
     String getPath();
 }

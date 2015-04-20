@@ -17,7 +17,7 @@ package com.opoopress.maven.plugins.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 import org.opoo.press.impl.SiteImpl;
 
 /**
@@ -31,7 +31,7 @@ public class CleanMojo extends AbstractOpooPressMojo{
     private boolean skipClean = false;
 
     @Override
-    protected void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config) throws MojoExecutionException, MojoFailureException {
         if(skipClean){
             getLog().info("Skipping clean site.");
             return;

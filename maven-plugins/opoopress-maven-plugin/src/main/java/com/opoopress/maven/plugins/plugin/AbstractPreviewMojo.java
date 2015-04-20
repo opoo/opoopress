@@ -29,7 +29,7 @@ import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.opoo.press.Observer;
 import org.opoo.press.Site;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 import org.opoo.press.impl.SiteImpl;
 import org.opoo.press.impl.SiteObserver;
 
@@ -63,7 +63,7 @@ public class AbstractPreviewMojo extends AbstractBuildMojo{
     private boolean running = true;
 
     @Override
-    protected void executeInternal(ConfigImpl config)  throws MojoExecutionException, MojoFailureException{
+    protected void executeInternal(SiteConfigImpl config)  throws MojoExecutionException, MojoFailureException{
         if(skipPreview){
             getLog().info("Skipping preview.");
             return;
@@ -72,7 +72,7 @@ public class AbstractPreviewMojo extends AbstractBuildMojo{
     }
 
     @Override
-    protected void executeInternal(ConfigImpl config, SiteImpl site) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config, SiteImpl site) throws MojoExecutionException, MojoFailureException {
         if(interval < 3){
             interval = 3;
         }
@@ -93,7 +93,7 @@ public class AbstractPreviewMojo extends AbstractBuildMojo{
         }
     }
 
-    private void startAll(ConfigImpl config, SiteImpl site, long intervalMillis) throws Exception {
+    private void startAll(SiteConfigImpl config, SiteImpl site, long intervalMillis) throws Exception {
         Server server = createJettyServer(site);
         server.start();
 
@@ -127,7 +127,7 @@ public class AbstractPreviewMojo extends AbstractBuildMojo{
         }
 
         //start again
-        config = new ConfigImpl(config.getBasedir(), getOverrideConfiguration());
+        config = new SiteConfigImpl(config.getBasedir(), getOverrideConfiguration());
         if(config.getConfigFiles().length == 0){
             throw new Exception("No valid OpooPress configuration file.");
         }

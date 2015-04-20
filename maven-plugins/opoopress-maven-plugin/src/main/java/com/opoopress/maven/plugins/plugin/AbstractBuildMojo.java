@@ -23,7 +23,7 @@ import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.codehaus.plexus.util.StringUtils;
 import org.opoo.press.ThemeCompiler;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 import org.opoo.press.impl.SiteImpl;
 
 import java.io.File;
@@ -60,7 +60,7 @@ public abstract class AbstractBuildMojo extends AbstractOpooPressMojo{
     private Invoker invoker;
 
     @Override
-    protected void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config) throws MojoExecutionException, MojoFailureException {
         if(showDrafts){
             config.put("show_drafts", true);
         }
@@ -100,7 +100,7 @@ public abstract class AbstractBuildMojo extends AbstractOpooPressMojo{
         executeInternal(config, site);
     }
 
-    protected void executeInternal(ConfigImpl config, SiteImpl site) throws MojoExecutionException, MojoFailureException{
+    protected void executeInternal(SiteConfigImpl config, SiteImpl site) throws MojoExecutionException, MojoFailureException{
     }
 
 

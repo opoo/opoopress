@@ -15,13 +15,8 @@
  */
 package org.opoo.press.util;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Excerptable;
 
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -56,16 +51,16 @@ public abstract class LinkUtils {
 		params.put("second", StringUtils.leftPad(second + "", 2, '0'));
 	}
 
-	public static String renderUrl(String pattern, Map<String,Object> params){
-		try {
-			Configuration configuration = new Configuration();
-			Template template = new Template("filename", new StringReader(pattern), configuration, "UTF-8");
-			StringWriter writer = new StringWriter();
-			template.process(params, writer);
-			writer.flush();
-			return writer.toString();
-		}catch (Exception e){
-			throw new RuntimeException("Render url failed: " + e.getMessage(), e);
-		}
-	}
+//	public static String renderUrl(String pattern, Map<String,Object> params){
+//		try {
+//			Configuration configuration = new Configuration();
+//			Template template = new Template("filename", new StringReader(pattern), configuration, "UTF-8");
+//			StringWriter writer = new StringWriter();
+//			template.process(params, writer);
+//			writer.flush();
+//			return writer.toString();
+//		}catch (Exception e){
+//			throw new RuntimeException("Render url failed: " + e.getMessage(), e);
+//		}
+//	}
 }

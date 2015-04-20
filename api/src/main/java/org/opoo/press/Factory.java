@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * @author Alex Lin
  */
-public interface Factory {
+public interface Factory extends ObjectFactory{
 
     SourceEntryLoader getSourceEntryLoader();
 
@@ -34,27 +34,27 @@ public interface Factory {
 
     RelatedPostsFinder getRelatedPostsFinder();
 
-    Post createPost(Site site, Source source);
+    Page createPage(Site site, Source source, String layout);
 
     Page createPage(Site site, Source source);
 
-    Post createDraft(Site site, Source source);
-
-//    List<Converter> getConverters();
-//
-//    List<Generator> getGenerators();
-//
-//    List<Processor> getProcessors();
-
-//    List<TemplateLoader> getTemplateLoaders();
-
     List<Plugin> getPlugins();
-
-//    Map<String,TemplateModel> getTemplateModels();
 
     PluginManager getPluginManager();
 
-    Renderer createRenderer(Site site);
+    Renderer getRenderer();
+
+    PaginationUpdater getPaginationUpdater();
 
     ResourceBuilder createResourceBuilder(String type);
+
+    Category createCategory(String categoryMeta, String slug, String categoryName, Category parent);
+
+    Category createCategory(String categoryMeta, String slug, String categoryName);
+
+    Category createCategory(String categoryMeta, String slugOrName);
+
+    Tag createTag(String tagMeta, String slug, String name);
+
+    Tag createTag(String tagMeta, String slugOrName);
 }

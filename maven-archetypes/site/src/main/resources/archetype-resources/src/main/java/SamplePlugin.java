@@ -11,7 +11,7 @@ import org.opoo.press.Plugin;
 import org.opoo.press.Post;
 import org.opoo.press.Registry;
 import org.opoo.press.Site;
-import org.opoo.press.processor.ProcessorAdapter;
+import org.opoo.press.ProcessorAdapter;
 
 public class SamplePlugin implements Plugin{
 

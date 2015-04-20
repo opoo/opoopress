@@ -41,7 +41,7 @@
             <defaultValue>com.opoopress.site</defaultValue>
         </requiredProperty>
         <!--<requiredProperty key="artifactId">-->
-            <!--<defaultValue>${name}</defaultValue>-->
+        <!--<defaultValue>${name}</defaultValue>-->
         <!--</requiredProperty>-->
         <requiredProperty key="version">
             <defaultValue>1.0-SNAPSHOT</defaultValue>

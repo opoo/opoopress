@@ -17,8 +17,8 @@ package org.opoo.press.impl;
 
 import org.apache.commons.io.FileUtils;
 import org.opoo.press.Site;
-import org.opoo.press.StaticFile;
 import org.opoo.press.SourceEntry;
+import org.opoo.press.StaticFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

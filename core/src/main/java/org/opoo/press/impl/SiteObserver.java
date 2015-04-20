@@ -17,14 +17,14 @@ package org.opoo.press.impl;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.opoo.press.Config;
 import org.opoo.press.Observer;
+import org.opoo.press.SiteConfig;
+import org.opoo.press.SourceEntry;
+import org.opoo.press.SourceEntryLoader;
 import org.opoo.press.file.Result;
 import org.opoo.press.file.Watchable;
 import org.opoo.press.file.WatchableDirectory;
 import org.opoo.press.file.WatchableFiles;
-import org.opoo.press.SourceEntry;
-import org.opoo.press.SourceEntryLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,11 +76,11 @@ public class SiteObserver implements Observer{
      * @return file filter
      */
     private FileFilter createConfigFilesFilter(){
-        Config config = site.getConfig();
+        SiteConfig config = site.getConfig();
         boolean useDefaultConfigFiles = config.useDefaultConfigFiles();
         if(useDefaultConfigFiles){
             log.debug("Using default config files.");
-            return ConfigImpl.DEFAULT_CONFIG_FILES_FILTER;
+            return SiteConfigImpl.DEFAULT_CONFIG_FILES_FILTER;
         }else{//custom config files
             final File[] configFiles = config.getConfigFiles();
             return new FileFilter(){

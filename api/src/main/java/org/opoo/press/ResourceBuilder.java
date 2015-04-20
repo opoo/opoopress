@@ -27,14 +27,6 @@ import java.util.Map;
  */
 public interface ResourceBuilder/* extends Observer */ {
 
-//	/**
-//	 * Initialize this builder.
-//	 * @param site
-//	 * @param theme
-//	 * @param config
-//	 */
-//	void init(Site site, Theme theme, Map<String, Object> config);
-
     /**
      * Initialize this builder.
      *

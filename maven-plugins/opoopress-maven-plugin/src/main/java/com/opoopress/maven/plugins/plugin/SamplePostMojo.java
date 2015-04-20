@@ -15,13 +15,12 @@
  */
 package com.opoopress.maven.plugins.plugin;
 
-import freemarker.template.utility.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.i18n.I18N;
 import org.opoo.press.SiteManager;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 import org.opoo.press.impl.SiteImpl;
 import org.opoo.press.impl.SiteManagerImpl;
 
@@ -74,7 +73,7 @@ public class SamplePostMojo extends AbstractOpooPressMojo{
     private SiteManager siteManager = new SiteManagerImpl();
 
     @Override
-    protected void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config) throws MojoExecutionException, MojoFailureException {
         SiteImpl site = new SiteImpl(config);
 
         Locale locale = site.getLocale();

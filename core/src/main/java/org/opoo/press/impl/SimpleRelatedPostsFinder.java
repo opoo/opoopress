@@ -15,7 +15,14 @@
  */
 package org.opoo.press.impl;
 
-import org.opoo.press.*;
+import org.opoo.press.Category;
+import org.opoo.press.Config;
+import org.opoo.press.ConfigAware;
+import org.opoo.press.Page;
+import org.opoo.press.Post;
+import org.opoo.press.RelatedPostsFinder;
+import org.opoo.press.SiteConfig;
+import org.opoo.press.Tag;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +39,7 @@ import java.util.List;
 public class SimpleRelatedPostsFinder implements RelatedPostsFinder, ConfigAware {
 	private int size = 5;
 	
-	SimpleRelatedPostsFinder(Config config){
+	SimpleRelatedPostsFinder(SiteConfig config){
 		setConfig(config);
 	}
 	
@@ -70,11 +77,11 @@ public class SimpleRelatedPostsFinder implements RelatedPostsFinder, ConfigAware
 		List<Post> allRelatedPosts = new ArrayList<Post>();
 		
 		for(Category category: categories){
-			mergeRelatedPosts(allRelatedPosts, post, category.getPosts());
+			mergeRelatedPosts(allRelatedPosts, post, category.getPages());
 		}
 		
 		for(Tag tag: tags){
-			mergeRelatedPosts(allRelatedPosts, post, tag.getPosts());
+			mergeRelatedPosts(allRelatedPosts, post, tag.getPages());
 		}
 		
 		if(allRelatedPosts.isEmpty()){
@@ -93,15 +100,17 @@ public class SimpleRelatedPostsFinder implements RelatedPostsFinder, ConfigAware
 	 * @param allRelatedPosts
 	 * @param posts
 	 */
-	private void mergeRelatedPosts(List<Post> allRelatedPosts, Post thisPost, List<Post> posts) {
-		for(Post post: posts){
-			if(post.equals(thisPost)){
-				continue;
+	private void mergeRelatedPosts(List<Post> allRelatedPosts, Post thisPost, List<Page> posts) {
+		for(Page post: posts) {
+			if (post instanceof Post) {
+				if (post.equals(thisPost)) {
+					continue;
+				}
+				if (allRelatedPosts.contains(post)) {
+					continue;
+				}
+				allRelatedPosts.add((Post) post);
 			}
-			if(allRelatedPosts.contains(post)){
-				continue;
-			}
-			allRelatedPosts.add(post);
 		}
 	}
 }

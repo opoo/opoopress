@@ -58,7 +58,7 @@ public class CachedSource implements Source {
 		this.sourceEntry = sourceEntry;
 		FileOutputStream stream = null;
 		try {
-			this.contentFile = File.createTempFile("PageSourceContent", ".bin");
+			this.contentFile = File.createTempFile("PageContent", ".bin");
 			stream = new FileOutputStream(contentFile);
 			IOUtils.writeLines(contentLines, null, stream);
 		} catch (IOException e) {

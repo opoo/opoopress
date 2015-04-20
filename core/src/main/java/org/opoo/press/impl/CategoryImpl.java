@@ -15,77 +15,37 @@
  */
 package org.opoo.press.impl;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 import org.opoo.press.Category;
-import org.opoo.press.Post;
-import org.opoo.press.Site;
-import org.opoo.util.URLUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Alex Lin
  *
  */
-public class CategoryImpl implements Category{
+public class CategoryImpl extends AbstractMetaTag implements Category{
 	private Category parent;
-	private List<Category> children = new ArrayList<Category>();
-	private String nicename;
-	private String name;
-	private List<Post> posts = new ArrayList<Post>();
+	private List<Category> children = Lists.newArrayList();
 
-	private String path;
-	private String title;
-	private String url;
-
-	public CategoryImpl(String nicename, String name, Site site){
-		this(nicename, name, null, site);
+	public CategoryImpl(String slug, String name){
+		this(slug, name, null);
 	}
-	
-	public CategoryImpl(String nicename, String name, Category parent, Site site) {
+
+	public CategoryImpl(String slug, String name, Category parent){
+		super(slug, name);
 		this.parent = parent;
-		this.nicename = nicename;
-		this.name = name;
-		init(site);
-	}
-	public CategoryImpl(String url, String path, String title, String nicename, String name, Category parent){
-		this.parent = parent;
-		this.nicename = nicename;
-		this.name = name;
-		this.url = url;
-		this.path = path;
-		this.title = title;
-	}
 
-	private void init(Site site){
 		if(parent != null){
 			parent.getChildren().add(this);
-		}
-		boolean categoryTree = site.getConfig().get("category_tree", true);
-		
-		if(categoryTree && parent != null){
-			path =  parent.getPath() + "." + nicename;
-		}else{
-			path = nicename;
-		}
-		
-		if(categoryTree && parent != null){
-			url = parent.getUrl() + URLUtils.encodeURL(nicename) + "/";
-		}else{
-			String categoryDir = site.getConfig().get("category_dir", "");
-			url = categoryDir + "/" + URLUtils.encodeURL(nicename) + "/";
-		}
-		
-		if(categoryTree && parent != null){
-			title = parent.getTitle() + " &#8250; " + name;
-		}else{
-			title = name;
 		}
 	}
 	
 	/**
 	 * @return the parent
 	 */
+	@Override
 	public Category getParent() {
 		return parent;
 	}
@@ -98,69 +58,19 @@ public class CategoryImpl implements Category{
 		return children;
 	}
 
-	/**
-	 * @return the nicename
-	 */
-	public String getNicename() {
-		return nicename;
-	}
-
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @return the posts
-	 */
-	public List<Post> getPosts() {
-		return posts;
-	}
-
-	public boolean isNameOrNicename(String nameOrNicename){
-		if(nameOrNicename.equalsIgnoreCase(getNicename())){
-			return true;
-		}
-		
-		if(nameOrNicename.equals(getName())){
-			return true;
-		}
-		return false;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Category#getTitle()
-	 */
-	@Override
-	public String getTitle() {
-		return title;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Category#getUrl()
-	 */
-	@Override
-	public String getUrl() {
-		//String categoryDir = (String) config.get("category_dir");
-		//return /*rootUrl + */ categoryDir + "/" + category.getUrl() + "/";
-		return url;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Category#getPath()
-	 */
 	@Override
 	public String getPath() {
-		return path;
+		return parent != null ? parent.getPath() + "/" + getSlug() : getSlug();
 	}
-	/**
-	 * The size of posts.
-	 * for sort.
-	 * @return
-	 */
-	public int getPostSize(){
-		return posts.size();
+
+	public String toString(){
+		MoreObjects.ToStringHelper toStringHelper = MoreObjects.toStringHelper(this)
+				.add("slug", getSlug())
+				.add("name", getName())
+				.add("size", getPagesSize());
+		if(parent != null){
+			toStringHelper.add("parent", parent.getSlug());
+		}
+		return toStringHelper.toString();
 	}
 }

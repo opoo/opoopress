@@ -21,27 +21,28 @@ import java.util.List;
  * @author Alex Lin
  */
 public class Pager {
-    private List<? extends Base> posts;
-    private int totalPosts;
+    private int totalItems;
     private int totalPages;
     private int pageNumber;
     private int pageSize;
     private Page next;
     private Page previous;
+    private List<?> items;
 
     /**
+     *
      * @param pageNumber
      * @param totalPages
-     * @param totalPosts
+     * @param totalItems
      * @param pageSize
-     * @param pagePosts
+     * @param items
      */
-    public Pager(int pageNumber, int totalPages, int totalPosts, int pageSize, List<? extends Base> pagePosts) {
+    public Pager(int pageNumber, int totalPages, int totalItems, int pageSize, List<?> items) {
         this.pageNumber = pageNumber;
         this.totalPages = totalPages;
-        this.totalPosts = totalPosts;
+        this.totalItems = totalItems;
         this.pageSize = pageSize;
-        this.posts = pagePosts;
+        this.items = items;
     }
 
     /**
@@ -73,17 +74,11 @@ public class Pager {
     }
 
     /**
-     * @return the posts
+     *
+     * @return the totalItems
      */
-    public List<? extends Base> getPosts() {
-        return posts;
-    }
-
-    /**
-     * @return the totalPosts
-     */
-    public int getTotalPosts() {
-        return totalPosts;
+    public int getTotalItems() {
+        return totalItems;
     }
 
     /**
@@ -105,5 +100,9 @@ public class Pager {
      */
     public int getPageSize() {
         return pageSize;
+    }
+
+    public List<?> getItems() {
+        return items;
     }
 }

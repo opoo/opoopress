@@ -29,7 +29,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.StringUtils;
-import org.opoo.press.impl.ConfigImpl;
+import org.opoo.press.impl.SiteConfigImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -150,7 +150,7 @@ public class PluginMojo extends AbstractOpooPressMojo {
 
 
     @Override
-    protected void executeInternal(ConfigImpl config) throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal(SiteConfigImpl config) throws MojoExecutionException, MojoFailureException {
         String pluginDir = config.get("plugin_dir");
         File plugins = new File(config.getBasedir(), pluginDir);
 

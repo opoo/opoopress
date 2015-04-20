@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Alex Lin
@@ -27,7 +28,7 @@ public interface Site extends SiteBuilder, SiteHelper {
     /**
      * Source directories.
      *
-     * @return other source directories
+     * @return all source directories
      * @since 1.0.2
      */
     List<File> getSources();
@@ -44,24 +45,27 @@ public interface Site extends SiteBuilder, SiteHelper {
 
     String getRoot();
 
-    Config getConfig();
+    SiteConfig getConfig();
 
+    /**
+     * @return all posts
+     * @deprecated using getCollections().get("post").getPages();
+     */
+    @Deprecated
     List<Post> getPosts();
 
+    /**
+     * @deprecated using getCollections().get("page").getPages();
+     * @return all pages(except posts)
+     */
+    @Deprecated
     List<Page> getPages();
 
     List<StaticFile> getStaticFiles();
 
+    List<Page> getAllPages();
+
     Date getTime();
-
-//	Map<String, List<Post>> getCategories();
-//	Map<String, List<Post>> getTags();
-//	Map<String, String> getCategoryNames();
-//	Map<String, String> getTagNames();
-
-    List<Category> getCategories();
-
-    List<Tag> getTags();
 
     Renderer getRenderer();
 
@@ -69,23 +73,13 @@ public interface Site extends SiteBuilder, SiteHelper {
 
     Locale getLocale();
 
-//	@Deprecated
-//	Highlighter getHighlighter();
-
     /**
-     * Could configured in <code>config.yml</code> by variable 'relatedPostsFinder'.
-     * @since 1.0.2
-     * @return RelatedPostsFinder
-     */
-//	@Deprecated
-//	RelatedPostsFinder getRelatedPostsFinder();
-
-    /**
-     * The site permalink style for all posts.
+     * The permalink style for specified layout.
      *
+     * @param layout
      * @return permalink
      */
-    String getPermalink();
+    String getPermalink(String layout);
 
     boolean showDrafts();
 
@@ -118,9 +112,9 @@ public interface Site extends SiteBuilder, SiteHelper {
      */
     ClassLoader getClassLoader();
 
-
     Factory getFactory();
 
-
     Observer getObserver();
+
+    Map<String, Collection> getCollections();
 }
