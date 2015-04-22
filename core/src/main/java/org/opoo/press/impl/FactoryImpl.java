@@ -532,6 +532,7 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     public static Factory createInstance(Site site){
         String factoryClassName = site.getConfig().get("factory");
         if(StringUtils.isNotBlank(factoryClassName)){
+            log.debug("Create factory: {}", factoryClassName);
             return ClassUtils.newInstance(factoryClassName, site.getClassLoader(), site, site.getConfig());
         }
 

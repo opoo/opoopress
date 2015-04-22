@@ -36,7 +36,7 @@ public class SourcePost extends AbstractSourcePage implements Post, Comparable<P
 	private boolean excerptExtracted = false;
 
 
-	SourcePost(Site site, Source source) {
+	public SourcePost(Site site, Source source) {
 		super(site, source, null);
 		init();
 	}

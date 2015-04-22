@@ -1,8 +1,10 @@
 package org.opoo.press.inject;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
 import com.google.inject.name.Names;
 import org.opoo.press.Category;
 import org.opoo.press.Factory;
@@ -16,53 +18,63 @@ import org.opoo.press.RelatedPostsFinder;
 import org.opoo.press.Renderer;
 import org.opoo.press.ResourceBuilder;
 import org.opoo.press.Site;
+import org.opoo.press.SiteAware;
 import org.opoo.press.SlugHelper;
 import org.opoo.press.Source;
 import org.opoo.press.SourceEntryLoader;
 import org.opoo.press.SourceManager;
 import org.opoo.press.SourceParser;
 import org.opoo.press.Tag;
+import org.opoo.press.impl.CategoryImpl;
 import org.opoo.press.impl.SourcePage;
+import org.opoo.press.impl.TagImpl;
+import org.opoo.press.plugin.PluginManagerImpl;
+import org.opoo.press.util.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  */
-public class GuiceFactory implements Factory,ObjectFactory{
+public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
     private static final Logger log = LoggerFactory.getLogger(GuiceFactory.class);
 
     private Injector injector;
     private Site site;
+    private PluginManager pluginManager;
 
+    @Override
     public void setSite(Site site){
         this.site = site;
 
-        DefaultSiteModule module = new DefaultSiteModule(site);
+        Module module = ServiceModules.loadFromClasspath(site);
         injector = Guice.createInjector(module);
+
+        pluginManager = new PluginManagerImpl(site);
     }
 
     @Override
     public SourceEntryLoader getSourceEntryLoader() {
-        return injector.getInstance(SourceEntryLoader.class);
+        return getInstance(SourceEntryLoader.class);
     }
 
     @Override
     public SourceParser getSourceParser() {
-        return injector.getInstance(SourceParser.class);
+        return getInstance(SourceParser.class);
     }
 
     @Override
     public SourceManager getSourceManager() {
-        return injector.getInstance(SourceManager.class);
+        return getInstance(SourceManager.class);
     }
 
     @Override
     public Highlighter getHighlighter() {
-        return injector.getInstance(Highlighter.class);
+        return getInstance(Highlighter.class);
     }
 
     @Override
@@ -70,23 +82,26 @@ public class GuiceFactory implements Factory,ObjectFactory{
         if(site.getLocale() != null){
             String name = site.getLocale().toString();
             try {
-                return injector.getInstance(Key.get(SlugHelper.class, Names.named(name)));
+                return getInstance(SlugHelper.class, name);
             } catch (Exception e) {
                 log.debug("No locale SlugHelper found: {}", name);
             }
         }
-        return injector.getInstance(Key.get(SlugHelper.class, Names.named("default")));
+        return getInstance(SlugHelper.class, "default");
     }
 
     @Override
     public RelatedPostsFinder getRelatedPostsFinder() {
-        return injector.getInstance(RelatedPostsFinder.class);
+        return getInstance(RelatedPostsFinder.class);
     }
 
     @Override
     public Page createPage(Site site, Source source, String layout) {
-        Constructor<Page> constructor = injector.getInstance(Key.get(Constructor.class, Names.named("Page:" + layout)));
-        return newInstance(constructor, site, source);
+        try{
+            return constructInstance(Page.class, "Page:" + layout, site, source);
+        }catch(Exception e){
+            return new SourcePage(site, source);
+        }
     }
 
     @Override
@@ -97,12 +112,13 @@ public class GuiceFactory implements Factory,ObjectFactory{
 
     @Override
     public List<Plugin> getPlugins() {
-        return null;
+        ServiceLoader<Plugin> loader = ServiceLoader.load(Plugin.class, site.getClassLoader());
+        return Lists.newArrayList(loader);
     }
 
     @Override
     public PluginManager getPluginManager() {
-        return null;
+        return pluginManager;
     }
 
     @Override
@@ -111,30 +127,99 @@ public class GuiceFactory implements Factory,ObjectFactory{
         if(className == null){
             className = "freemarker";
         }
-        return injector.getInstance(Key.get(Renderer.class, Names.named(className)));
+//        return injector.getInstance(Key.get(Renderer.class, Names.named(className)));
+        try{
+            return constructInstance(Renderer.class, "Render:" + className, site);
+        }catch (Exception e){
+            return getInstance(Renderer.class, className);
+        }
     }
 
     @Override
     public PaginationUpdater getPaginationUpdater() {
-        return injector.getInstance(PaginationUpdater.class);
+        return getInstance(PaginationUpdater.class);
     }
 
     @Override
     public ResourceBuilder createResourceBuilder(String type) {
-        return injector.getInstance(Key.get(ResourceBuilder.class, Names.named(type)));
+        return getInstance(ResourceBuilder.class, type);
     }
 
     @Override
     public Category createCategory(String categoryMeta,
                                    String slug, String categoryName, Category parent) {
-        String name = "Category-with-parent:-" + categoryMeta;
-        Constructor<Category> constructor = injector.getInstance(Key.get(Constructor.class, Names.named(name)));
-        return newInstance(constructor, slug, categoryName, parent);
+        try {
+            return constructInstance(Category.class, "CategoryWithParent:" + categoryMeta, slug, categoryName, parent);
+        } catch (Exception e) {
+            return new CategoryImpl(slug, categoryName, parent);
+        }
+    }
+
+
+
+    @Override
+    public Category createCategory(String categoryMeta, String slug, String categoryName) {
+        try {
+            return constructInstance(Category.class, "Category:" + categoryMeta, slug, categoryName);
+        } catch (Exception e) {
+            return new CategoryImpl(slug, categoryName);
+        }
+    }
+
+    @Override
+    public Category createCategory(String categoryMeta, String slugOrName) {
+        String slug = getSlugHelper().toSlug(slugOrName);
+        return createCategory(categoryMeta, slug, slugOrName);
+    }
+
+    @Override
+    public Tag createTag(String tagMeta, String slug, String name) {
+        try {
+            return constructInstance(Tag.class, "Tag:" + tagMeta, slug, name);
+        } catch (Exception e) {
+            return new TagImpl(slug, name);
+        }
+    }
+
+    @Override
+    public Tag createTag(String tagMeta, String slugOrName) {
+        String slug = getSlugHelper().toSlug(slugOrName);
+        return createTag(tagMeta, slug, slugOrName);
+    }
+
+    @Override
+    public <T> T getInstance(Class<T> clazz, String name) {
+        return createInstance(clazz, name);
+    }
+
+    @Override
+    public <T> T getInstance(Class<T> clazz) {
+        return createInstance(clazz);
+    }
+
+    @Override
+    public <T> T createInstance(Class<T> clazz, String hint) {
+        return apply(injector.getInstance(Key.get(clazz, Names.named(hint))));
+    }
+
+    @Override
+    public <T> T createInstance(Class<T> clazz) {
+        return apply(injector.getInstance(clazz));
+    }
+
+    @Override
+    public <T> T constructInstance(Class<T> clazz, String hint, Object... args) {
+        Constructor<T> constructor = injector.getInstance(Key.get(Constructor.class, Names.named(hint)));
+        return newInstance(constructor, args);
+    }
+
+    private <T> T apply(T t){
+        return ClassUtils.apply(t, site);
     }
 
     private <T> T newInstance(Constructor<T> constructor, Object... args){
         try {
-            return constructor.newInstance(args);
+            return apply(constructor.newInstance(args));
         } catch (InstantiationException e) {
             throw new RuntimeException("Create instance failed: " + e.getMessage(), e);
         } catch (IllegalAccessException e) {
@@ -143,51 +228,5 @@ public class GuiceFactory implements Factory,ObjectFactory{
             throw new RuntimeException("Create instance failed: " + e.getTargetException().getMessage(),
                     e.getTargetException());
         }
-    }
-
-    @Override
-    public Category createCategory(String categoryMeta, String slug, String categoryName) {
-        return null;
-    }
-
-    @Override
-    public Category createCategory(String categoryMeta, String slugOrName) {
-        return null;
-    }
-
-    @Override
-    public Tag createTag(String tagMeta, String slug, String name) {
-        return null;
-    }
-
-    @Override
-    public Tag createTag(String tagMeta, String slugOrName) {
-        return null;
-    }
-
-    @Override
-    public <T> T getInstance(Class<T> clazz, String name) {
-        return injector.getInstance(Key.get(clazz, Names.named(name)));
-    }
-
-    @Override
-    public <T> T getInstance(Class<T> clazz) {
-        return injector.getInstance(clazz);
-    }
-
-    @Override
-    public <T> T createInstance(Class<T> clazz, String hint) {
-        return injector.getInstance(Key.get(clazz, Names.named(hint)));
-    }
-
-    @Override
-    public <T> T createInstance(Class<T> clazz) {
-        return injector.getInstance(clazz);
-    }
-
-    @Override
-    public <T> T constructInstance(Class<T> clazz, String hint, Object... args) {
-        Constructor constructor = injector.getInstance(Key.get(Constructor.class, Names.named(hint)));
-        return (T) newInstance(constructor, args);
     }
 }

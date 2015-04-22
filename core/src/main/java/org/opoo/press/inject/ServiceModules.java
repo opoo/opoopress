@@ -35,6 +35,9 @@ public class ServiceModules {
     public static Module loadFromClasspath(Site site, Class<? extends Module> moduleType) {
         List<Module> runtime = new LinkedList<Module>();
         List overrides = new LinkedList();
+
+        runtime.add(new DefaultSiteModule(site));
+
         for (Module module : ServiceLoader.load(moduleType, site.getClassLoader())) {
 
             ClassUtils.apply(module, site);
