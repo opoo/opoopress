@@ -192,7 +192,7 @@ public class CollectionProcessor extends ProcessorAdapter {
 
 
     @Override
-    public void preRenderAllPages(Site site) {
+    public void preRender(Site site) {
         Set<Page> siteTemplatePages = (Set<Page>) site.get("template_pages");
         if (siteTemplatePages != null) {
             log.info("Removing template pages: {}", siteTemplatePages.size());

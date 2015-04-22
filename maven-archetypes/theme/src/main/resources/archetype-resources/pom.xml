@@ -110,6 +110,6 @@
     </build>
 
     <properties>
-        <opoopress.version>2.0-beta-1</opoopress.version>
+        <opoopress.version>2.0-SNAPSHOT</opoopress.version>
     </properties>
 </project>

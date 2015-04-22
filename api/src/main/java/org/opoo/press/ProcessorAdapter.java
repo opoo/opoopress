@@ -24,7 +24,7 @@ public class ProcessorAdapter implements Processor {
 	public static final int DEFAULT_ORDER = 100;
 
 	@Override
-	public void preRenderPage(Site site, Page page) {
+	public void preRender(Site site, Page page) {
 
 	}
 	
@@ -63,18 +63,18 @@ public class ProcessorAdapter implements Processor {
 	}
 
 	@Override
-	public void preRenderAllPages(Site site) {
+	public void preRender(Site site) {
 	}
 
 	/* (non-Javadoc)
          * @see org.opoo.press.Processor#postConvertPage(org.opoo.press.Site, org.opoo.press.Page)
          */
 	@Override
-	public void postConvertPage(Site site, Page page) {
+	public void postConvert(Site site, Page page) {
 	}
 
 	@Override
-	public void postConvertAllPages(Site site) {
+	public void postConvert(Site site) {
 	}
 
 
@@ -82,14 +82,14 @@ public class ProcessorAdapter implements Processor {
 	 * @see org.opoo.press.Processor#postRenderPage(org.opoo.press.Site, org.opoo.press.Page)
 	 */
 	@Override
-	public void postRenderPage(Site site, Page page) {
+	public void postRender(Site site, Page page) {
 	}
 
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Processor#postRenderAllPages(org.opoo.press.Site)
 	 */
 	@Override
-	public void postRenderAllPages(Site site) {
+	public void postRender(Site site) {
 	}
 
 	/* (non-Javadoc)

@@ -41,7 +41,7 @@ public class GuiceFactory implements Factory,ObjectFactory{
     public void setSite(Site site){
         this.site = site;
 
-        SiteModule module = new SiteModule(site);
+        DefaultSiteModule module = new DefaultSiteModule(site);
         injector = Guice.createInjector(module);
     }
 

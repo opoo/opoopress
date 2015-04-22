@@ -24,9 +24,9 @@ import java.lang.reflect.Constructor;
 
 /**
  */
-public class SiteModule extends AbstractModule implements Module{
+public class DefaultSiteModule extends AbstractModule implements Module{
     private final Site site;
-    public SiteModule(Site site){
+    public DefaultSiteModule(Site site){
         this.site = site;
     }
 

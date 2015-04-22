@@ -26,6 +26,7 @@ import org.opoo.press.Registry;
 import org.opoo.press.Site;
 import org.opoo.press.SiteAware;
 import org.opoo.press.Source;
+import org.opoo.press.util.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,19 +55,7 @@ public class PluginManagerImpl implements PluginManager {
     }
 
     protected <T> T apply(T t) {
-        if(t instanceof SiteAware){
-            ((SiteAware) t).setSite(site);
-        }
-        if(t instanceof ConfigAware){
-            ((ConfigAware) t).setConfig(site.getConfig());
-        }
-        return t;
-    }
-
-    protected <T> void apply(List<T> list){
-        for(T t: list){
-            apply(t);
-        }
+        return ClassUtils.apply(t, site);
     }
 
     protected <T extends Ordered> void sort(List<T> list){

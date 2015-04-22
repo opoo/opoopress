@@ -23,6 +23,7 @@ import org.opoo.press.SiteConfig;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -102,13 +103,25 @@ public abstract class ClassUtils extends org.apache.commons.lang.ClassUtils {
 			throw new RuntimeException("Create instance failed: " + className, e);
 		}
 
-		if(instance instanceof SiteAware){
-			((SiteAware) instance).setSite(site);
-		}
-		if(instance instanceof ConfigAware){
-			((ConfigAware)instance).setConfig(config);
-		}
+		apply(instance, site);
+
 		return instance;
+	}
+
+	public static <T> T apply(T t, Site site) {
+		if(t instanceof SiteAware){
+			((SiteAware) t).setSite(site);
+		}
+		if(t instanceof ConfigAware){
+			((ConfigAware) t).setConfig(site.getConfig());
+		}
+		return t;
+	}
+
+	public static <T> void apply(Iterable<T> list, Site site){
+		for(T t: list){
+			apply(t, site);
+		}
 	}
 
     public static Class getCachedClass(ClassLoader classLoader, String className) throws ClassNotFoundException {

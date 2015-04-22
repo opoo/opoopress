@@ -69,7 +69,7 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     private static final Logger log = LoggerFactory.getLogger(FactoryImpl.class);
 
     private Site site;
-    private Map<String,Object> configuration = new LinkedHashMap<String, Object>();;
+    private Map<String,Object> configuration = new LinkedHashMap<String, Object>();
 
     private SourceEntryLoader sourceEntryLoader;
     private SourceParser sourceParser;

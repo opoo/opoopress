@@ -185,12 +185,40 @@
       </pluginRepositories>
     -->
 
+    <repositories>
+        <repository>
+            <id>opoopress-repos-snapshots</id>
+            <name>OpooPress Repos Snapshots</name>
+            <url>http://repo.opoopress.com/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>opoopress-repos-snapshots</id>
+            <name>OpooPress Repos Snapshots</name>
+            <url>http://repo.opoopress.com/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.test.skip>true</maven.test.skip>
         <project.build.sourceVersion>1.6</project.build.sourceVersion>
         <project.build.targetVersion>1.6</project.build.targetVersion>
-        <opoopress.version>2.0-beta-1</opoopress.version>
+        <opoopress.version>2.0-SNAPSHOT</opoopress.version>
         <opoopress.wagon.version>1.1.3</opoopress.wagon.version>
     </properties>
 </project>

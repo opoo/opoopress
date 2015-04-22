@@ -29,17 +29,17 @@ public interface Processor extends Ordered {
 
     void postGenerate(Site site);
 
-    void postConvertPage(Site site, Page page);
+    void postConvert(Site site, Page page);
 
-    void postConvertAllPages(Site site);
+    void postConvert(Site site);
 
-    void preRenderAllPages(Site site);
+    void preRender(Site site);
 
-    void preRenderPage(Site site, Page page);
+    void preRender(Site site, Page page);
 
-    void postRenderPage(Site site, Page page);
+    void postRender(Site site, Page page);
 
-    void postRenderAllPages(Site site);
+    void postRender(Site site);
 
     void postCleanup(Site site);
 

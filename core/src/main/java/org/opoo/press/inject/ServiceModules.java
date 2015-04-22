@@ -17,6 +17,8 @@ package org.opoo.press.inject;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import org.opoo.press.Site;
+import org.opoo.press.util.ClassUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,18 +28,22 @@ public class ServiceModules {
     private ServiceModules() {
     }
 
-    public static Module loadFromClasspath() {
-        return loadFromClasspath(Module.class);
+    public static Module loadFromClasspath(Site site) {
+        return loadFromClasspath(site, Module.class);
     }
 
-    public static Module loadFromClasspath(Class<? extends Module> moduleType) {
-        List<Module> runtime = new LinkedList();
+    public static Module loadFromClasspath(Site site, Class<? extends Module> moduleType) {
+        List<Module> runtime = new LinkedList<Module>();
         List overrides = new LinkedList();
-        for (Module module : ServiceLoader.load(moduleType)) {
-            if (module.getClass().isAnnotationPresent(OverrideModule.class))
+        for (Module module : ServiceLoader.load(moduleType, site.getClassLoader())) {
+
+            ClassUtils.apply(module, site);
+
+            if (module.getClass().isAnnotationPresent(OverrideModule.class)) {
                 overrides.add(module);
-            else
+            }else {
                 runtime.add(module);
+            }
         }
         return overrides.isEmpty() ? Modules.combine(runtime) : Modules.override(runtime).with(overrides);
     }

@@ -89,37 +89,37 @@ public class ProcessorsProcessor implements Processor{
 	 * @see org.opoo.press.Processor#postConvertPage(org.opoo.press.Site, org.opoo.press.Page)
 	 */
 	@Override
-	public void postConvertPage(Site site, Page page) {
+	public void postConvert(Site site, Page page) {
 		if(processors != null){
 			for(Processor p: processors){
-				p.postConvertPage(site, page);
+				p.postConvert(site, page);
 			}
 		}
 	}
 
 	@Override
-	public void postConvertAllPages(Site site) {
+	public void postConvert(Site site) {
 		if(processors != null){
 			for(Processor p: processors){
-				p.postConvertAllPages(site);
+				p.postConvert(site);
 			}
 		}
 	}
 
 	@Override
-	public void preRenderAllPages(Site site) {
+	public void preRender(Site site) {
 		if(processors != null){
 			for(Processor p: processors){
-				p.preRenderAllPages(site);
+				p.preRender(site);
 			}
 		}
 	}
 
 	@Override
-	public void preRenderPage(Site site, Page page) {
+	public void preRender(Site site, Page page) {
 		if(processors != null){
 			for(Processor p: processors){
-				p.preRenderPage(site, page);
+				p.preRender(site, page);
 			}
 		}
 	}
@@ -128,10 +128,10 @@ public class ProcessorsProcessor implements Processor{
 	 * @see org.opoo.press.Processor#postRenderPage(org.opoo.press.Site, org.opoo.press.Page)
 	 */
 	@Override
-	public void postRenderPage(Site site, Page page) {
+	public void postRender(Site site, Page page) {
 		if(processors != null){
 			for(Processor p: processors){
-				p.postRenderPage(site, page);
+				p.postRender(site, page);
 			}
 		}
 	}
@@ -140,10 +140,10 @@ public class ProcessorsProcessor implements Processor{
 	 * @see org.opoo.press.Processor#postRenderAllPages(org.opoo.press.Site)
 	 */
 	@Override
-	public void postRenderAllPages(Site site) {
+	public void postRender(Site site) {
 		if(processors != null){
 			for(Processor p: processors){
-				p.postRenderAllPages(site);
+				p.postRender(site);
 			}
 		}
 	}

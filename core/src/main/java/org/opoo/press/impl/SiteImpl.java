@@ -368,7 +368,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		
 		taskExecutor.run(t1, t2);
 		
-		postRead();
+		processors.postRead(this);
 	}
 	
 	private void readSources(){
@@ -400,9 +400,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 	}
 
-	private void postRead() {
-		processors.postRead(this);
-	}
 
 	private void read(SourceEntry en, SourceParser parser) {
 		try {
@@ -415,6 +412,8 @@ public class SiteImpl implements Site, SiteBuilder{
 			if(!draft || (draft && showDrafts)) {
 				Page page = factory.createPage(this, src, layout);
 				allPages.add(page);
+
+				processors.postRead(this, page);
 			}
 		} catch (NoFrontMatterException e) {
 			this.staticFiles.add(new StaticFileImpl(this, en));
@@ -464,73 +463,37 @@ public class SiteImpl implements Site, SiteBuilder{
 		for(Generator g: factory.getPluginManager().getGenerators()){
 			g.generate(this);
 		}
-		postGenerate();
-	}
-	
-	/**
-	 * 
-	 */
-	private void postGenerate() {
 		processors.postGenerate(this);
 	}
 
+
 	void convert(){
 		log.info("Converting {} pages...", allPages.size());
-		taskExecutor.run(allPages, new RunnableTask<Page>(){
+		taskExecutor.run(allPages, new RunnableTask<Page>() {
 			public void run(Page page) {
 				log.debug("Converting page: {}", page.getUrl());
 				page.convert();
-				postConvertPage(page);
+				processors.postConvert(SiteImpl.this, page);
 			}
 		});
-		postConvertPages();
+		processors.postConvert(this);
 	}
 
 	void render(){
-		preRenderPages();
+		processors.preRender(this);
 		final Map<String, Object> rootMap = buildRootMap();
 		renderer.prepare();
-		
+
 		log.info("Rendering {} pages...", allPages.size());
-		taskExecutor.run(allPages, new RunnableTask<Page>(){
+		taskExecutor.run(allPages, new RunnableTask<Page>() {
 			public void run(Page page) {
 				log.debug("Rendering page: {}", page.getUrl());
 
 				page.render(rootMap);
-				postRenderPage(page);
+				processors.postRender(SiteImpl.this, page);
 			}
 		});
-		postRenderPages();
-	}
-
-	private void preRenderPages() {
-		processors.preRenderAllPages(this);
-	}
-
-
-	/**
-	 * @param page
-	 */
-	private void postConvertPage(Page page) {
-		processors.postConvertPage(this, page);
-	}
-
-	private void postConvertPages(){
-		processors.postConvertAllPages(this);
-	}
-
-	/**
-	 * @param page
-	 */
-	private void postRenderPage(Page page) {
-		processors.postRenderPage(this, page);
-	}
-
-	/**
-	 * 
-	 */
-	private void postRenderPages() {
-		processors.postRenderAllPages(this);
+		processors.postRender(this);
 	}
 
 
@@ -587,7 +550,7 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 
 		//call post cleanup
-		postCleanup();
+		processors.postCleanup(this);
 	}
 	
 	/**
@@ -613,12 +576,6 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 	}
 
-	/**
-	 * 
-	 */
-	private void postCleanup() {
-		processors.postCleanup(this);
-	}
 
 	void write(){
 		dest.mkdirs();
@@ -635,15 +592,9 @@ public class SiteImpl implements Site, SiteBuilder{
 			}
 		});
 
-		postWrite();
-	}
-
-	/**
-	 * 
-	 */
-	private void postWrite() {
 		processors.postWrite(this);
 	}
+
 
 	/**
 	 * @return the pages

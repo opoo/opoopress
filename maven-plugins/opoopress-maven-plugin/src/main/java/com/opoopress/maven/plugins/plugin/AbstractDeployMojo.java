@@ -261,7 +261,7 @@ public class AbstractDeployMojo extends AbstractBuildMojo implements Contextuali
         }
 
         for(Profile profile: settings.getProfiles()){
-            if(profile.getActivation().isActiveByDefault()){
+            if(profile.getActivation() != null && profile.getActivation().isActiveByDefault()){
                 Properties properties = profile.getProperties();
                 if(properties != null){
                     String property = properties.getProperty(propertyName);

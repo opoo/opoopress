@@ -40,7 +40,7 @@ public class SystemConsoleInteractiveUserInfo implements InteractiveUserInfo {
 			line = new String(console.readLine(message));
 
 			if (line != null && !possibleValues.contains(line)) {
-				console.printf("Invalod selection");
+				console.printf("Invalid selection");
 			}
 		} while (line == null || !possibleValues.contains(line));
 
