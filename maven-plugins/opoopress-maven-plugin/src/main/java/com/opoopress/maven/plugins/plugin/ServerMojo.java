@@ -15,11 +15,30 @@
  */
 package com.opoopress.maven.plugins.plugin;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.mortbay.jetty.Server;
+import org.opoo.press.impl.SiteConfigImpl;
+import org.opoo.press.impl.SiteImpl;
+
 /**
  * @author Alex Lin
  * @goal server
  * @execute phase="package"
  */
-public class ServerMojo extends AbstractPreviewMojo{
+public class ServerMojo extends AbstractServerMojo{
 
+    @Override
+    protected void executeInternal(SiteConfigImpl config, SiteImpl site) throws MojoExecutionException, MojoFailureException {
+        Server server = createJettyServer(site);
+
+        try {
+            server.start();
+            onServerStart(site, server);
+
+            server.join();
+        } catch (Exception e) {
+            throw new MojoExecutionException("Start server failed: " + e.getMessage(), e);
+        }
+    }
 }
