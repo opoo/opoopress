@@ -245,7 +245,7 @@ public class YUIBuilder implements ResourceBuilder, Observer{
 		if(shouldBuild()){
 			buildInternal();
 		}else{
-			log.debug("Nothing to build - the output file '{}' is up to date.", outputFile);
+			log.trace("Nothing to build - the output file '{}' is up to date.", outputFile);
 		}
 	}
 

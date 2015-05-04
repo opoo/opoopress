@@ -18,6 +18,7 @@ package org.opoo.press.impl;
 import org.apache.commons.lang.StringUtils;
 import org.opoo.press.Category;
 import org.opoo.press.Post;
+import org.opoo.press.Renderer;
 import org.opoo.press.Site;
 import org.opoo.press.Source;
 import org.opoo.press.Tag;
@@ -27,125 +28,157 @@ import java.util.Map;
 
 /**
  * @author Alex Lin
- *
  */
-public class SourcePost extends AbstractSourcePage implements Post, Comparable<Post>{
-	private String id;
-	private String excerpt;
-//	private boolean excerpted;
-	private boolean excerptExtracted = false;
+public class SourcePost extends AbstractSourcePage implements Post, Comparable<Post> {
+    private final boolean excerptable;
 
+    private String id;
+    private boolean excerpted = false;
+    private boolean excerptExtracted = false;
 
-	public SourcePost(Site site, Source source) {
-		super(site, source, null);
-		init();
-	}
-	
-	private void init() {
-		if(getDate() == null || getDateFormatted() == null){
-			throw new IllegalArgumentException("Date is required in post yaml front-matter header: " 
-					+ getSource().getSourceEntry().getFile());
-		}
-		
-		Map<String, Object> frontMatter = getSource().getMeta();
+    public SourcePost(Site site, Source source) {
+        super(site, source, null);
 
-		String id = (String) frontMatter.get("id");
-		
-		excerpt = (String) frontMatter.get("excerpt");
-		if(StringUtils.isBlank(excerpt)){
-			excerpt = extractExcerpt(getSourceContent());
-		}
+        if (getDate() == null || getDateFormatted() == null) {
+            throw new IllegalArgumentException("Date is required in post yaml front-matter header: "
+                    + getSource().getSourceEntry().getFile());
+        }
 
-		setTagsHolder(new ListHolderImpl<Tag>());
-		setCategoriesHolder(new ListHolderImpl<Category>());
-	}
-	
-	private String extractExcerpt(String content) {
-		if(StringUtils.isBlank(content)){
-			return null;
-		}
+        Map<String, Object> frontMatter = getSource().getMeta();
+        String id = (String) frontMatter.get("id");
 
-		//default "<!--more-->";
-		String excerptSeparator = getSite().getConfig().get("excerpt_separator", DEFAULT_EXCERPT_SEPARATOR);
-		int index = content.indexOf(excerptSeparator);
-		if(index > 0){
-			String temp = content.substring(0, index);
-			if(StringUtils.isNotBlank(temp)){
-				excerptExtracted = true;
-				return temp;
-			}
-		}
+        excerptable = isExcerptable(site);
+        initExcerpt(frontMatter);
+    }
 
-		return null;
-	}
+    private static boolean isExcerptable(Site site){
+        Boolean bool = site.get("excerptable");
+        return (bool == null || bool);
+    }
 
-	
-	/* (non-Javadoc)
-	 * @see org.opoo.press.impl.Convertible#convert()
-	 */
-	@Override
-	public void convert() {
-		super.convert();
-		if(excerptExtracted){
-			log.debug("Converting excerpt.");
-			this.excerpt = getConverter().convert(excerpt);
+    private void initExcerpt(Map<String, Object> frontMatter) {
+        if(!excerptable){
+            log.debug("Skip process excerpt.");
+            return;
+        }
 
-			if(log.isTraceEnabled()){
-				log.trace("Excerpt converted[{}]: {}", getUrl(), excerpt);
-			}
-		}
-	}
+        String excerpt = (String) frontMatter.get("excerpt");
+        if (StringUtils.isNotBlank(excerpt)) {
+            excerpted = true;
+            setExcerpt(excerpt);
+            return;
+        }
 
+        String content = getContent();
+        if (StringUtils.isBlank(content)) {
+            log.debug("Content is empty, can not extract excerpt.");
+            excerpt = "";
+            setExcerpt(excerpt);
+            return;
+        }
 
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id != null ? id : getUrl();
-	}
+        //default "<!--more-->";
+        String excerptSeparator = getSite().getConfig().get("excerpt_separator", DEFAULT_EXCERPT_SEPARATOR);
+        int index = content.indexOf(excerptSeparator);
+        if (index > 0) {
+            excerpt = content.substring(0, index);
+            if (StringUtils.isNotBlank(excerpt)) {
+                excerptExtracted = true;
+                excerpted = true;
+                setExcerpt(excerpt);
+                return;
+            }
+        }
 
-	public void setId(String id){
-		this.id = id;
-	}
+        excerptExtracted = true;
+        excerpt = content;
+        setExcerpt(excerpt);
+    }
 
-	/**
-	 * @return the excerpt
-	 */
-	@Override
-	public String getExcerpt() {
-		return excerpt;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.impl.Convertible#convert()
+     */
+    @Override
+    public void convert() {
+        super.convert();
+        if (excerptable) {
+            setExcerpt(getConverter().convert(getExcerpt()));
+        }
+    }
 
-	@Override
-	public void setExcerpt(String excerpt) {
-		this.excerpt = excerpt;
-	}
+    @Override
+    public void render(Map<String, Object> rootMap) {
+        super.render(rootMap);
 
-	@Override
-	public boolean isExcerptExtracted(){
-		return excerptExtracted;
-	}
+        if (isRenderSkip()) {
+            return;
+        }
 
-	@Override
-	public boolean isExcerpted(){
-		return excerpt != null;
-	}
+        if(excerptable) {
+            Renderer renderer = getSite().getRenderer();
+            String excerpt = getExcerpt();
+            if (renderer.isRenderRequired(this, excerpt)) {
+                log.debug("Rendering excerpt.");
+                setExcerpt(renderer.renderContent(excerpt, rootMap));
 
-	/* (non-Javadoc)
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(Post o) {
-		return o.getDate().compareTo(getDate());
-	}
+                if (log.isTraceEnabled()) {
+                    log.trace("Excerpt rendered[{}]: {}", getUrl(), excerpt);
+                }
+            }
+        }
+    }
 
-	@Override
-	public List<Category> getCategories() {
-		return getCategoriesHolder().get("category");
-	}
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id != null ? id : getUrl();
+    }
 
-	@Override
-	public List<Tag> getTags() {
-		return getTagsHolder().get("tag");
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the excerpt
+     */
+    @Override
+    public String getExcerpt() {
+        return getContentHolder().getExcerpt();
+    }
+
+    public void setExcerpt(String excerpt){
+        getContentHolder().setExcerpt(excerpt);
+    }
+
+    public boolean isExcerptExtracted() {
+        return excerptExtracted;
+    }
+
+    @Override
+    public boolean isExcerpted() {
+        return excerpted;
+    }
+
+    public boolean isExcerptable() {
+        return excerptable;
+    }
+
+    /* (non-Javadoc)
+         * @see java.lang.Comparable#compareTo(java.lang.Object)
+         */
+    @Override
+    public int compareTo(Post o) {
+        return o.getDate().compareTo(getDate());
+    }
+
+    @Override
+    public List<Category> getCategories() {
+        return getCategoriesHolder().get("category");
+    }
+
+    @Override
+    public List<Tag> getTags() {
+        return getTagsHolder().get("tag");
+    }
 }

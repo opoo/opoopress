@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class ConfigurablePaginationUpdater extends DefaultPaginationUpdater {
     @Override
-    protected void updateInternal(Page page, Pager pager) {
+    protected void update(Page page, Pager pager) {
         Map<String, ?> pagination = PaginationUtils.getPagination(page);
 
         //pagination->permalink: ${url}page/${pageNumber}                               //url ends with '/'
@@ -63,30 +63,4 @@ public class ConfigurablePaginationUpdater extends DefaultPaginationUpdater {
             super.updateTitle(page, pager);
         }
     }
-
-//    private Map<String,?> getPagination(Page page){
-//        Map<String,?> pagination = (Map<String, ?>) page.get("pagination");
-//        if(pagination == null){
-//            Collection collection = (Collection) page.get("collection");
-//            if(collection != null){
-//                pagination = collection.getConfiguration().get("pagination");
-//            }
-//        }
-//        return pagination;
-//    }
-
-//    private String resolve(String pattern, Object rootMap){
-//        try {
-//            Configuration configuration = new Configuration();
-//            Template template = new Template("pagination_temp", new StringReader(pattern), configuration, "UTF-8");
-//            StringWriter writer = new StringWriter();
-//            template.process(rootMap, writer);
-//            writer.flush();
-//            return writer.toString();
-//        } catch (IOException e) {
-//            throw new RuntimeException("Resolve format failed: " + pattern, e);
-//        } catch (TemplateException e) {
-//            throw new RuntimeException("Resolve format failed: " + pattern, e);
-//        }
-//    }
 }

@@ -19,11 +19,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.opoo.press.Base;
-import org.opoo.press.Excerptable;
+import org.opoo.press.Page;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
-import org.opoo.press.impl.SimplePage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +76,7 @@ public class VelocityRenderer extends AbstractVelocityRenderer implements Render
         }
 
         //configuration in theme.yaml
-        Map<String, Object> configuration = (Map<String, Object>) site.get("velocity.properties");
+        Map<String, Object> configuration = site.get("velocity.properties");
         if (configuration != null) {
             for (Map.Entry<String, Object> entry : configuration.entrySet()) {
                 velocityEngine.setProperty(entry.getKey(), entry.getValue());
@@ -99,13 +97,13 @@ public class VelocityRenderer extends AbstractVelocityRenderer implements Render
     }
 
     @Override
-    public void render(Base base, Object rootMap) {
+    public String render(Page base, Object rootMap) {
         Context context = convert(rootMap);
 
-        String content = base.getConvertedContent();
+        String content = base.getContent();
         String layout = base.getLayout();
 
-        boolean isContentRenderRequired = isRenderRequired(site, base);
+        boolean isContentRenderRequired = isRenderRequired(site, base, content);
         boolean isValidLayout = isValidLayout(layout);
 
         if (isContentRenderRequired) {
@@ -120,18 +118,12 @@ public class VelocityRenderer extends AbstractVelocityRenderer implements Render
             //content = content;
         }
 
-        //base.setRenderedContent(content);
-        if(base instanceof SimplePage){
-            ((SimplePage) base).setRenderedContent(content);
-        }else{
-            base.set("renderedContent", content);
-        }
+        return content;
+    }
 
-        if(isContentRenderRequired && base instanceof Excerptable && ((Excerptable) base).isExcerpted()){
-            Excerptable o = (Excerptable) base;
-            String excerpt = renderContent(o.getExcerpt(), context);
-            o.setExcerpt(excerpt);
-        }
+    @Override
+    public boolean isRenderRequired(Page base, String content) {
+        return isRenderRequired(site, base, content);
     }
 
     @Override

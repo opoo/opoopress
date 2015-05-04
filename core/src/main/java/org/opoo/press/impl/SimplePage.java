@@ -16,9 +16,11 @@
 package org.opoo.press.impl;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.opoo.press.Base;
 import org.opoo.press.Category;
+import org.opoo.press.Converter;
 import org.opoo.press.Excerptable;
 import org.opoo.press.Highlighter;
 import org.opoo.press.ListHolder;
@@ -32,6 +34,7 @@ import org.opoo.util.URLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.cache.Cache;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -48,7 +51,6 @@ public class SimplePage implements Page{
 
     private final Site site;
     private Source source;
-    private String sourceContent;
     private String title;
     private String url;
     private String path;
@@ -63,28 +65,38 @@ public class SimplePage implements Page{
     private Pager pager;
     private Page next;
     private Page previous;
-    private ListHolder<Category> categoriesHolder;
-    private ListHolder<Tag> tagsHolder;
-	private String convertedContent;
-    private String renderedContent;
+    private ListHolder<Category> categoriesHolder = new ListHolderImpl<Category>();
+    private ListHolder<Tag> tagsHolder = new ListHolderImpl<Tag>();
 
-    protected boolean renderSkip;
-    protected boolean urlEncode;
-    protected boolean urlDecode;
+    private String outputFileExtension = ".html";
+    private String originalUrl;
+
+    private boolean renderSkip;
+    private boolean urlEncode;
+    private boolean urlDecode;
+    private Converter converter;
+
+    private final ContentHolder contentHolder;
 
     public SimplePage(Site site) {
         this.site = site;
-        //this.urlEncode = site.getConfig().get("url_encode", false);
-        //this.urlDecode = site.getConfig().get("url_decode", false);
+
+        this.urlEncode = site.getConfig().get("url_encode", false);
+        this.urlDecode = site.getConfig().get("url_decode", false);
+
+        Cache<String,String> cache = site.get("contentCache");
+        if(cache != null){
+            contentHolder = new CachedContentHolder(this, cache);
+        }else{
+            contentHolder = new SimpleContentHolder();
+        }
     }
 
     public SimplePage(Site site, Page page, Pager pager){
         this(site);
         this.setTitle(page.getTitle());
-        this.setUrl(page.getUrl());
-        this.setSourceContent(page.getSourceContent());
-        this.setConvertedContent(page.getConvertedContent());
-        this.setRenderedContent(page.getRenderedContent());
+        //this.setUrl(page.getUrl());
+        this.setContent(page.getContent());
         this.setDate(page.getDate());
         this.setLayout(page.getLayout());
         this.setCategoriesHolder(page.getCategoriesHolder());
@@ -97,9 +109,13 @@ public class SimplePage implements Page{
         this.setSource(page.getSource());
         this.setTagsHolder(page.getTagsHolder());
         this.setUpdated(page.getUpdated());
-        if(page instanceof SimplePage){
+        if(SimplePage.class.equals(page.getClass())){
             SimplePage sp = (SimplePage)page;
             this.data = new LinkedHashMap<String, Object>(sp.data);
+            this.originalUrl = sp.originalUrl;
+            this.url = sp.url;
+        }else{
+            this.setUrl(page.getDecodedUrl());
         }
     }
 
@@ -113,17 +129,12 @@ public class SimplePage implements Page{
     }
 
     @Override
-    public String getSourceContent() {
-        return sourceContent;
-    }
-
-    public void setSourceContent(String sourceContent) {
-        this.sourceContent = sourceContent;
-    }
-
-    @Deprecated
     public String getContent(){
-        return getSourceContent();
+        return contentHolder.getContent();
+    }
+
+    public void setContent(String content){
+        contentHolder.setContent(content);
     }
 
     @Override
@@ -134,6 +145,11 @@ public class SimplePage implements Page{
     @Override
     public String getUrl() {
         return url;
+    }
+
+    @Override
+    public String getDecodedUrl(){
+        return originalUrl;
     }
 
     @Override
@@ -172,23 +188,30 @@ public class SimplePage implements Page{
     }
 
     @Override
-    public Object get(String name) {
+    public <T> T get(String name) {
+        if("convertedContent".equals(name)){
+            return (T) "";
+        }
         if(data.containsKey(name)){
-            return data.get(name);
+            return (T) data.get(name);
         }
         if(source != null){
-            return source.getMeta().get(name);
+            return (T) source.getMeta().get(name);
         }
         return null;
     }
 
     @Override
-    public void set(String name, Object value) {
+    public <T> void set(String name, T value) {
         MapUtils.put(data, name, value);
     }
 
     @Override
     public void convert() {
+        Converter c = getConverter();
+        if(c != null){
+            setContent(c.convert(getContent()));
+        }
     }
 
     public SimplePage encodeUrl(){
@@ -206,20 +229,36 @@ public class SimplePage implements Page{
         return this;
     }
 
+    protected Converter getConverter(){
+        return converter;
+    }
+
+    protected boolean isRenderSkip(){
+        return renderSkip;
+    }
+
+    protected boolean isUrlEncode(){
+        return urlEncode;
+    }
+
+    protected boolean isUrlDecode(){
+        return urlDecode;
+    }
+
     @Override
     public void render(Map<String, Object> rootMap) {
         if(renderSkip){
             return;
         }
 
-        if(StringUtils.isBlank(getConvertedContent())){
-            log.warn("Empty converted content, skip render: {}", getUrl());
+        if(StringUtils.isBlank(getContent())){
+            log.warn("Empty content, skip render: {}", getUrl());
             return;
         }
 
         rootMap = new HashMap<String, Object>(rootMap);
         mergeRootMap(rootMap);
-        getSite().getRenderer().render(this, rootMap);
+        setContent(getSite().getRenderer().render(this, rootMap));
     }
 
     protected void mergeRootMap(Map<String, Object> rootMap) {
@@ -249,7 +288,7 @@ public class SimplePage implements Page{
      * @param highlighter the Highlighter
      */
     protected boolean containsHighlightCodeBlock(Highlighter highlighter) {
-        boolean contains = highlighter.containsHighlightCodeBlock(getConvertedContent());
+        boolean contains = highlighter.containsHighlightCodeBlock(getContent());
         if(contains){
             return true;
         }
@@ -262,9 +301,6 @@ public class SimplePage implements Page{
                 for (Object p : items) {
                     if (p instanceof Excerptable) {
                         String excerpt = ((Excerptable) p).getExcerpt();
-                        if(excerpt == null && p instanceof Page){
-                            excerpt = ((Page) p).getConvertedContent();
-                        }
                         if (highlighter.containsHighlightCodeBlock(excerpt)) {
                             if(log.isDebugEnabled() && p instanceof Base){
                                 log.debug("Found highlighter code block in post excerpt: " + ((Base) p).getUrl());
@@ -287,7 +323,7 @@ public class SimplePage implements Page{
             file.getParentFile().mkdirs();
 
             log.debug("Writing file to {} [{}]", file, getUrl());
-            FileUtils.write(file, getRenderedContent(), "UTF-8");
+            FileUtils.write(file, getContent(), "UTF-8");
         } catch (IOException e) {
             log.error("Write file error: {}", file, e);
             throw new RuntimeException(e);
@@ -311,12 +347,15 @@ public class SimplePage implements Page{
     }
 
     protected String getOutputFileExtension(){
-        return ".html";
+        return outputFileExtension;
     }
-
 
     public void setSource(Source source) {
         this.source = source;
+        if(source != null) {
+            this.converter = getSite().getConverter(source);
+            this.outputFileExtension = this.converter.getOutputFileExtension(source);
+        }
     }
 
     public void setTitle(String title) {
@@ -324,6 +363,7 @@ public class SimplePage implements Page{
     }
 
     public void setUrl(String url) {
+        this.originalUrl = url;
         if(url != null && urlEncode){
             url = URLUtils.encodeURL(url);
         }
@@ -407,29 +447,20 @@ public class SimplePage implements Page{
         this.published = published;
     }
 
-    @Override
-    public String getConvertedContent() {
-        if(convertedContent == null){
-            return getSourceContent();
-        }
-        return convertedContent;
+    public SimplePage setConverter(Converter converter){
+        this.converter = converter;
+        return this;
     }
 
-    public void setConvertedContent(String convertedContent) {
-        this.convertedContent = convertedContent;
+    public SimplePage setOutputFileExtension(String outputFileExtension){
+        this.outputFileExtension = outputFileExtension;
+        return this;
     }
 
-    @Override
-    public String getRenderedContent() {
-        if(renderedContent == null){
-            return getConvertedContent();
-        }
-        return renderedContent;
+    protected ContentHolder getContentHolder(){
+        return contentHolder;
     }
 
-    public void setRenderedContent(String renderedContent) {
-        this.renderedContent = renderedContent;
-    }
     /**
      *
      * @param current
@@ -463,5 +494,70 @@ public class SimplePage implements Page{
      */
     public Page getPage(int targetPageNumber){
         return getPage(this, targetPageNumber);
+    }
+
+    public interface ContentHolder {
+        String getContent();
+        void setContent(String content);
+        String getExcerpt();
+        void setExcerpt(String excerpt);
+    }
+
+    static class SimpleContentHolder implements ContentHolder{
+        private String content;
+        private String excerpt;
+
+        @Override
+        public String getContent() {
+            return content;
+        }
+
+        @Override
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        @Override
+        public String getExcerpt() {
+            return excerpt;
+        }
+
+        @Override
+        public void setExcerpt(String excerpt) {
+            this.excerpt = excerpt;
+        }
+    }
+
+    static class CachedContentHolder implements ContentHolder{
+        private final String cacheKey;
+        private final Cache<String,String> contentCache;
+
+        CachedContentHolder(Page page, Cache<String,String> contentCache){
+            this.contentCache = contentCache;
+            this.cacheKey = page.getClass().getName()
+                    + "-" + page.hashCode()
+                    + "-" + RandomStringUtils.randomAlphanumeric(13);
+            log.debug("Random cacheKey: {}", cacheKey);
+        }
+
+        @Override
+        public String getContent() {
+            return contentCache.get(cacheKey);
+        }
+
+        @Override
+        public void setContent(String content) {
+            contentCache.put(cacheKey, content);
+        }
+
+        @Override
+        public String getExcerpt() {
+            return contentCache.get(cacheKey + "-excerpt");
+        }
+
+        @Override
+        public void setExcerpt(String excerpt) {
+            contentCache.put(cacheKey + "-excerpt", excerpt);
+        }
     }
 }

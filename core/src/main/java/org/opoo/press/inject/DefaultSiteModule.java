@@ -31,7 +31,7 @@ import org.opoo.press.resource.CompassBuilder;
 import org.opoo.press.resource.CssBuilder;
 import org.opoo.press.resource.JsBuilder;
 import org.opoo.press.slug.DefaultSlugHelper;
-import org.opoo.press.slug.NoOpSlugHelper;
+import org.opoo.press.slug.SimpleSlugHelper;
 import org.opoo.press.source.SourceEntryLoaderImpl;
 import org.opoo.press.source.SourceManagerImpl;
 import org.opoo.press.source.SourceParserImpl;
@@ -54,7 +54,7 @@ public class DefaultSiteModule extends AbstractModule implements Module{
         bind(SourceParser.class).to(SourceParserImpl.class).in(Singleton.class);
         bind(SourceManager.class).to(SourceManagerImpl.class).in(Singleton.class);
         //bind(SlugHelper.class).annotatedWith(Names.named("zh_CN")).to(ChineseToPinyinSlugHelper.class).in(Singleton.class);
-        bind(SlugHelper.class).annotatedWith(Names.named("zh_CN")).to(NoOpSlugHelper.class);
+        bind(SlugHelper.class).annotatedWith(Names.named("zh_CN")).to(SimpleSlugHelper.class);
         bind(SlugHelper.class).annotatedWith(Names.named("default")).to(DefaultSlugHelper.class).in(Singleton.class);
         bind(Highlighter.class).to(SyntaxHighlighter.class).in(Singleton.class);
         bind(RelatedPostsFinder.class).to(CosineSimilarityRelatedPostsFinder.class).in(Singleton.class);

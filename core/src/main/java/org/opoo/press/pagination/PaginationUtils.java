@@ -45,7 +45,7 @@ public class PaginationUtils {
                 pages[i] = newPage;
                 newPages.add(newPage);
 
-                site.getFactory().getPaginationUpdater().update(newPage);
+                site.getFactory().getPaginationUpdater().apply(newPage);
             }else{
                 page.setPager(pager);
                 pages[i] = page;
@@ -68,9 +68,9 @@ public class PaginationUtils {
     }
 
     public static Map<String,?> getPagination(Page page){
-        Map<String,?> pagination = (Map<String, ?>) page.get("pagination");
+        Map<String,?> pagination = page.get("pagination");
         if(pagination == null){
-            Collection collection = (Collection) page.get("collection");
+            Collection collection = page.get("collection");
             if(collection != null){
                 pagination = collection.getConfiguration().get("pagination");
             }

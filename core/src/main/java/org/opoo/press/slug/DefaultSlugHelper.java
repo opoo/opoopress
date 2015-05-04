@@ -18,8 +18,8 @@ package org.opoo.press.slug;
 import org.opoo.press.SlugHelper;
 
 /**
- * @author Alex Lin
  *
+ * @author Alex Lin
  */
 public class DefaultSlugHelper implements SlugHelper {
 
@@ -33,30 +33,33 @@ public class DefaultSlugHelper implements SlugHelper {
 		}
 		text = text.toLowerCase();
 		text = text.replace(' ', '-');
-		char[] chars = text.toLowerCase().toCharArray();
+		char[] chars = text.toCharArray();
 		StringBuffer sb = new StringBuffer();
 		for(char c: chars){
 			toSlug(sb, c);
 		}
-		if(sb.length() == 0){
+		if(sb.length() > 0){
+            trimDot(sb);
+        }
+        if(sb.length() == 0){
 			throw new UnsupportedOperationException("Cannot process text '"
 					+ text + "' to slug, try configure another SlugHelper instead.");
 		}
-		trimDot(sb);
 		return sb.toString();
 	}
 
 	protected void toSlug(StringBuffer result, char c) {
-		if((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '/' || c == '.'){
+		//alpha numeric characters.
+        if((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '/' || c == '.'){
 			result.append(c);
 		}
 	}
 	
 	public static void trimDot(StringBuffer sb){
-		while(sb.charAt(0) == '.'){
+		while(sb.length() > 0 && (sb.charAt(0) == '.' || sb.charAt(0) == ' ')){
 			sb.deleteCharAt(0);
 		}
-		while(sb.charAt(sb.length() - 1) == '.'){
+		while(sb.length() > 0 && (sb.charAt(sb.length() - 1) == '.' || sb.charAt(sb.length() - 1) == ' ')){
 			sb.deleteCharAt(sb.length() - 1);
 		}
 	}

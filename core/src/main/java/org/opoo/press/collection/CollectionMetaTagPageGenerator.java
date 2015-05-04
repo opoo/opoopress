@@ -61,7 +61,7 @@ public class CollectionMetaTagPageGenerator implements Generator{
         // put tempate pages in cache, will be removed later.
         if(!templatePages.isEmpty()){
             //site.getAllPages().removeAll(templatePages);
-            Set<Page> siteTemplatePages = (Set<Page>) site.get("template_pages");
+            Set<Page> siteTemplatePages = site.get("template_pages");
             if(siteTemplatePages != null){
                 siteTemplatePages.addAll(templatePages);
             }else{
@@ -160,7 +160,7 @@ public class CollectionMetaTagPageGenerator implements Generator{
     }
 
     private <T> T getProperty(Page templatePage, Config metaTagConfig, String propertyName){
-        T value = (T) templatePage.get(propertyName);
+        T value = templatePage.get(propertyName);
         if(value == null && metaTagConfig != null){
             value = metaTagConfig.get(propertyName);
         }

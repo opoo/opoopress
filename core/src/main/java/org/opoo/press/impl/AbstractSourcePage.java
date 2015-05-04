@@ -15,11 +15,9 @@
  */
 package org.opoo.press.impl;
 
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.opoo.press.Base;
-import org.opoo.press.Converter;
 import org.opoo.press.Convertible;
 import org.opoo.press.Pager;
 import org.opoo.press.Post;
@@ -28,7 +26,6 @@ import org.opoo.press.Source;
 import org.opoo.press.SourceEntry;
 import org.opoo.press.renderer.AbstractFreeMarkerRenderer;
 import org.opoo.press.util.LinkUtils;
-import org.opoo.util.URLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,28 +45,21 @@ public abstract class AbstractSourcePage extends SimplePage implements Base, Con
     private DateFormat f1 = new SimpleDateFormat(DATE_FORMAT_PATTERN_1);
     private DateFormat f2 = new SimpleDateFormat(DATE_FORMAT_PATTERN_2);
 
-    private String outputFileExtension;
-    private Converter converter;
-    private String url;
-
     AbstractSourcePage(Site site, Source source, Pager pager) {
         super(site);
 
         if (source == null) {
-            log.warn("Source is null, skip initialize.");
+            throw new NullPointerException("page source null.");
         }
 
         setSource(source);
         setPager(pager);
 
-        this.converter = getSite().getConverter(source);
-        this.outputFileExtension = this.converter.getOutputFileExtension(source);
-
         String title = (String) source.getMeta().get("title");
         String content = source.getContent();
         String layout = (String) source.getMeta().get("layout");
         String permalink = (String) source.getMeta().get("permalink");
-        url = (String) source.getMeta().get("url");
+        String url = (String) source.getMeta().get("url");
 
         String path = (String) source.getMeta().get("path");
         if (path == null) {
@@ -84,26 +74,24 @@ public abstract class AbstractSourcePage extends SimplePage implements Base, Con
         Boolean bool = (Boolean) source.getMeta().get("published");
         boolean published = (bool == null || bool.booleanValue());
 
-        boolean urlEncode = site.getConfig().get("url_encode", false);
-        boolean urlDecode = site.getConfig().get("url_decode", false);
-
         setTitle(published ? title : "[Draft]" + title);
-        setSourceContent(content);
+        setContent(content);
         setLayout(layout);
         setPermalink(permalink);
         setPath(path);
         setDate(date);
         setUpdated(updated);
-        //setUrl(url);
+//        setUrl(url);
         setPublished(published);
-
-        if(urlDecode) decodeUrl();
-        if(urlEncode) encodeUrl();
 
 //        if (title != null) {
 //            log = LoggerFactory.getLogger(getClass().getName() + "[" + title + "]");
 //        }
 
+        if(url == null){
+            url = buildUrl();
+        }
+        setUrl(url);
     }
 
     protected Date lookup(Map<String, Object> frontMatter, String dateName) {
@@ -127,25 +115,6 @@ public abstract class AbstractSourcePage extends SimplePage implements Base, Con
         return (Date) date;
     }
 
-    @Override
-    protected String getOutputFileExtension() {
-        return this.outputFileExtension;
-    }
-
-    /**
-     * @return the converter
-     */
-    protected Converter getConverter() {
-        return converter;
-    }
-
-
-    @Override
-    public void convert() {
-        setConvertedContent(getConverter().convert(getSourceContent()));
-    }
-
-
     /**
      * For freemarker template.
      *
@@ -164,28 +133,7 @@ public abstract class AbstractSourcePage extends SimplePage implements Base, Con
         return getUpdatedFormatted();
     }
 
-    @Override
-    public String getUrl(){
-        //Lazy build url
-        if(url == null){
-            url = buildUrl();
-
-            if(urlEncode){
-                url = URLUtils.encodeURL(url);
-            }
-        }
-        return url;
-    }
-
-    @Override
-    public void setUrl(String url){
-        this.url = url;
-    }
-
-
     private String buildUrl() {
-        //log.debug("Building page url: " + getTitle());
-
         SourceEntry sourceEntry = getSource().getSourceEntry();
         String fileName = sourceEntry.getName();
         String baseName = FilenameUtils.getBaseName(fileName);

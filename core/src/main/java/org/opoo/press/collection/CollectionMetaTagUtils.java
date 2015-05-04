@@ -205,7 +205,11 @@ public class CollectionMetaTagUtils {
                 tags.add(tag);
             }
 
-            tag.getPages().add(page);
+			//tag.getPages().add(page);
+            List<Page> pages = tag.getPages();
+			if(!pages.contains(page)){
+				pages.add(page);
+			}
             page.getTagsHolder().add(tagMeta, tag);
         }
     }
@@ -250,8 +254,13 @@ public class CollectionMetaTagUtils {
                 }
                 categories.add(category);
             }
-            category.getPages().add(page);
-            page.getCategoriesHolder().add(categoryMeta, category);
+
+            //category.getPages().add(page);
+            List<Page> pages = category.getPages();
+			if(!pages.contains(page)){
+				pages.add(page);
+			}
+			page.getCategoriesHolder().add(categoryMeta, category);
         }
     }
 }

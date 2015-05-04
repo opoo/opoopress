@@ -25,11 +25,9 @@ import freemarker.template.Template;
 import freemarker.template.TemplateModel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Base;
-import org.opoo.press.Excerptable;
+import org.opoo.press.Page;
 import org.opoo.press.Site;
 import org.opoo.press.SourceEntry;
-import org.opoo.press.impl.SimplePage;
 import org.opoo.press.util.ClassUtils;
 import org.opoo.util.PathUtils;
 import org.slf4j.Logger;
@@ -171,22 +169,22 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
     }
 
     @Override
-    public void render(Base base, Map<String, Object> rootMap) {
+    public String render(Page base, Map<String, Object> rootMap) {
         //render methods: merge|recursive, default is merge
         if (renderMethod == null || "merge".equalsIgnoreCase(renderMethod)) {
-            renderMergedTemplate(base, rootMap);
+            return renderMergedTemplate(base, rootMap);
         } else if ("recursive".equalsIgnoreCase(renderMethod)) {
-            renderRecursive(base, rootMap);
+            return renderRecursive(base, rootMap);
         } else {
             throw new RuntimeException("Unknown render method: " + renderMethod);
         }
     }
 
-    private void renderMergedTemplate(Base base, Map<String, Object> rootMap) {
-        String content = base.getConvertedContent();
+    private String renderMergedTemplate(Page base, Map<String, Object> rootMap) {
+        String content = base.getContent();
         String layout = base.getLayout();
 
-        boolean isContentRenderRequired = isRenderRequired(site, base);
+        boolean isContentRenderRequired = isRenderRequired(site, base, content);
         boolean isValidLayout = isValidLayout(layout);
 
         if (isValidLayout) {
@@ -210,24 +208,15 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
                 //do nothing
             }
         }
-        //set rendered content
-        //base.setRenderedContent(content);
-        if(base instanceof SimplePage){
-            ((SimplePage) base).setRenderedContent(content);
-        }else{
-            base.set("renderedContent", content);
-        }
 
-        if(isContentRenderRequired){
-            renderExcerpt(base, rootMap);
-        }
+        return content;
     }
 
-    private void renderRecursive(Base base, Map<String, Object> rootMap) {
-        String content = base.getConvertedContent();
+    private String renderRecursive(Page base, Map<String, Object> rootMap) {
+        String content = base.getContent();
         String layout = base.getLayout();
 
-        boolean isContentRenderRequired = isRenderRequired(site, base);
+        boolean isContentRenderRequired = isRenderRequired(site, base, content);
         boolean isValidLayout = isValidLayout(layout);
 
         if (isContentRenderRequired) {
@@ -243,27 +232,13 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
             //content = content;
         }
 
-        //base.setRenderedContent(content);
-        if(base instanceof SimplePage){
-            ((SimplePage) base).setRenderedContent(content);
-        }else{
-            base.set("renderedContent", content);
-        }
-
-        if(isContentRenderRequired){
-            renderExcerpt(base, rootMap);
-        }
+        return content;
     }
 
-    private void renderExcerpt(Base base, Map<String, Object> rootMap){
-        if(base instanceof Excerptable && ((Excerptable) base).isExcerpted()){
-            Excerptable o = (Excerptable) base;
-            String excerpt = renderContent(o.getExcerpt(), rootMap);
-            o.setExcerpt(excerpt);
-            log.warn("Render excerpt: {} => {}", base.getUrl(), excerpt);
-        }
+    @Override
+    public boolean isRenderRequired(Page base, String content) {
+        return isRenderRequired(site, base, content);
     }
-
 
     static interface WorkingTemplateHolder{
         String getMergedWorkingTemplate(String layout, String content, SourceEntry entry);

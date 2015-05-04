@@ -67,50 +67,6 @@ public class PaginationGenerator implements Generator {
 			}
 		}
 	}
-
-	/*
-	private void paginate(Site site, Page page, List<Page> allNewPages) {
-		List<Post> posts = site.getPosts();
-		int pageSize = ((Number) site.getConfig().get("paginate")).intValue();
-		
-		int totalPosts = posts.size();
-		int totalPages = Pager.calculateTotalPages(totalPosts, pageSize);
-		
-		Page[] pages = new Page[totalPages];
-		Pager[] pagers = new Pager[totalPages];
-		for(int i = 0 ; i < totalPages ; i++){
-			int pageNumber = i + 1;
-			int fromIndex = i * pageSize;
-			int toIndex = fromIndex + pageSize;
-			if(toIndex > totalPosts){
-				toIndex = totalPosts;
-			}
-			List<Post> pagePosts = posts.subList(fromIndex, toIndex);
-			
-			Pager pager = new Pager(pageNumber, totalPages, totalPosts, pageSize, pagePosts);
-			if(pageNumber > 1){
-				PageImpl impl = new PageImpl(site, page.getSource(), pager);
-//				site.getPages().add(impl);
-				pages[i] = impl;
-				allNewPages.add(impl);
-			}else{
-				page.setPager(pager);
-				pages[i] = page;
-			}
-			pagers[i] = pager;
-		}
-		
-		//set next and previous 
-		for(int i = 0 ; i < totalPages ; i++){
-			if(i > 0){
-				pagers[i].setPrevious(pages[i - 1]);
-			}
-			if(i < (totalPages - 1 )){
-				pagers[i].setNext(pages[i + 1]);
-			}
-		}
-	}*/
-	
 	
 	/* (non-Javadoc)
 	 * @see org.opoo.press.Ordered#getOrder()
@@ -119,76 +75,6 @@ public class PaginationGenerator implements Generator {
 	public int getOrder() {
 		return 2000;
 	}
-	
-
-	
-//	public static int calculateTotalPages(int totalPosts, int pageSize){
-//		int totalPages = (int) Math.ceil((double) totalPosts / (double) pageSize);
-//		return totalPages;
-//	}
-//
-//	public static List<Page> paginate(Site site, Page page, List<? extends Base> posts){
-//		Number number = (Number) page.get("paginate");
-//		if(number == null){
-//			number = (Number) site.getConfig().get("paginate");
-//		}
-//		if(number == null){
-//			throw new IllegalArgumentException("No page size variable specified.");
-//		}
-//
-//		int pageSize = number.intValue();
-//
-//		return paginate(site, page, posts, pageSize);
-//	}
-//
-//	public static List<Page> paginate(Site site, Page page, List<? extends Base> posts, int pageSize) {
-//		if(posts.isEmpty()){
-//			throw new RuntimeException("There is no post in this site.");
-//		}
-//
-//		//only new pages, exclude first page
-//		List<Page> newPages = new ArrayList<Page>();
-//		int totalPosts = posts.size();
-//		int totalPages = calculateTotalPages(totalPosts, pageSize);
-//
-//		Page[] pages = new Page[totalPages];
-//		Pager[] pagers = new Pager[totalPages];
-//		for(int i = 0 ; i < totalPages ; i++){
-//			int pageNumber = i + 1;
-//			int fromIndex = i * pageSize;
-//			int toIndex = fromIndex + pageSize;
-//			if(toIndex > totalPosts){
-//				toIndex = totalPosts;
-//			}
-//			List<? extends Base> pagePosts = posts.subList(fromIndex, toIndex);
-//
-//			Pager pager = new Pager(pageNumber, totalPages, totalPosts, pageSize, pagePosts);
-//			if(pageNumber > 1){
-//				PageImpl impl = new PageImpl(site, page.getSource(), pager);
-////				site.getPages().add(impl);
-//				pages[i] = impl;
-//				newPages.add(impl);
-//			}else{
-//				page.setPager(pager);
-//				pages[i] = page;
-//			}
-//			pagers[i] = pager;
-//		}
-//
-//		//set next and previous
-//		int maxIndex = totalPages - 1;
-//		for(int i = 0 ; i < totalPages ; i++){
-//			if(i > 0){
-//				pagers[i].setPrevious(pages[i - 1]);
-//			}
-//			if(i < maxIndex){
-//				pagers[i].setNext(pages[i + 1]);
-//			}
-//		}
-//
-//		return newPages;
-//	}
-
 
 	public static int getPageSize(Site site, Page page){
 		return getPageSize(site, page, null);
@@ -252,7 +138,7 @@ public class PaginationGenerator implements Generator {
 //		// (isIndexPaginationEnabled || isNormalPagePaginationEnabled) && containsPaginatorInContent
 //		return (config.get("paginate") != null && "".equals(path) && "index.html".equals(name)
 //				|| page.get("paginate") != null)
-//				&& page.getConvertedContent().contains("paginator.");
+//				&& page.getContent().contains("paginator.");
 
 		return page.get("pagination") != null || page.get("paginate") != null;
 	}

@@ -49,6 +49,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -82,7 +84,6 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
 
     private Map<String,Object> instances = new HashMap<String,Object>();
 
-
     public FactoryImpl(Site site){
         super(site);
         this.site = site;
@@ -102,6 +103,8 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
         addConfiguration(factoryFile);
 
         initializePlugins();
+
+        initializeCaches();
     }
 
     void addConfiguration(InputStream is){
@@ -122,6 +125,9 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
         }
     }
 
+    void initializeCaches(){
+
+    }
 
     @Override
     public SourceEntryLoader getSourceEntryLoader() {
@@ -218,13 +224,13 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
 
         if("post".equalsIgnoreCase(layout)){
             if(log.isDebugEnabled()){
-                log.debug("Create post using PostImpl as default: {}", source.getSourceEntry().getFile());
+                log.debug("Create post using SourcePost as default: {}", source.getSourceEntry().getFile());
             }
             return new SourcePost(site, source);
         }
 
         if(log.isDebugEnabled()){
-            log.debug("Create page using PageImpl class as default: {}", source.getSourceEntry().getFile());
+            log.debug("Create page using SourcePage as default: {}", source.getSourceEntry().getFile());
         }
         return new SourcePage(site, source);
     }
@@ -438,7 +444,6 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     public <T> T constructInstance(Class<T> clazz, String hint, Object... args) {
         return constructInstance(clazz, hint, null, args);
     }
-
 
     public <T> T constructInstance(Class<T> clazz, String hint, Class<?>[] parameterTypes, Object[] args) {
         String classKey = clazz.getName();

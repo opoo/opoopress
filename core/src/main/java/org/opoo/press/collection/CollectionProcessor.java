@@ -165,7 +165,6 @@ public class CollectionProcessor extends ProcessorAdapter {
 
 
     private Filter createFilter(Site site, Factory factory, FilterConfiguration filterConfiguration) {
-//        try {
         Object[] args = filterConfiguration.getArgs();
         Filter filter = null;
         if (args == null || args.length == 0) {
@@ -185,14 +184,11 @@ public class CollectionProcessor extends ProcessorAdapter {
         } else {
             return ClassUtils.constructInstance(classname, site.getClassLoader(), null, args);
         }
-//        }catch (Exception e){
-//            throw new RuntimeException("Create collection filter failed: " + e.getMessage(), e);
-//        }
     }
 
 
     @Override
-    public void preRender(Site site) {
+    public void postGenerate(Site site) {
         Set<Page> siteTemplatePages = (Set<Page>) site.get("template_pages");
         if (siteTemplatePages != null) {
             log.info("Removing template pages: {}", siteTemplatePages.size());

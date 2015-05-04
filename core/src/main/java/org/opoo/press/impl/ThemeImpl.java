@@ -122,9 +122,10 @@ public class ThemeImpl implements Theme{
 			for(Map<String,Object> config: resourceBuildersConfig){
 				ResourceBuilder resourceBuilder = createResourceBuilder(config);
 				builders.add(resourceBuilder);
-				log.debug("Initializing resource builder: {}", resourceBuilder);
+				log.trace("Initializing resource builder: {}", resourceBuilder);
 				resourceBuilder.init(path, config);
 			}
+			log.info("Initialized {} resource builders.", resourceBuildersConfig.size());
 		}
 	}
 
@@ -200,8 +201,8 @@ public class ThemeImpl implements Theme{
 	 * @see org.opoo.press.Theme#get(java.lang.String)
 	 */
 	@Override
-	public Object get(String name) {
-		return config.get(name);
+	public <T> T get(String name) {
+		return (T) config.get(name);
 	}
 
 

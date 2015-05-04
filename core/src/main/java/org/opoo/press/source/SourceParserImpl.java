@@ -39,13 +39,13 @@ import java.util.Map;
  */
 public class SourceParserImpl implements SourceParser {
 	private static final Logger log = LoggerFactory.getLogger(SourceParserImpl.class);
-	private Yaml yaml = new Yaml();
+//	private Yaml yaml = new Yaml();
 	
 	/* (non-Javadoc)
 	 * @see org.opoo.press.SourceParser#parse(org.opoo.press.SourceEntry)
 	 */
 	@Override
-	public Source parse(SourceEntry sourceEntry)	throws NoFrontMatterException {
+	public Source parse(SourceEntry sourceEntry) throws NoFrontMatterException {
 		List<String> metaLines = new ArrayList<String>();
 		List<String> contentLines = new ArrayList<String>();
 		InputStream stream = null;
@@ -99,9 +99,13 @@ public class SourceParserImpl implements SourceParser {
 		}
 		
 		@SuppressWarnings("unchecked")
-		Map<String, Object> map = (Map<String, Object>) yaml.load(metaWriter.toString());
+		Map<String, Object> map = (Map<String, Object>) new Yaml().load(metaWriter.toString());
 		String content = contentWriter.toString();
 		
+		return new SimpleSource(sourceEntry, map, content);
+	}
+
+	protected Source createSource(SourceEntry sourceEntry, Map<String,Object> map, String content){
 		return new SimpleSource(sourceEntry, map, content);
 	}
 	

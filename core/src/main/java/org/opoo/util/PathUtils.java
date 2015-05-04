@@ -161,4 +161,41 @@ public abstract class PathUtils {
 		}
 	}
 
+	/**
+	 * Use {@link java.nio.file.Path#relativize(java.nio.file.Path)} in JDK1.7.
+	 * @param baseDir
+	 * @param file
+	 * @return
+	 */
+	public static String getRelativePath(File baseDir, File file){
+		if(!baseDir.isDirectory()){
+			throw new IllegalArgumentException("Base directory must be a directory.");
+		}
+
+		String dirPath = FilenameUtils.normalize(baseDir.getAbsolutePath(), true);
+		String filePath = FilenameUtils.normalize(file.getAbsolutePath(), true);
+		if(!dirPath.endsWith("/")){
+			dirPath += "/";
+		}
+
+		if(filePath.startsWith(dirPath)){
+			return filePath.substring(dirPath.length());
+		}else {
+			throw new IllegalArgumentException("File not in base directory.");
+		}
+	}
+
+	public static String getRelativePath(String baseDir, File file){
+		String filePath = FilenameUtils.normalize(file.getAbsolutePath(), true);
+
+		if(!baseDir.endsWith("/")){
+			baseDir += "/";
+		}
+
+		if(filePath.startsWith(baseDir)){
+			return filePath.substring(baseDir.length());
+		}else {
+			throw new IllegalArgumentException("File not in base directory.");
+		}
+	}
 }

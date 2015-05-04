@@ -16,8 +16,6 @@
 package org.opoo.press.source;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
 import org.opoo.press.Source;
 import org.opoo.press.SourceEntry;
 import org.opoo.press.SourceManager;
@@ -31,66 +29,66 @@ import java.util.Map;
 
 /**
  * @author Alex Lin
- *
  */
 public class SourceManagerImpl implements SourceManager {
-	private Yaml yaml= new Yaml();
+    private Yaml yaml = new Yaml();
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SourceManager#saveSourceToFile(org.opoo.press.Source)
-	 */
-	@Override
-	public void saveSourceToFile(Source source) {
-		File file = source.getSourceEntry().getFile();
-		File dir = file.getParentFile();
-		if(!dir.exists()){
-			dir.mkdirs();
-		}else{
-			if(!dir.isDirectory()){
-				throw new RuntimeException("Can not save file, '" + dir + "' is not a valid directory.");
-			}
-		}
-		List<String> lines = new ArrayList<String>();
-		lines.add(Source.TRIPLE_DASHED_LINE);
-		//for(Map.Entry<String, Object> en: source.getMeta().entrySet()){
-		//	
-		//}
-		String line = yaml.dumpAsMap(source.getMeta());
-		lines.add(line);
-		lines.add(Source.TRIPLE_DASHED_LINE);
-		
-		lines.add(source.getContent());
+    /* (non-Javadoc)
+     * @see org.opoo.press.SourceManager#saveSourceToFile(org.opoo.press.Source)
+     */
+    @Override
+    public void saveSourceToFile(Source source) {
+        File file = source.getSourceEntry().getFile();
+        File dir = file.getParentFile();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        } else {
+            if (!dir.isDirectory()) {
+                throw new RuntimeException("Can not save file, '" + dir + "' is not a valid directory.");
+            }
+        }
+        List<String> lines = new ArrayList<String>();
+        lines.add(Source.TRIPLE_DASHED_LINE);
+        //for(Map.Entry<String, Object> en: source.getMeta().entrySet()){
+        //
+        //}
+        String line = yaml.dumpAsMap(source.getMeta());
+        lines.add(line);
+        lines.add(Source.TRIPLE_DASHED_LINE);
 
-		try {
-			FileUtils.writeLines(file, "UTF-8", lines);
-		} catch (IOException e) {
-			throw new RuntimeException("Write file exception", e);
-		}
-	}
+        lines.add(source.getContent());
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SourceManager#buildEntry(java.io.File, java.lang.String)
-	 */
-	@Override
-	public SourceEntry buildEntry(File sourceDir, String path) {
-		path = FilenameUtils.separatorsToUnix(path);
-		String[] arr = StringUtils.split(path, "/");
-		
-		SourceEntry entry = null;
-		for(String s: arr){
-			sourceDir = new File(sourceDir, s);
-			entry = new SourceEntry(entry, sourceDir);
-		}
-		
-		return entry;
-	}
+        try {
+            FileUtils.writeLines(file, "UTF-8", lines);
+        } catch (IOException e) {
+            throw new RuntimeException("Write file exception", e);
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SourceManager#buildSource(java.io.File, java.lang.String, java.util.Map, java.lang.String)
-	 */
-	@Override
-	public Source buildSource(File sourceDir, String path, Map<String, Object> meta, String content) {
-		SourceEntry entry = buildEntry(sourceDir, path);
-		return new SimpleSource(entry, meta, content);
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.SourceManager#buildEntry(java.io.File, java.lang.String)
+     */
+    @Override
+    public SourceEntry buildEntry(File sourceDir, String path) {
+//		path = FilenameUtils.separatorsToUnix(path);
+//		String[] arr = StringUtils.split(path, "/");
+//
+//		SourceEntry entry = null;
+//		for(String s: arr){
+//			sourceDir = new File(sourceDir, s);
+//			entry = new SourceEntry(entry, sourceDir);
+//		}
+//
+//		return entry;
+        throw new UnsupportedOperationException();
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.SourceManager#buildSource(java.io.File, java.lang.String, java.util.Map, java.lang.String)
+     */
+    @Override
+    public Source buildSource(File sourceDir, String path, Map<String, Object> meta, String content) {
+        SourceEntry entry = buildEntry(sourceDir, path);
+        return new SimpleSource(entry, meta, content);
+    }
 }

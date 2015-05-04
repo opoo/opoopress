@@ -16,9 +16,11 @@
 package org.opoo.press.renderer;
 
 import org.apache.commons.io.IOUtils;
-import org.opoo.press.Base;
+import org.apache.commons.lang.StringUtils;
+import org.opoo.press.Page;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
+import org.opoo.press.util.LayoutUtils;
 
 import java.io.StringWriter;
 
@@ -28,25 +30,17 @@ import java.io.StringWriter;
 public abstract class AbstractRenderer implements Renderer{
 
     public boolean isValidLayout(String layout){
-        if(layout == null){
-            return false;
-        }
-        if("nil".equalsIgnoreCase(layout)){
-            return false;
-        }
-        if("null".equalsIgnoreCase(layout)){
-            return false;
-        }
-        if("none".equalsIgnoreCase(layout)){
-            return false;
-        }
-        return true;
+        return LayoutUtils.isValidLayout(layout);
     }
 
-    public boolean isRenderRequired(Site site, Base base) {
-        Boolean requireRender = (Boolean) base.get("render");
+    public boolean isRenderRequired(Site site, Page base, String content) {
+        if(StringUtils.isBlank(content)){
+            return false;
+        }
+
+        Boolean requireRender = base.get("render");
         if(requireRender == null){
-            requireRender = (Boolean) site.get("require_render_content");
+            requireRender = site.get("require_render_content");
         }
 
         if(requireRender != null){

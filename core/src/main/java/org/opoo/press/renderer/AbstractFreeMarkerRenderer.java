@@ -19,7 +19,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Base;
+import org.opoo.press.Page;
 import org.opoo.press.Site;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,8 @@ public abstract class AbstractFreeMarkerRenderer extends AbstractRenderer {
     public void renderContent(String templateContent, Object rootMap, Writer out) {
         log.debug("Rendering content...");
         try {
-            Template template = new Template("CT" + (start++), new StringReader(templateContent), getConfiguration(), "UTF-8");
+            Template template = new Template("CT" + (start++),
+                    new StringReader(templateContent), getConfiguration(), "UTF-8");
             process(template, rootMap, out);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -81,20 +82,19 @@ public abstract class AbstractFreeMarkerRenderer extends AbstractRenderer {
     protected abstract Configuration getConfiguration();
 
     @Override
-    public boolean isRenderRequired(Site site, Base base) {
-        boolean b = super.isRenderRequired(site, base);
+    public boolean isRenderRequired(Site site, Page page, String content) {
+        boolean b = super.isRenderRequired(site, page, content);
         if (b) {
             return true;
         }
 
         //if auto_render set to true, check freemarker tag in content
-        Boolean autoRender = (Boolean) site.get("auto_render_content");
+        Boolean autoRender = site.get("auto_render_content");
         if (autoRender != null && autoRender) {
-            String convertedContent = base.getConvertedContent();
-            if (StringUtils.contains(convertedContent, "<#") && StringUtils.contains(convertedContent, ">")) {
+            if (StringUtils.contains(content, "<#") && StringUtils.contains(content, ">")) {
                 return true;
             }
-            if (StringUtils.contains(convertedContent, "${") && StringUtils.contains(convertedContent, "}")) {
+            if (StringUtils.contains(content, "${") && StringUtils.contains(content, "}")) {
                 return true;
             }
         }
@@ -103,17 +103,16 @@ public abstract class AbstractFreeMarkerRenderer extends AbstractRenderer {
     }
 
     @Override
-    public void render(Base base, Object rootMap) {
-        if(StringUtils.isBlank(base.getConvertedContent())){
+    public String render(Page base, Object rootMap) {
+        if(StringUtils.isBlank(base.getContent())){
             log.warn("Empty converted content, skip render: {}", base.getUrl());
-            return;
+            return "";
         }
-        render(base, (Map<String, Object>) rootMap);
+        return render(base, (Map<String, Object>) rootMap);
     }
 
-    public abstract void render(Base base, Map<String, Object> rootMap);
+    public abstract String render(Page base, Map<String, Object> rootMap);
 
-    
     public static String process(String templateContent, Object rootMap){
         try {
             Configuration configuration = new Configuration();

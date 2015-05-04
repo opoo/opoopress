@@ -52,31 +52,25 @@ public class SiteManagerImpl implements SiteManager {
 
     private void updateConfigurationFile(File baseDirectory, Locale locale) {
         File configFile = new File(baseDirectory, "config.yml");
-        File configFileZH = new File(baseDirectory, "config_zh_CN.yml");
-
-        if (!configFileZH.exists()) {
-            log.debug("config-zh_CN.yml not exists, skip update.");
-            return;
-        }
-
-        if (!configFile.exists()) {
-            //simple rename
-            configFileZH.renameTo(configFile);
-            return;
-        }
 
         if (locale == null) {
             locale = Locale.getDefault();
         }
 
-        boolean isZH = "zh".equals(locale.getLanguage());
+        String locString = locale.toString();
 
-        if (isZH) {
-            FileUtils.deleteQuietly(configFile);
-            configFileZH.renameTo(configFile);
-        } else {
-            FileUtils.deleteQuietly(configFileZH);
+        File configFileLocale = new File(baseDirectory, "config_" + locString + ".yml");
+
+        if (!configFileLocale.exists()) {
+            log.debug("{} not exists, skip update.", configFileLocale.getName());
+            return;
         }
+
+        if(configFile.exists()){
+            FileUtils.deleteQuietly(configFile);
+        }
+
+        configFileLocale.renameTo(configFile);
     }
 
     private void checkDirectories(File baseDirectory) throws Exception {
@@ -123,11 +117,6 @@ public class SiteManagerImpl implements SiteManager {
     @Override
     public File createNewFile(Site site, String layout, String title, String name, String format,
                               String newFilePattern, String template, Map<String, Object> meta) throws Exception {
-        //FIXME validate title
-//        if (StringUtils.isBlank(title)) {
-//            throw new Exception("Title is required.");
-//        }
-
         name = processName(site, title, name);
 
         if (format == null) {
@@ -136,7 +125,7 @@ public class SiteManagerImpl implements SiteManager {
 
         if (StringUtils.isBlank(newFilePattern)) {
             //new_page, new_page, new_pic
-            newFilePattern = (String) site.get("new_" + layout);
+            newFilePattern = site.get("new_" + layout);
             if(StringUtils.isBlank(newFilePattern)){
                 if("post".equals(layout)){
                     newFilePattern = SiteConfigImpl.DEFAULT_NEW_POST_FILE;
@@ -149,7 +138,7 @@ public class SiteManagerImpl implements SiteManager {
         }
 
         if(StringUtils.isBlank(template)){
-            template = (String) site.get("new_" + layout + "_template");
+            template = site.get("new_" + layout + "_template");
             if(StringUtils.isBlank(template)){
                 if("post".equals(layout)){
                     template = SiteConfigImpl.DEFAULT_NEW_POST_TEMPLATE;

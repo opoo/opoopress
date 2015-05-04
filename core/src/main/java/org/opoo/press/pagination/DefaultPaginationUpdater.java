@@ -25,19 +25,19 @@ import org.opoo.press.PaginationUpdater;
  */
 public class DefaultPaginationUpdater implements PaginationUpdater {
     @Override
-    public void update(Page page) {
+    public void apply(Page page) {
         if(page.getPager() != null && page.getPager().getPageNumber() > 1){
-            updateInternal(page, page.getPager());
+            update(page, page.getPager());
         }
     }
 
-    protected void updateInternal(Page page, Pager pager) {
+    protected void update(Page page, Pager pager) {
         updateUrl(page, pager);
         updateTitle(page, pager);
     }
 
     protected void updateUrl(Page page, Pager pager) {
-        String url = page.getUrl();
+        String url = page.getDecodedUrl();
         int pageNumber = pager.getPageNumber();
 
         if(url.endsWith("/")){

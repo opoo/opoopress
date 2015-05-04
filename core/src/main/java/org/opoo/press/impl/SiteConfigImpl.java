@@ -66,7 +66,7 @@ public class SiteConfigImpl extends HashMap<String,Object> implements SiteConfig
 	 * Construct configuration instance.
 	 * 
 	 * @param base Base directory of this site. 
-	 * 		Call {@link File#getCanonicalFile()} first.
+	 * 		Call {@link File#getCanonicalFile()} before construct this..
 	 * @param override Options override.
 	 */
 	public SiteConfigImpl(File base, Map<String, Object> override){

@@ -15,9 +15,11 @@
  */
 package org.opoo.press.impl;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
+import org.opoo.press.Category;
 import org.opoo.press.Collection;
 import org.opoo.press.Converter;
 import org.opoo.press.Factory;
@@ -34,11 +36,13 @@ import org.opoo.press.SiteConfig;
 import org.opoo.press.Source;
 import org.opoo.press.SourceEntry;
 import org.opoo.press.SourceEntryLoader;
+import org.opoo.press.SourceEntryVisitor;
 import org.opoo.press.SourceParser;
 import org.opoo.press.StaticFile;
 import org.opoo.press.Theme;
 import org.opoo.press.ThemeCompiler;
 import org.opoo.press.Writable;
+import org.opoo.press.source.CachedSourceParserWrapper;
 import org.opoo.press.task.RunnableTask;
 import org.opoo.press.task.TaskExecutor;
 import org.opoo.press.util.StaleUtils;
@@ -46,6 +50,9 @@ import org.opoo.util.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -94,6 +101,11 @@ public class SiteImpl implements Site, SiteBuilder{
 	private String dateFormatPattern;
 	private Map<String,Collection> collections;
 	private List<Page> allPages;
+
+    private CacheManager cacheManager;
+    private Cache<String,Source> sourceCache;
+    private Cache<String,SourceEntry> staticFileSourceEntryCache;
+    private Cache<String,String> contentCache;
 
 
 	public SiteImpl(SiteConfigImpl siteConfig) {
@@ -229,17 +241,50 @@ public class SiteImpl implements Site, SiteBuilder{
 //		}
 
 		reset();
-		read();
+        prepare();
+        read();
 		generate();
 		convert();
 		render();
 		cleanup();
 		write();
+        close();
 
 		StaleUtils.saveLastBuildInfo(this);
 	}
 
-	void reset(){
+    void prepare() {
+        boolean cache = config.get("cache", false);
+        if(cache){
+            cacheManager = Caching.getCachingProvider().getCacheManager();
+            sourceCache = cacheManager.getCache("sources");
+            staticFileSourceEntryCache = cacheManager.getCache("static-file-source-entries");
+            contentCache = cacheManager.getCache("contents");
+
+            if(sourceCache == null){
+                throw new IllegalArgumentException("'sources' cache not defined");
+            }
+            if(staticFileSourceEntryCache == null){
+                throw new IllegalArgumentException("'static-file-source-entries' cache not defined");
+            }
+            if(contentCache == null){
+                throw new IllegalArgumentException("'contents' cache not defined");
+            }
+            data.put("contentCache", contentCache);
+        }
+    }
+
+    void close() {
+        if(cacheManager != null){
+            data.remove("contentCache");
+            contentCache.clear();
+
+            cacheManager.close();
+            cacheManager = null;
+        }
+    }
+
+    void reset(){
 		this.time = config.get("time", new Date());
 		//Call #add() in multi-threading
 		this.allPages = Collections.synchronizedList(new ArrayList<Page>());
@@ -284,6 +329,8 @@ public class SiteImpl implements Site, SiteBuilder{
 
 		//Construct RendererImpl after initializing all plugins
 		renderer = factory.getRenderer();
+
+		processors.postSetup(this);
 	}
 
 	private ClassLoader createClassLoader(SiteConfig config, Theme theme) {
@@ -296,7 +343,7 @@ public class SiteImpl implements Site, SiteBuilder{
 
 
 		String sitePluginDir = config.get("plugin_dir");
-		String themePluginDir = (String) theme.get("plugin_dir");
+		String themePluginDir = theme.get("plugin_dir");
 
 		List<File> classPathEntries = new ArrayList<File>(2);
 
@@ -350,61 +397,79 @@ public class SiteImpl implements Site, SiteBuilder{
 		}
 	}
 
-
-
 	void read(){
+		log.info("Reading sources...");
 
-		Runnable t1 = new Runnable(){
-			public void run() {
-				readSources();
-			}
-		};
-		
-		Runnable t2 = new Runnable(){
-			public void run() {
-				readStaticFiles();
-			}
-		};
-		
-		taskExecutor.run(t1, t2);
-		
+        final FileFilter fileFilter = buildFilter();
+        final SourceEntryLoader sourceEntryLoader = factory.getSourceEntryLoader();
+        final SourceParser sourceParser = getSourceParser();//factory.getSourceParser();
+
+        final SourceEntryVisitor sourceVisitor = new SourceEntryVisitor() {
+            @Override
+            public void visit(SourceEntry sourceEntry) {
+                readSource(sourceEntry, sourceParser);
+            }
+        };
+        final SourceEntryVisitor staticFileVisitor = new SourceEntryVisitor() {
+            @Override
+            public void visit(SourceEntry sourceEntry) {
+                log.trace("Reading static file {}", sourceEntry.getFile());
+                staticFiles.add(new StaticFileImpl(SiteImpl.this, sourceEntry));
+            }
+        };
+
+        List<Runnable> tasks = Lists.newArrayList();
+
+        for(final File src: sources){
+            tasks.add(new Runnable() {
+                @Override
+                public void run() {
+                    log.debug("Walk source: {}", src);
+                    sourceEntryLoader.walkSourceTree(src, fileFilter, sourceVisitor);
+                }
+            });
+        }
+
+
+        for(final File assetDir: assets){
+            tasks.add(new Runnable() {
+                @Override
+                public void run() {
+                    log.debug("Walk asset: {}", assetDir);
+                    sourceEntryLoader.walkSourceTree(assetDir, fileFilter, staticFileVisitor);
+                }
+            });
+        }
+
+        taskExecutor.run(tasks);
+
 		processors.postRead(this);
-	}
-	
-	private void readSources(){
-		log.info("Reading sources ...");
-		final SourceEntryLoader sourceEntryLoader = factory.getSourceEntryLoader();
-		final SourceParser sourceParser = factory.getSourceParser();
 
-		//load sources and load static files
-		FileFilter fileFilter = buildFilter();
-		for(File src: sources){
-			List<SourceEntry> tempList = sourceEntryLoader.loadSourceEntries(src, fileFilter);
-			for(SourceEntry en: tempList){
-				read(en, sourceParser);
-			}
-		}
-
-	}
-	
-	private void readStaticFiles(){
-		log.info("Reading assets ...");
-		final SourceEntryLoader sourceEntryLoader = factory.getSourceEntryLoader();
-		FileFilter fileFilter = buildFilter();
-		for(File assetDir: assets){
-			List<SourceEntry> tempList = sourceEntryLoader.loadSourceEntries(assetDir, fileFilter);
-			for(SourceEntry se: tempList){
-				log.debug("read static file {}", se.getFile());
-				staticFiles.add(new StaticFileImpl(this, se));
-			}
-		}
-	}
+        log.debug("Read {} pages.", allPages.size());
+        if(log.isTraceEnabled()){
+            for(Page page: allPages) {
+                System.out.println("==> " + page.getSource().getSourceEntry().getFile());
+            }
+        }
+    }
 
 
-	private void read(SourceEntry en, SourceParser parser) {
+    private SourceParser getSourceParser() {
+        SourceParser sourceParser = factory.getSourceParser();
+
+        if(cacheManager != null){
+            log.debug("Use {} as SourceParser.", CachedSourceParserWrapper.class.getName());
+            sourceParser = new CachedSourceParserWrapper(sourceParser, sourceCache, staticFileSourceEntryCache);
+        }
+        return sourceParser;
+    }
+
+	private void readSource(SourceEntry en, SourceParser parser) {
 		try {
+
 			Source src = parser.parse(en);
-			log.debug("read source {}", src.getSourceEntry().getFile());
+
+			log.trace("Reading source {}", src.getSourceEntry().getFile());
 
 			Map<String, Object> map = src.getMeta();
 			String layout = (String) map.get("layout");
@@ -460,6 +525,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	
 	
 	void generate(){
+        log.info("Generating...");
 		for(Generator g: factory.getPluginManager().getGenerators()){
 			g.generate(this);
 		}
@@ -486,13 +552,13 @@ public class SiteImpl implements Site, SiteBuilder{
 
 		log.info("Rendering {} pages...", allPages.size());
 		taskExecutor.run(allPages, new RunnableTask<Page>() {
-			public void run(Page page) {
-				log.debug("Rendering page: {}", page.getUrl());
+            public void run(Page page) {
+                log.debug("Rendering page: {}", page.getUrl());
 
-				page.render(rootMap);
-				processors.postRender(SiteImpl.this, page);
-			}
-		});
+                page.render(rootMap);
+                processors.postRender(SiteImpl.this, page);
+            }
+        });
 		processors.postRender(this);
 	}
 
@@ -544,7 +610,7 @@ public class SiteImpl implements Site, SiteBuilder{
 			taskExecutor.run(destFiles, new RunnableTask<File>() {
 				public void run(File file) {
 					FileUtils.deleteQuietly(file);
-					log.debug("File deleted: {}", file);
+					log.trace("File deleted: {}", file);
 				}
 			});
 		}
@@ -585,6 +651,8 @@ public class SiteImpl implements Site, SiteBuilder{
 		if(!staticFiles.isEmpty()){
 			list.addAll(staticFiles);
 		}
+
+        log.info("Writing {} files to {}...", list.size(), dest);
 		
 		taskExecutor.run(list, new RunnableTask<Writable>() {
 			public void run(Writable o) {
@@ -596,7 +664,7 @@ public class SiteImpl implements Site, SiteBuilder{
 	}
 
 
-	/**
+    /**
 	 * @return the pages
 	 */
 	public List<Page> getPages() {

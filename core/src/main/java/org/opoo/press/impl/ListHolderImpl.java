@@ -18,6 +18,8 @@ package org.opoo.press.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.opoo.press.ListHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,9 @@ import java.util.Set;
  * @author Alex Lin
  */
 public class ListHolderImpl<T> implements ListHolder<T> {
+    private static final Logger log = LoggerFactory.getLogger(ListHolderImpl.class);
     private Map<String, List<T>> map = Maps.newHashMap();
+	private SingleHolder<T> singleHoder;
 
     @Override
     public List<T> get(String metaName) {
@@ -50,4 +54,32 @@ public class ListHolderImpl<T> implements ListHolder<T> {
         Set<String> set = map.keySet();
         return set.toArray(new String[set.size()]);
     }
+
+	public SingleHolder<T> getSingleHolder(){
+		if(singleHoder == null){
+			singleHoder = new SingleHolderImpl<T>(this);
+		}
+		return singleHoder;
+	}
+
+	public interface SingleHolder<X>{
+		X get(String metaName);
+	}
+
+	private static class SingleHolderImpl<X> implements SingleHolder<X>{
+		private final ListHolderImpl<X> listHolder;
+		private SingleHolderImpl(ListHolderImpl<X> listHolder){
+			this.listHolder = listHolder;
+		}
+
+		@Override
+		public X get(String metaName){
+			List<X> list = listHolder.get(metaName);
+			if(list != null && !list.isEmpty()){
+                return list.iterator().next();
+            }else{
+				return null;
+			}
+		}
+	}
 }

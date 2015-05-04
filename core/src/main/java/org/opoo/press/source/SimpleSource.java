@@ -18,13 +18,14 @@ package org.opoo.press.source;
 import org.opoo.press.Source;
 import org.opoo.press.SourceEntry;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * @author Alex Lin
  *
  */
-public class SimpleSource implements Source {
+public class SimpleSource implements Source, Serializable {
 	private final Map<String, Object> frontMatter;
 	private final String content;
 	private final SourceEntry sourceEntry;
