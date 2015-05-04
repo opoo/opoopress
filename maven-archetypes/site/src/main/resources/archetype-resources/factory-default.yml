@@ -18,7 +18,7 @@
 #org.opoo.press.SlugHelper: org.opoo.press.slug.DefaultSlugHelper
 
 # URLEncode(text) as url
-#org.opoo.press.SlugHelper-zh_CN: org.opoo.press.slug.NoOpSlugHelper
+#org.opoo.press.SlugHelper-zh_CN: org.opoo.press.slug.SimpleSlugHelper
 
 #org.opoo.press.RelatedPostsFinder: org.opoo.press.impl.CosineSimilarityRelatedPostsFinder
 
