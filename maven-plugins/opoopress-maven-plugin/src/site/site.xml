@@ -22,7 +22,7 @@
     <menu name="Overview">
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
-      <item name="Usage" href="http://www.opoopress.com/docs/"/>
+      <item name="Usage" href="http://www.opoopress.com/"/>
     </menu>
     <menu ref="modules" />
     <menu ref="reports"/>

@@ -176,7 +176,7 @@ public class ProgressURLDownloader implements URLDownloader {
     }
 
     private String detectApplicationVersion() {
-        String version = "1.2";
+        String version = "2.0";
         try {
             version = ProgressURLDownloader.class.getPackage().getSpecificationVersion();
         } catch (Exception e) {

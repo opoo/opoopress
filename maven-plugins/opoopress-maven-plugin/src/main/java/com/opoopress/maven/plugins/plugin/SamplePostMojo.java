@@ -88,6 +88,12 @@ public class SamplePostMojo extends AbstractOpooPressMojo{
             name = i18n.getString("sample-post", locale, "name");
         }
 
+        String samplePostTemplate = site.getTheme().get("sample_post_template");
+        if(samplePostTemplate != null){
+            template = samplePostTemplate;
+            getLog().info("Using template configured by theme: " + samplePostTemplate);
+        }
+
         Map<String, Object> meta = new HashMap<String, Object>();
         meta.put("published", !draft);
         try {

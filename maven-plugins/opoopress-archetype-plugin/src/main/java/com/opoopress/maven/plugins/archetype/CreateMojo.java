@@ -182,7 +182,7 @@ public class CreateMojo extends AbstractMojo{
     private String themeArtifactId;
 
     /**
-     * @parameter expression="${theme.version}" default-value="1.0-beta-1"
+     * @parameter expression="${theme.version}" default-value="1.0-SNAPSHOT"
      */
     private String themeVersion;
 

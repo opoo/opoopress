@@ -71,7 +71,8 @@ public class AbstractServerMojo extends AbstractBuildMojo{
             contextHandler.setContextPath(root);
             contextHandler.setHandler(new ResourceHandler());
             contextHandler.setResourceBase(resourceBase/*site.getDestination().getPath()*/);
-            server.setHandler(contextHandler);
+            //server.setHandler(contextHandler);
+            server.setHandlers(new Handler[]{contextHandler, new DefaultHandler()});
             //server.setHandlers(new Handler[]{contextHandler, logHandler});
             //log.info( "Starting preview server on http://localhost:" + port + root );
         }
