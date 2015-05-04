@@ -30,7 +30,9 @@ public interface SourceEntryLoader {
      * @param sourcePath
      * @param fileFilter
      * @return the list of all source entries
+     * @deprecated Use {@link #walkSourceTree(File, FileFilter, SourceEntryVisitor)} instead.
      */
+    @Deprecated
     List<SourceEntry> loadSourceEntries(File sourcePath, FileFilter fileFilter);
 
     /**
@@ -42,4 +44,12 @@ public interface SourceEntryLoader {
      * @return SourceEntry instance
      */
     SourceEntry buildSourceEntry(File root, File file);
+
+    /**
+     * Walk source file tree.
+     * @param sourceDirectory source root directory
+     * @param fileFilter filter
+     * @param visitor source entry visitor
+     */
+    void walkSourceTree(File sourceDirectory, FileFilter fileFilter, SourceEntryVisitor visitor);
 }

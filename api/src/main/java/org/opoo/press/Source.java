@@ -23,7 +23,7 @@ import java.util.Map;
  * @author Alex Lin
  */
 public interface Source {
-    public static final String TRIPLE_DASHED_LINE = "---";
+    String TRIPLE_DASHED_LINE = "---";
 
     /**
      * @return source entry

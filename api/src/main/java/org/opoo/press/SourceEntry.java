@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Alex Lin.
+ * Copyright 2013-2015 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,58 +15,46 @@
  */
 package org.opoo.press;
 
-import org.apache.commons.io.monitor.FileEntry;
-
 import java.io.File;
+import java.io.Serializable;
 
 /**
- * Source file entry.
- *
  * @author Alex Lin
  */
-public class SourceEntry extends FileEntry {
-    private static final long serialVersionUID = -3629623831263979006L;
-    private final String path;
+public interface SourceEntry extends Serializable{
+    /**
+     * The file.
+     * @return
+     */
+    File getFile();
 
     /**
-     * @param file
+     * The name of file.
+     * @return
      */
-    public SourceEntry(File file) {
-        super(file);
-        path = "";
-        refresh(file);
-    }
+    String getName();
 
     /**
-     * @param parent
-     * @param file
+     * Last modified time of the file.
+     * @return
      */
-    public SourceEntry(SourceEntry parent, File file) {
-        super(parent, file);
-        path = getPath(parent);
-        refresh(file);
-    }
+    long getLastModified();
 
     /**
-     * @param parent
-     * @return full path
+     * The length of the file.
+     * @return
      */
-    private static String getPath(SourceEntry parent) {
-        if (parent != null) {
-            //return getPath(parent) + "/" + parent.getName();
-            return parent.getPath() + "/" + parent.getName();
-        }
-        return "";
-    }
+    long getLength();
 
     /**
-     * @return the path
+     * Site source directory.
+     * @return
      */
-    public String getPath() {
-        return path;
-    }
+    File getSourceDirectory();
 
-    public String toString() {
-        return getFile().toString();
-    }
+    /**
+     * Path from source directory to this file.
+     * @return "" or string starts with "/".
+     */
+    String getPath();
 }

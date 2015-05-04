@@ -90,7 +90,7 @@ public interface Site extends SiteBuilder, SiteHelper {
      * @return value
      * @see #set(String, Object)
      */
-    Object get(String name);
+    <T> T get(String name);
 
     /**
      * Set a variable for site.
@@ -99,7 +99,7 @@ public interface Site extends SiteBuilder, SiteHelper {
      * @param value
      * @see #get(String)
      */
-    void set(String name, Object value);
+    <T> void set(String name, T value);
 
     /**
      * @return then theme of this site

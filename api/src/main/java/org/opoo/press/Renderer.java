@@ -27,14 +27,15 @@ public interface Renderer {
      */
     void prepare();
 
-    /**
-     * Render the content.
-     *
-     * @param base    page or post etc.
-     * @param rootMap root map, context
-     */
-    void render(Base base, Object rootMap);
+    boolean isRenderRequired(Page base, String content);
 
+    /**
+     *
+     * @param page
+     * @param rootMap
+     * @return
+     */
+    String render(Page page, Object rootMap);
 
     void render(String templateName, Object rootMap, Writer out);
 

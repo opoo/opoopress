@@ -36,28 +36,11 @@ public interface Base extends Convertible{
 
     /**
      * Return the post or page content.
-     * Content might be changed by {@link Converter} in generate processing.
+     * Content might be changed by {@link Converter} or {@link Renderer} in generate processing.
      *
      * @return the content text of post or page
-     * @deprecated using {@link #getSourceContent()} for replacement.
      */
-    @Deprecated
     String getContent();
-
-    /**
-     * @return The content of source.
-     */
-    String getSourceContent();
-
-    /**
-     * @return The content after converted.
-     */
-    String getConvertedContent();
-
-    /**
-     * @return The content after rendered.
-     */
-    String getRenderedContent();
 
     /**
      * Page title.
@@ -83,6 +66,12 @@ public interface Base extends Convertible{
     String getUrl();
 
     void setUrl(String url);
+
+    /**
+     * Decode the url if needed.
+     * @return the decoded url
+     */
+    String getDecodedUrl();
 
     /**
      * The origin file path of the source file, not source directory prefix.
@@ -157,7 +146,7 @@ public interface Base extends Convertible{
      * @param name
      * @return value
      */
-    Object get(String name);
+    <T> T get(String name);
 
     /**
      * Set meta data.
@@ -166,5 +155,5 @@ public interface Base extends Convertible{
      * @param value
      * @see #get(String)
      */
-    void set(String name, Object value);
+    <T> void set(String name, T value);
 }

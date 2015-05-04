@@ -20,5 +20,5 @@ package org.opoo.press;
  */
 public interface PaginationUpdater {
 
-    void update(Page page);
+    void apply(Page page);
 }

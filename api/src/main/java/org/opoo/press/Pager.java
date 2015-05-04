@@ -102,7 +102,18 @@ public class Pager {
         return pageSize;
     }
 
+    /**
+     * @return item list in this pager.
+     */
     public List<?> getItems() {
         return items;
+    }
+
+    /**
+     * @deprecated Forward compatibility. use {@link #getItems()} instead.
+     */
+    @Deprecated
+    public List<?> getPosts() {
+        return getItems();
     }
 }

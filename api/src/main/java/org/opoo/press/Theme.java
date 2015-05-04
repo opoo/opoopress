@@ -66,7 +66,7 @@ public interface Theme {
      * @param name variable name
      * @return variable value
      */
-    Object get(String name);
+    <T> T get(String name);
 
     /**
      * build this theme.
