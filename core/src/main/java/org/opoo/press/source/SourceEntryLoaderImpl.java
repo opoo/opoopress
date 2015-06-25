@@ -69,7 +69,7 @@ public class SourceEntryLoaderImpl implements SourceEntryLoader {
 				SourceEntryImpl sourceEntry = new SourceEntryImpl(file, sourceDirectory, path);
 				sourceEntryVisitor.visit(sourceEntry);
 			}else if(file.isDirectory()){
-				walkSourceTree(sourceDirectory, fileFilter, sourceEntryVisitor, file, "/" + file.getName());
+				walkSourceTree(sourceDirectory, fileFilter, sourceEntryVisitor, file, path + "/" + file.getName());
 			}
 		}
 	}

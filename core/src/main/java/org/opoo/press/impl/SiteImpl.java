@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.Category;
 import org.opoo.press.Collection;
 import org.opoo.press.Converter;
 import org.opoo.press.Factory;
@@ -413,7 +412,7 @@ public class SiteImpl implements Site, SiteBuilder{
         final SourceEntryVisitor staticFileVisitor = new SourceEntryVisitor() {
             @Override
             public void visit(SourceEntry sourceEntry) {
-                log.trace("Reading static file {}", sourceEntry.getFile());
+                log.debug("Reading static file {} => [{}]", sourceEntry.getFile(), sourceEntry.getPath());
                 staticFiles.add(new StaticFileImpl(SiteImpl.this, sourceEntry));
             }
         };
@@ -465,11 +464,12 @@ public class SiteImpl implements Site, SiteBuilder{
     }
 
 	private void readSource(SourceEntry en, SourceParser parser) {
-		try {
+        try {
 
-			Source src = parser.parse(en);
+            Source src = parser.parse(en);
 
-			log.trace("Reading source {}", src.getSourceEntry().getFile());
+			SourceEntry sourceEntry = src.getSourceEntry();
+			log.debug("Reading source {} => [{}]", sourceEntry.getFile(), sourceEntry.getPath());
 
 			Map<String, Object> map = src.getMeta();
 			String layout = (String) map.get("layout");
@@ -477,6 +477,11 @@ public class SiteImpl implements Site, SiteBuilder{
 			if(!draft || (draft && showDrafts)) {
 				Page page = factory.createPage(this, src, layout);
 				allPages.add(page);
+
+				//path from basedir to source file
+				String pathFromBasedirToFile = PathUtils.getRelativePath(basedir,  sourceEntry.getSourceDirectory())
+						+ sourceEntry.getPath() + "/" + sourceEntry.getName();
+				page.set("pathFromBasedirToFile", pathFromBasedirToFile);
 
 				processors.postRead(this, page);
 			}
