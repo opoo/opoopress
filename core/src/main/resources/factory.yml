@@ -1,19 +1,20 @@
-org.opoo.press.SourceEntryLoader: org.opoo.press.source.SourceEntryLoaderImpl
+org.opoo.press.SourceDirectoryWalker: org.opoo.press.source.SourceDirectoryWalkerImpl
 
-org.opoo.press.SourceParser: org.opoo.press.source.SourceParserImpl
+# source walkers
+#org.opoo.press.SourceWalker:
 
 org.opoo.press.SourceManager: org.opoo.press.source.SourceManagerImpl
 
 org.opoo.press.Highlighter: org.opoo.press.highlighter.SyntaxHighlighter
 
 # slug helper for zh_CN
-#org.opoo.press.SlugHelper-zh_CN: org.opoo.press.slug.ChineseToPinyinSlugHelper
+org.opoo.press.SlugHelper-zh_CN: org.opoo.press.slug.ChineseToPinyinSlugHelper
 
 # slug helper (default)
 org.opoo.press.SlugHelper: org.opoo.press.slug.DefaultSlugHelper
 
 # URLEncode(text) as url
-org.opoo.press.SlugHelper-zh_CN: org.opoo.press.slug.SimpleSlugHelper
+#org.opoo.press.SlugHelper-zh_CN: org.opoo.press.slug.SimpleSlugHelper
 
 org.opoo.press.RelatedPostsFinder: org.opoo.press.impl.CosineSimilarityRelatedPostsFinder
 

@@ -31,88 +31,90 @@ import java.util.List;
 
 /**
  * A <code>txtmark</code> implemented converter.
+ *
  * @author Alex Lin
  */
 public class TxtmarkMarkdownConverter implements Converter, SiteAware {
-	private static final Logger log = LoggerFactory.getLogger(TxtmarkMarkdownConverter.class);
-	private Configuration config;
-	private Highlighter highlighter;
+    private static final Logger log = LoggerFactory.getLogger(TxtmarkMarkdownConverter.class);
+    private Configuration config;
+    private Highlighter highlighter;
 
-	public TxtmarkMarkdownConverter() {
-		super();
-	}
+    public TxtmarkMarkdownConverter() {
+        super();
+    }
 
-	@Override
-	public void setSite(Site site) {
-		this.highlighter = site.getFactory().getHighlighter();
-		if(this.highlighter == null){
-			log.warn("This converter might be need a Highlighter.");
-		}else{
-			config = Configuration.builder()
-					.setCodeBlockEmitter(new BlockEmitterImpl(highlighter))
-					.forceExtentedProfile()
-					.build();
-		}
-	}
+    @Override
+    public void setSite(Site site) {
+        this.highlighter = site.getFactory().getHighlighter();
+        if (this.highlighter == null) {
+            log.warn("This converter might be need a Highlighter.");
+        } else {
+            config = Configuration.builder()
+                    .setCodeBlockEmitter(new BlockEmitterImpl(highlighter))
+                    .forceExtentedProfile()
+                    .build();
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 100;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 100;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#matches(org.opoo.press.Source)
-	 */
-	@Override
-	public boolean matches(Source src) {
-		String name = src.getSourceEntry().getName().toLowerCase();
-		if(FilenameUtils.isExtension(name, new String[]{"markdown", "md"})){
-			return true;
-		}
-		if("post".equals(src.getMeta().get("layout")) && FilenameUtils.isExtension(name, "txt")){
-			return true;
-		}
-		return false;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Converter#matches(org.opoo.press.Source)
+     */
+    @Override
+    public boolean matches(Source src) {
+        String name = src.getOrigin().getName().toLowerCase();
+        if (FilenameUtils.isExtension(name, new String[]{"markdown", "md"})) {
+            return true;
+        }
+        if ("post".equals(src.getMeta().get("layout")) && FilenameUtils.isExtension(name, "txt")) {
+            return true;
+        }
+        return false;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#convert(java.lang.String)
-	 */
-	@Override
-	public String convert(String content) {
-		if(config != null){
-			return Processor.process(content, config);
-		}else{
-			return Processor.process(content);
-		}
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Converter#convert(java.lang.String)
+     */
+    @Override
+    public String convert(String content) {
+        if (config != null) {
+            return Processor.process(content, config);
+        } else {
+            return Processor.process(content);
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
-	 */
-	@Override
-	public String getOutputFileExtension(Source src) {
-		return ".html";
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
+     */
+    @Override
+    public String getOutputFileExtension(Source src) {
+        return ".html";
+    }
 
-	/**
-	 * A BlockEmitter to process highlight code block. 
-	 */
-	private static class BlockEmitterImpl implements BlockEmitter{
-		private Highlighter highlighter;
-		public BlockEmitterImpl(Highlighter highlighter) {
-			this.highlighter = highlighter;
-		}
+    /**
+     * A BlockEmitter to process highlight code block.
+     */
+    private static class BlockEmitterImpl implements BlockEmitter {
+        private Highlighter highlighter;
 
-		/* (non-Javadoc)
-		 * @see com.github.rjeschke.txtmark.BlockEmitter#emitBlock(java.lang.StringBuilder, java.util.List, java.lang.String)
-		 */
-		@Override
-		public void emitBlock(StringBuilder out, List<String> lines, String meta) {
-			highlighter.highlight(out, lines, meta);
-		}
-	}
+        public BlockEmitterImpl(Highlighter highlighter) {
+            this.highlighter = highlighter;
+        }
+
+        /* (non-Javadoc)
+         * @see com.github.rjeschke.txtmark.BlockEmitter#emitBlock(java.lang.StringBuilder, java.util.List, java.lang.String)
+         */
+        @Override
+        public void emitBlock(StringBuilder out, List<String> lines, String meta) {
+            highlighter.highlight(out, lines, meta);
+        }
+    }
 }

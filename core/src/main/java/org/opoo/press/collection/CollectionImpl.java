@@ -20,8 +20,9 @@ import org.opoo.press.Collection;
 import org.opoo.press.Config;
 import org.opoo.press.ListHolder;
 import org.opoo.press.Page;
+import org.opoo.press.Site;
 import org.opoo.press.Tag;
-import org.opoo.press.collection.configuration.CollectionConfiguration;
+import org.opoo.press.collection.config.CollectionConfig;
 import org.opoo.press.impl.ListHolderImpl;
 
 import java.util.ArrayList;
@@ -30,25 +31,26 @@ import java.util.List;
 /**
  * @author Alex Lin
  */
-public class CollectionImpl implements Collection{
-    private CollectionConfiguration configuration;
-    private List<Page> pages = new ArrayList<Page>();
+public class CollectionImpl implements Collection {
+    private CollectionConfig configuration;
+    private List<Page> pages;
     private ListHolder<Tag> tags;
     private ListHolder<Category> categories;
 
-    public CollectionImpl(CollectionConfiguration configuration){
+    public CollectionImpl(Site site, CollectionConfig configuration) {
         this.configuration = configuration;
         this.tags = new ListHolderImpl<Tag>();
         this.categories = new ListHolderImpl<Category>();
+        this.pages = new ArrayList<Page>();
     }
 
     @Override
-    public Config getConfiguration() {
+    public Config getConfig() {
         return configuration;
     }
 
     @Override
-    public List<? extends Page> getPages() {
+    public List<Page> getPages() {
         return pages;
     }
 
@@ -60,11 +62,6 @@ public class CollectionImpl implements Collection{
     @Override
     public ListHolder<Category> getCategoriesHolder() {
         return categories;
-    }
-
-    public CollectionImpl addPage(Page page){
-        pages.add(page);
-        return this;
     }
 
     @Override

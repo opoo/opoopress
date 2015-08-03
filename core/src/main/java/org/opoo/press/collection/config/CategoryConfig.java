@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration.impl;
-
-import org.opoo.press.collection.configuration.TagConfiguration;
-
-import java.util.Map;
+package org.opoo.press.collection.config;
 
 /**
  * @author Alex Lin
  */
-public class TagConfigurationImpl extends MetaTagConfigurationImpl implements TagConfiguration {
-    TagConfigurationImpl(Map.Entry<String, ?> entry) {
-        super(entry);
-    }
+public interface CategoryConfig extends MetaTagConfig {
 }

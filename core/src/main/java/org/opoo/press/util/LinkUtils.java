@@ -23,38 +23,37 @@ import java.util.Map;
 
 /**
  * @author Alex Lin
- *
  */
 public abstract class LinkUtils {
-	
-	public static void addDateParams(Map<String,Object> params, Date date){
-		if(date == null){
-			date = new Date();
-		}
-		if(params == null){
-			return;
-		}
-		Calendar c = Calendar.getInstance();
-		c.setTime(date);
-		int year = c.get(Calendar.YEAR);
-		int monthnum = c.get(Calendar.MONTH) + 1;
-		int day = c.get(Calendar.DAY_OF_MONTH);
-		int hour = c.get(Calendar.HOUR_OF_DAY);
-		int minute = c.get(Calendar.MINUTE);
-		int second = c.get(Calendar.SECOND);
-		
-		params.put("year", year + "");
-		params.put("month", StringUtils.leftPad(monthnum + "", 2, '0'));
-		params.put("day", StringUtils.leftPad(day + "", 2, '0'));
-		params.put("hour", StringUtils.leftPad(hour + "", 2, '0'));
-		params.put("minute", StringUtils.leftPad(minute + "", 2, '0'));
-		params.put("second", StringUtils.leftPad(second + "", 2, '0'));
-	}
+
+    public static void addDateParams(Map<String, Object> params, Date date) {
+        if (date == null) {
+            date = new Date();
+        }
+        if (params == null) {
+            return;
+        }
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        int year = c.get(Calendar.YEAR);
+        int monthnum = c.get(Calendar.MONTH) + 1;
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        int minute = c.get(Calendar.MINUTE);
+        int second = c.get(Calendar.SECOND);
+
+        params.put("year", year + "");
+        params.put("month", StringUtils.leftPad(monthnum + "", 2, '0'));
+        params.put("day", StringUtils.leftPad(day + "", 2, '0'));
+        params.put("hour", StringUtils.leftPad(hour + "", 2, '0'));
+        params.put("minute", StringUtils.leftPad(minute + "", 2, '0'));
+        params.put("second", StringUtils.leftPad(second + "", 2, '0'));
+    }
 
 //	public static String renderUrl(String pattern, Map<String,Object> params){
 //		try {
-//			Configuration configuration = new Configuration();
-//			Template template = new Template("filename", new StringReader(pattern), configuration, "UTF-8");
+//			Configuration config = new Configuration();
+//			Template template = new Template("filename", new StringReader(pattern), config, "UTF-8");
 //			StringWriter writer = new StringWriter();
 //			template.process(params, writer);
 //			writer.flush();

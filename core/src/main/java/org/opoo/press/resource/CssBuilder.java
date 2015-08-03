@@ -22,16 +22,11 @@ import java.util.Map;
 
 /**
  * @author Alex Lin
- *
  */
 public class CssBuilder extends YUIBuilder implements ResourceBuilder {
-//	@Override
-//	public void init(Site site, Theme theme, Map<String, Object> config) {
-//		init("css", theme.getPath(), config);
-//	}
 
-	@Override
-	public void init(File resourceBaseDirectory, Map<String, Object> config) {
-		init("css", resourceBaseDirectory, config);
-	}
+    @Override
+    public void init(File resourceBaseDirectory, Map<String, Object> config) {
+        init("css", resourceBaseDirectory, config);
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Alex Lin.
+ * Copyright 2013-2015 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.resource;
+package org.opoo.press.collection.config;
 
-import org.opoo.press.ResourceBuilder;
+import org.opoo.press.Config;
 
-import java.io.File;
 import java.util.Map;
-
 
 /**
  * @author Alex Lin
  */
-public class JsBuilder extends YUIBuilder implements ResourceBuilder {
+public interface MetaTagConfig extends Config {
 
-    @Override
-    public void init(File resourceBaseDirectory, Map<String, Object> config) {
-        init("js", resourceBaseDirectory, config);
-    }
+    String getMeta();
+
+    String getMetaForCollection();
+
+    String[] getAlias();
+
+    String getSeparator();
+
+    /**
+     * Default mapping names.
+     *
+     * @return
+     */
+    Map<String, String> getNames();
+
+    <T> T get(String key);
 }

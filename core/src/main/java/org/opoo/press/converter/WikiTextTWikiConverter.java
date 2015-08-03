@@ -20,31 +20,33 @@ import org.eclipse.mylyn.wikitext.twiki.core.TWikiLanguage;
 
 /**
  * WikiText MediaWiki converter. <code>*.twiki</code>
+ *
  * @author Alex Lin
  */
 public class WikiTextTWikiConverter extends AbstractWikiTextConverter {
-	private MarkupParser parser = new MarkupParser(new TWikiLanguage());
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 170;
-	}
+    private MarkupParser parser = new MarkupParser(new TWikiLanguage());
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
-	 */
-	@Override
-	protected MarkupParser getMarkupParser() {
-		return parser;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 170;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
-	 */
-	@Override
-	protected String[] getInputFileExtensions() {
-		return new String[]{"twiki"};
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
+     */
+    @Override
+    protected MarkupParser getMarkupParser() {
+        return parser;
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
+     */
+    @Override
+    protected String[] getInputFileExtensions() {
+        return new String[]{"twiki"};
+    }
 }

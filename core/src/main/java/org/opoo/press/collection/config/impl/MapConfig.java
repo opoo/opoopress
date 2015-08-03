@@ -13,19 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration.impl;
-
-import org.opoo.press.collection.configuration.CollectionConfiguration;
-import org.opoo.press.collection.configuration.CollectionConfigurationResolver;
+package org.opoo.press.collection.config.impl;
 
 import java.util.Map;
 
 /**
  * @author Alex Lin
  */
-public class CollectionConfigurationResolverImpl implements CollectionConfigurationResolver {
-    @Override
-    public CollectionConfiguration resolve(String collectionName, Map<String, ?> configurationMap) {
-        return new CollectionConfigurationImpl(collectionName, configurationMap);
+public class MapConfig {
+    private final Map<String, ?> map;
+
+    MapConfig(Map<String, ?> map) {
+        this.map = map;
+    }
+
+    public <T> T get(String key) {
+        return (T) map.get(key);
+    }
+
+    public <T> T get(String key, T defaultValue) {
+        T t = get(key);
+        return (t == null) ? defaultValue : t;
     }
 }

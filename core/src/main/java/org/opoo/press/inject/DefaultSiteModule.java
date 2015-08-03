@@ -8,15 +8,12 @@ import org.opoo.press.Category;
 import org.opoo.press.Highlighter;
 import org.opoo.press.PaginationUpdater;
 import org.opoo.press.RelatedPostsFinder;
-import org.opoo.press.Renderer;
 import org.opoo.press.ResourceBuilder;
 import org.opoo.press.Site;
-import org.opoo.press.SiteAware;
 import org.opoo.press.SlugHelper;
 import org.opoo.press.Source;
-import org.opoo.press.SourceEntryLoader;
+import org.opoo.press.SourceDirectoryWalker;
 import org.opoo.press.SourceManager;
-import org.opoo.press.SourceParser;
 import org.opoo.press.collection.filter.LayoutFilter;
 import org.opoo.press.highlighter.SyntaxHighlighter;
 import org.opoo.press.impl.CategoryImpl;
@@ -32,26 +29,24 @@ import org.opoo.press.resource.CssBuilder;
 import org.opoo.press.resource.JsBuilder;
 import org.opoo.press.slug.DefaultSlugHelper;
 import org.opoo.press.slug.SimpleSlugHelper;
-import org.opoo.press.source.SourceEntryLoaderImpl;
+import org.opoo.press.source.SourceDirectoryWalkerImpl;
 import org.opoo.press.source.SourceManagerImpl;
-import org.opoo.press.source.SourceParserImpl;
 
 import java.lang.reflect.Constructor;
 
 /**
  */
-public class DefaultSiteModule extends AbstractModule implements Module{
+public class DefaultSiteModule extends AbstractModule implements Module {
     private Site site;
 
-    DefaultSiteModule(Site site){
+    DefaultSiteModule(Site site) {
         this.site = site;
     }
 
     @Override
     protected void configure() {
         bind(Site.class).toInstance(site);
-        bind(SourceEntryLoader.class).to(SourceEntryLoaderImpl.class).in(Singleton.class);
-        bind(SourceParser.class).to(SourceParserImpl.class).in(Singleton.class);
+        bind(SourceDirectoryWalker.class).to(SourceDirectoryWalkerImpl.class).in(Singleton.class);
         bind(SourceManager.class).to(SourceManagerImpl.class).in(Singleton.class);
         //bind(SlugHelper.class).annotatedWith(Names.named("zh_CN")).to(ChineseToPinyinSlugHelper.class).in(Singleton.class);
         bind(SlugHelper.class).annotatedWith(Names.named("zh_CN")).to(SimpleSlugHelper.class);

@@ -15,7 +15,6 @@
  */
 package org.opoo.press.plugin;
 
-import org.opoo.press.ConfigAware;
 import org.opoo.press.Converter;
 import org.opoo.press.Generator;
 import org.opoo.press.Named;
@@ -24,7 +23,6 @@ import org.opoo.press.PluginManager;
 import org.opoo.press.Processor;
 import org.opoo.press.Registry;
 import org.opoo.press.Site;
-import org.opoo.press.SiteAware;
 import org.opoo.press.Source;
 import org.opoo.press.util.ClassUtils;
 import org.slf4j.Logger;
@@ -47,10 +45,10 @@ public class PluginManagerImpl implements PluginManager {
     private List<Converter> converters;
     private List<Generator> generators;
     private List<Processor> processors;
-    private Map<Class,List> listMap = new HashMap<Class, List>();
-    private Map<Class,Map> mapMap = new HashMap<Class, Map>();
+    private Map<Class, List> listMap = new HashMap<Class, List>();
+    private Map<Class, Map> mapMap = new HashMap<Class, Map>();
 
-    public PluginManagerImpl(Site site){
+    public PluginManagerImpl(Site site) {
         this.site = site;
     }
 
@@ -58,16 +56,16 @@ public class PluginManagerImpl implements PluginManager {
         return ClassUtils.apply(t, site);
     }
 
-    protected <T extends Ordered> void sort(List<T> list){
-        if(!list.isEmpty()){
+    protected <T extends Ordered> void sort(List<T> list) {
+        if (!list.isEmpty()) {
             Collections.sort(list, Ordered.COMPARATOR);
         }
     }
 
-    public <T> List<T> instantiateList(Class<T> clazz){
+    public <T> List<T> instantiateList(Class<T> clazz) {
         List<T> list = new ArrayList<T>();
         ServiceLoader<T> loader = ServiceLoader.load(clazz, site.getClassLoader());
-        for(T t: loader){
+        for (T t : loader) {
             apply(t);
             log.debug("Load instance: {} => {}", clazz.getName(), t.getClass().getName());
             list.add(t);
@@ -76,11 +74,11 @@ public class PluginManagerImpl implements PluginManager {
         return list;
     }
 
-    public <T> Map<String,T> instantiateMap(Class<T> clazz){
-        Map<String,T> map = new HashMap<String, T>();
+    public <T> Map<String, T> instantiateMap(Class<T> clazz) {
+        Map<String, T> map = new HashMap<String, T>();
         ServiceLoader<T> loader = ServiceLoader.load(clazz, site.getClassLoader());
-        for(T t: loader){
-            if(t instanceof Named) {
+        for (T t : loader) {
+            if (t instanceof Named) {
                 apply(t);
                 log.debug("Load instance for '{}': {} => {}", ((Named) t).getName(), clazz.getName(), t.getClass().getName());
                 map.put(((Named) t).getName(), t);
@@ -93,16 +91,16 @@ public class PluginManagerImpl implements PluginManager {
     @Override
     public Converter getConverter(Source source) throws RuntimeException {
         getConverters();
-        for(Converter c: converters){
-            if(c.matches(source)){
+        for (Converter c : converters) {
+            if (c.matches(source)) {
                 return c;
             }
         }
-        throw new RuntimeException("No matched converter: " + source.getSourceEntry().getFile());
+        throw new RuntimeException("No matched converter: " + source.getOrigin());
     }
 
     public List<Converter> getConverters() {
-        if(converters == null){
+        if (converters == null) {
             converters = instantiateList(Converter.class);
             sort(converters);
         }
@@ -111,7 +109,7 @@ public class PluginManagerImpl implements PluginManager {
 
     @Override
     public List<Generator> getGenerators() {
-        if(generators == null){
+        if (generators == null) {
             generators = instantiateList(Generator.class);
             sort(generators);
         }
@@ -120,7 +118,7 @@ public class PluginManagerImpl implements PluginManager {
 
     @Override
     public List<Processor> getProcessors() {
-        if(processors == null){
+        if (processors == null) {
             processors = instantiateList(Processor.class);
             sort(processors);
         }
@@ -155,7 +153,7 @@ public class PluginManagerImpl implements PluginManager {
     @Override
     public <T> List<T> getObjectList(Class<T> clazz) {
         List<T> list = listMap.get(clazz);
-        if(list == null){
+        if (list == null) {
             list = instantiateList(clazz);
             listMap.put(clazz, list);
         }
@@ -170,9 +168,9 @@ public class PluginManagerImpl implements PluginManager {
     }
 
     @Override
-    public <T> Map<String,T> getObjectMap(Class<T> clazz){
-        Map<String,T> map = mapMap.get(clazz);
-        if(map == null){
+    public <T> Map<String, T> getObjectMap(Class<T> clazz) {
+        Map<String, T> map = mapMap.get(clazz);
+        if (map == null) {
             map = instantiateMap(clazz);
             mapMap.put(clazz, map);
         }
@@ -180,13 +178,13 @@ public class PluginManagerImpl implements PluginManager {
     }
 
     @Override
-    public <T> Registry register(Class<T> clazz, String name, T instance){
+    public <T> Registry register(Class<T> clazz, String name, T instance) {
         getObjectMap(clazz).put(name, instance);
         return this;
     }
 
     @Override
-    public <T> Registry register(Class<T> clazz, Named named){
-        return register(clazz, named.getName(), (T)named);
+    public <T> Registry register(Class<T> clazz, Named named) {
+        return register(clazz, named.getName(), (T) named);
     }
 }

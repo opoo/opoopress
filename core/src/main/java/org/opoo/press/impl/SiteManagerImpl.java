@@ -66,7 +66,7 @@ public class SiteManagerImpl implements SiteManager {
             return;
         }
 
-        if(configFile.exists()){
+        if (configFile.exists()) {
             FileUtils.deleteQuietly(configFile);
         }
 
@@ -79,7 +79,7 @@ public class SiteManagerImpl implements SiteManager {
 
         File[] configFiles = config.getConfigFiles();
         if (configFiles.length == 0) {
-            log.warn("No site configuration file.");
+            log.warn("No site config file.");
             return;
         }
 
@@ -126,25 +126,25 @@ public class SiteManagerImpl implements SiteManager {
         if (StringUtils.isBlank(newFilePattern)) {
             //new_page, new_page, new_pic
             newFilePattern = site.get("new_" + layout);
-            if(StringUtils.isBlank(newFilePattern)){
-                if("post".equals(layout)){
+            if (StringUtils.isBlank(newFilePattern)) {
+                if ("post".equals(layout)) {
                     newFilePattern = SiteConfigImpl.DEFAULT_NEW_POST_FILE;
-                }else if("page".equals(layout)){
+                } else if ("page".equals(layout)) {
                     newFilePattern = SiteConfigImpl.DEFAULT_NEW_PAGE_FILE;
-                }else{
+                } else {
                     throw new IllegalStateException("'new_" + layout + "' not defined.");
                 }
             }
         }
 
-        if(StringUtils.isBlank(template)){
+        if (StringUtils.isBlank(template)) {
             template = site.get("new_" + layout + "_template");
-            if(StringUtils.isBlank(template)){
-                if("post".equals(layout)){
+            if (StringUtils.isBlank(template)) {
+                if ("post".equals(layout)) {
                     template = SiteConfigImpl.DEFAULT_NEW_POST_TEMPLATE;
-                }else if("page".equals(layout)){
+                } else if ("page".equals(layout)) {
                     template = SiteConfigImpl.DEFAULT_NEW_PAGE_TEMPLATE;
-                }else{
+                } else {
                     throw new IllegalStateException("'new_" + layout + "_template' not defined.");
                 }
             }
@@ -162,15 +162,15 @@ public class SiteManagerImpl implements SiteManager {
         ImmutableMap<String, String> systemProperties = Maps.fromProperties(System.getProperties());
         map.putAll(systemProperties);
 
-        if(meta != null){
+        if (meta != null) {
             map.putAll(meta);
         }
 
-        if(title != null) {
+        if (title != null) {
             map.put("title", title);
         }
 
-        if(name != null){
+        if (name != null) {
             map.put("name", name);
         }
 

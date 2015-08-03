@@ -17,20 +17,22 @@ package org.opoo.press.file;
 
 /**
  * @author Alex Lin
- *
  */
 public interface Watchable {
-	/**
-	 * Initialize the observer.
-	 */
-	void initialize();
-	/**
-	 * Check file alteration.
-	 * @return
-	 */
-	Result check();
-	/**
-	 * Final processing.
-	 */
-	void destroy();
+    /**
+     * Initialize the observer.
+     */
+    void initialize();
+
+    /**
+     * Check file alteration.
+     *
+     * @return
+     */
+    Result check();
+
+    /**
+     * Final processing.
+     */
+    void destroy();
 }

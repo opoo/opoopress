@@ -18,19 +18,19 @@ package org.opoo.press.util;
 /**
  * @author Alex Lin
  */
-public class LayoutUtils {
+public abstract class LayoutUtils {
 
-    public static boolean isValidLayout(String layout){
-        if(layout == null){
+    public static boolean isValidLayout(String layout) {
+        if (layout == null) {
             return false;
         }
-        if("nil".equalsIgnoreCase(layout)){
+        if ("nil".equalsIgnoreCase(layout)) {
             return false;
         }
-        if("null".equalsIgnoreCase(layout)){
+        if ("null".equalsIgnoreCase(layout)) {
             return false;
         }
-        if("none".equalsIgnoreCase(layout)){
+        if ("none".equalsIgnoreCase(layout)) {
             return false;
         }
         return true;

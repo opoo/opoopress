@@ -17,8 +17,7 @@ package org.opoo.press.task;
 
 /**
  * @author Alex Lin
- *
  */
 public interface RunnableTask<T> {
-	void run(T input);
+    void run(T input);
 }

@@ -20,7 +20,7 @@ import org.opoo.press.SlugHelper;
 /**
  * @author Alex Lin
  */
-public class NoOpSlugHelper implements SlugHelper{
+public class NoOpSlugHelper implements SlugHelper {
     @Override
     public String toSlug(String text) {
         return text;

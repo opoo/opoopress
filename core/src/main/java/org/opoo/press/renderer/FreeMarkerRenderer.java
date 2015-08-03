@@ -25,9 +25,11 @@ import freemarker.template.Template;
 import freemarker.template.TemplateModel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.opoo.press.FileOrigin;
+import org.opoo.press.Origin;
 import org.opoo.press.Page;
 import org.opoo.press.Site;
-import org.opoo.press.SourceEntry;
+import org.opoo.press.Source;
 import org.opoo.press.util.ClassUtils;
 import org.opoo.util.PathUtils;
 import org.slf4j.Logger;
@@ -44,7 +46,7 @@ import java.util.Map;
 /**
  * @author Alex Lin
  */
-public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
+public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer {
     private static final Logger log = LoggerFactory.getLogger(FreeMarkerRenderer.class);
     public static final String PROPERTY_PREFIX = "freemarker.";
 
@@ -52,13 +54,13 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
     private Site site;
     private File templateDir;
     private File workingTemplateDir;
-    private Map<String,TemplateModel> templateModels;
+    private Map<String, TemplateModel> templateModels;
 
     //merge(null), recursive
     private String renderMethod;
     private WorkingTemplateHolder workingTemplateHolder;
 
-    private Map<String,Boolean> templatePreparedCache = new HashMap<String, Boolean>();
+    private Map<String, Boolean> templatePreparedCache = new HashMap<String, Boolean>();
 
     public FreeMarkerRenderer(Site site) {
         super();
@@ -67,22 +69,22 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
         log.debug("Template directory: " + templateDir.getAbsolutePath());
 
         //Working directory
-        workingTemplateDir = new File( site.getWorking(), "templates");
+        workingTemplateDir = new File(site.getWorking(), "templates");
         PathUtils.checkDir(workingTemplateDir, PathUtils.Strategy.CREATE_IF_NOT_EXISTS);
         log.debug("Working template directory: {}", workingTemplateDir.getAbsolutePath());
 
-        //configuration
+        //config
         configuration = new Configuration();
         configuration.setObjectWrapper(new DefaultObjectWrapper());
         configuration.setTemplateLoader(buildTemplateLoader(site));
 
         Locale locale = site.getLocale();
-        if(locale != null){
+        if (locale != null) {
             configuration.setLocale(site.getLocale());
         }
 
         //Add import i18n messages template.
-        //configuration.addAutoImport("i18n", "i18n/messages.ftl");
+        //config.addAutoImport("i18n", "i18n/messages.ftl");
 
         initializeAutoImportTemplates(site, configuration);
         initializeAutoIncludeTemplates(site, configuration);
@@ -97,10 +99,10 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
                 new MacroWorkingTemplateHolder() : new NonMacroWorkingTemplateHolder();
     }
 
-    private void initializeTemplateModels(){
+    private void initializeTemplateModels() {
         templateModels = site.getFactory().getPluginManager().getObjectMap(TemplateModel.class);
-        Map<String,String> map = (Map<String, String>) site.get(TemplateModel.class.getName());
-        if(map != null){
+        Map<String, String> map = (Map<String, String>) site.get(TemplateModel.class.getName());
+        if (map != null) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 String name = entry.getKey();
                 String className = entry.getValue();
@@ -111,27 +113,27 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
         }
     }
 
-    private void initializeAutoImportTemplates(Site site, Configuration configuration){
-        Map<String,String> autoImportTemplates = (Map<String, String>) site.get(PROPERTY_PREFIX + "auto_import_templates");
-        if(autoImportTemplates != null && !autoImportTemplates.isEmpty()){
-            for(Map.Entry<String, String> en: autoImportTemplates.entrySet()){
+    private void initializeAutoImportTemplates(Site site, Configuration configuration) {
+        Map<String, String> autoImportTemplates = (Map<String, String>) site.get(PROPERTY_PREFIX + "auto_import_templates");
+        if (autoImportTemplates != null && !autoImportTemplates.isEmpty()) {
+            for (Map.Entry<String, String> en : autoImportTemplates.entrySet()) {
                 configuration.addAutoImport(en.getKey(), en.getValue());
                 log.debug("Add auto import: " + en.getKey() + " -> " + en.getValue());
             }
         }
     }
 
-    private void initializeAutoIncludeTemplates(Site site, Configuration configuration){
+    private void initializeAutoIncludeTemplates(Site site, Configuration configuration) {
         List<String> autoIncludeTemplates = (List<String>) site.get(PROPERTY_PREFIX + "auto_include_templates");
-        if(autoIncludeTemplates != null && !autoIncludeTemplates.isEmpty()){
-            for(String template: autoIncludeTemplates){
+        if (autoIncludeTemplates != null && !autoIncludeTemplates.isEmpty()) {
+            for (String template : autoIncludeTemplates) {
                 configuration.addAutoInclude(template);
                 log.debug("Add auto include: " + template);
             }
         }
     }
 
-    private TemplateLoader buildTemplateLoader(Site site){
+    private TemplateLoader buildTemplateLoader(Site site) {
         try {
             List<TemplateLoader> loaders = new ArrayList<TemplateLoader>();
             loaders.add(new FileTemplateLoader(workingTemplateDir));
@@ -140,7 +142,7 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
 
             //template registered by plugins
             List<TemplateLoader> instances = site.getFactory().getPluginManager().getObjectList(TemplateLoader.class);
-            if(instances != null && !instances.isEmpty()){
+            if (instances != null && !instances.isEmpty()) {
                 loaders.addAll(instances);
             }
 
@@ -152,19 +154,19 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
     }
 
     @Override
-    protected Configuration getConfiguration(){
+    protected Configuration getConfiguration() {
         return configuration;
     }
 
     @Override
-    protected void preProcess(Template template, Object rootMap){
-        if(templateModels != null && !templateModels.isEmpty()){
-            ((Map<String,Object>)rootMap).putAll(templateModels);
+    protected void preProcess(Template template, Object rootMap) {
+        if (templateModels != null && !templateModels.isEmpty()) {
+            ((Map<String, Object>) rootMap).putAll(templateModels);
         }
     }
 
     @Override
-    public void prepare(){
+    public void prepare() {
         templatePreparedCache.clear();
     }
 
@@ -189,16 +191,16 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
 
         if (isValidLayout) {
             String templateName;
-            if(isContentRenderRequired){
+            if (isContentRenderRequired) {
                 //对模板进行合并
-                templateName = workingTemplateHolder.getMergedWorkingTemplate(layout, content, base.getSource().getSourceEntry());
-            }else{
+                templateName = workingTemplateHolder.getMergedWorkingTemplate(layout, content, base.getSource());
+            } else {
                 templateName = workingTemplateHolder.getLayoutWorkingTemplate(layout);
                 rootMap.put("content", content);
             }
 
             content = render(templateName, rootMap);
-        }else {
+        } else {
             //!isValidLayout && isContentRenderRequired
             if (isContentRenderRequired) {
                 content = renderContent(content, rootMap);
@@ -240,37 +242,40 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
         return isRenderRequired(site, base, content);
     }
 
-    static interface WorkingTemplateHolder{
-        String getMergedWorkingTemplate(String layout, String content, SourceEntry entry);
+    static interface WorkingTemplateHolder {
+        String getMergedWorkingTemplate(String layout, String content, Source source);
+
         String getLayoutWorkingTemplate(String layout);
     }
 
-    abstract class AbstractWorkingTemplateHolder implements WorkingTemplateHolder{
+    abstract class AbstractWorkingTemplateHolder implements WorkingTemplateHolder {
         @Override
-        public String getMergedWorkingTemplate(String layout, String content, SourceEntry entry) {
-            String workingTemplateName = entry.getPath() + "/" + entry.getName() + "." + layout + ".ftl";
-            prepareWorkingTemplate(workingTemplateName, entry.getFile(), layout, content);
+        public String getMergedWorkingTemplate(String layout, String content, Source source) {
+            Origin origin = source.getOrigin();
+            String workingTemplateName = origin.getPath() + "/" + origin.getName() + "." + layout + ".ftl";
+            File sourceFile = origin instanceof FileOrigin ? ((FileOrigin) origin).getFile() : null;
+            prepareWorkingTemplate(workingTemplateName, sourceFile, layout, content);
             return workingTemplateName;
         }
 
-        void prepareWorkingTemplate(String workingTemplateName, File sourceFile, String layout, String content){
-            if(templatePreparedCache.containsKey(workingTemplateName)){
+        void prepareWorkingTemplate(String workingTemplateName, File sourceFile, String layout, String content) {
+            if (templatePreparedCache.containsKey(workingTemplateName)) {
                 //already prepared
                 return;
             }
 
             File workingTemplateFile = new File(workingTemplateDir, workingTemplateName);
 
-			String layoutFilename = getLayoutFilename(layout);
+            String layoutFilename = getLayoutFilename(layout);
             File layoutFile = new File(templateDir, layoutFilename);
 
-            if(workingTemplateFile.exists()
-                    && workingTemplateFile.lastModified() >= sourceFile.lastModified()
-					&& workingTemplateFile.lastModified() >= layoutFile.lastModified()){
+            if (workingTemplateFile.exists()
+                    && (sourceFile == null || workingTemplateFile.lastModified() >= sourceFile.lastModified())
+                    && workingTemplateFile.lastModified() >= layoutFile.lastModified()) {
 
                 log.debug("Working template exists and is newer than source file: {}", workingTemplateFile);
 
-            }else {
+            } else {
                 String template = buildTemplateContent(layout, layoutFile, content);
                 try {
                     FileUtils.write(workingTemplateFile, template, "UTF-8");
@@ -284,14 +289,14 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
             templatePreparedCache.put(workingTemplateName, true);
         }
 
-        String getLayoutFilename(String layout){
+        String getLayoutFilename(String layout) {
             return "_" + layout + ".ftl";
         }
 
         protected abstract String buildTemplateContent(String layout, File layoutFile, String content);
     }
 
-    class NonMacroWorkingTemplateHolder extends AbstractWorkingTemplateHolder{
+    class NonMacroWorkingTemplateHolder extends AbstractWorkingTemplateHolder {
         @Override
         public String getLayoutWorkingTemplate(String layout) {
             return getLayoutFilename(layout);
@@ -304,13 +309,13 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer{
             try {
                 String template = FileUtils.readFileToString(layoutFile, "UTF-8");
                 return StringUtils.replace(template, "${content}", content);
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new RuntimeException("Read layout file error: " + layoutFile, e);
             }
         }
     }
 
-    class MacroWorkingTemplateHolder extends AbstractWorkingTemplateHolder{
+    class MacroWorkingTemplateHolder extends AbstractWorkingTemplateHolder {
         @Override
         public String getLayoutWorkingTemplate(String layout) {
             String layoutTemplateName = "_" + layout + ".content.ftl";

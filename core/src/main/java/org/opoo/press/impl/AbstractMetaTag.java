@@ -21,19 +21,20 @@ import org.opoo.press.Config;
 import org.opoo.press.MetaTag;
 import org.opoo.press.Page;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Alex Lin
  */
-public abstract class AbstractMetaTag implements MetaTag{
+public abstract class AbstractMetaTag implements MetaTag, Serializable {
     private String slug;
     private String name;
     private List<Page> pages = Lists.newArrayList();
     private Page page;
     private Config config;
 
-    public AbstractMetaTag(String slug, String name){
+    public AbstractMetaTag(String slug, String name) {
         this.slug = slug;
         this.name = name;
     }
@@ -68,11 +69,11 @@ public abstract class AbstractMetaTag implements MetaTag{
 
     @Override
     public boolean isNameOrSlug(String nameOrSlug) {
-        if(nameOrSlug.equals(getSlug())){
+        if (nameOrSlug.equals(getSlug())) {
             return true;
         }
 
-        if(nameOrSlug.equals(getName())){
+        if (nameOrSlug.equals(getName())) {
             return true;
         }
         return false;
@@ -92,7 +93,7 @@ public abstract class AbstractMetaTag implements MetaTag{
         this.page = page;
     }
 
-    public int getPagesSize(){
+    public int getPagesSize() {
         return pages.size();
     }
 
@@ -105,13 +106,14 @@ public abstract class AbstractMetaTag implements MetaTag{
         this.config = config;
     }
 
-    public String getUrl(){
-        if(page != null){
+    public String getUrl() {
+        if (page != null) {
             return page.getUrl();
         }
         return null;
     }
-    public String toString(){
+
+    public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("slug", getSlug())
                 .add("name", getName())

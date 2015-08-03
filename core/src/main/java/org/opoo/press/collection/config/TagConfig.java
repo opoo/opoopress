@@ -13,26 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration.impl;
+package org.opoo.press.collection.config;
 
-import java.util.Map;
+;
 
 /**
  * @author Alex Lin
  */
-public class MapConfiguration{
-    private final Map<String,?> map;
-
-    MapConfiguration(Map<String,?> map){
-        this.map = map;
-    }
-
-    public <T> T get(String key){
-        return (T) map.get(key);
-    }
-
-    public <T> T get(String key, T defaultValue){
-        T t = get(key);
-        return (t == null) ? defaultValue : t;
-    }
+public interface TagConfig extends MetaTagConfig {
 }

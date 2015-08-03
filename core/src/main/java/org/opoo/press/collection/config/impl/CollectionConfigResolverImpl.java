@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration;
+package org.opoo.press.collection.config.impl;
 
-import org.opoo.press.Config;
+import org.opoo.press.collection.config.CollectionConfig;
+import org.opoo.press.collection.config.CollectionConfigResolver;
+
+import java.util.Map;
 
 /**
  * @author Alex Lin
  */
-public interface CollectionConfiguration extends Config{
-
-    String getName();
-
-    FilterConfiguration getFilter();
-
-    TagConfiguration[] getTags();
-
-    CategoryConfiguration[] getCategories();
-
-    <T> T get(String key);
+public class CollectionConfigResolverImpl implements CollectionConfigResolver {
+    @Override
+    public CollectionConfig resolve(String collectionName, Map<String, ?> configurationMap) {
+        return new CollectionConfigImpl(collectionName, configurationMap);
+    }
 }

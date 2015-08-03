@@ -41,7 +41,7 @@ import java.util.Set;
 /**
  * @author Alex Lin
  */
-public class CollectionMetaTagPageGenerator implements Generator{
+public class CollectionMetaTagPageGenerator implements Generator {
     private static final Logger log = LoggerFactory.getLogger(CollectionMetaTagPageGenerator.class);
 
 
@@ -52,32 +52,32 @@ public class CollectionMetaTagPageGenerator implements Generator{
         Set<Page> templatePages = Sets.newHashSet();
         List<Page> allNewPages = Lists.newArrayList();
 
-        for(Collection collection: collections.values()){
+        for (Collection collection : collections.values()) {
             log.debug("Generate meta tag page for collection: {}", collection.getName());
             generateCollectionTagPages(site, collection, templatePages, allNewPages);
             generateCollectionCategoryPages(site, collection, templatePages, allNewPages);
         }
 
-        // put tempate pages in cache, will be removed later.
-        if(!templatePages.isEmpty()){
+        // put template pages in cache, will be removed later.
+        if (!templatePages.isEmpty()) {
             //site.getAllPages().removeAll(templatePages);
             Set<Page> siteTemplatePages = site.get("template_pages");
-            if(siteTemplatePages != null){
+            if (siteTemplatePages != null) {
                 siteTemplatePages.addAll(templatePages);
-            }else{
+            } else {
                 site.set("template_pages", templatePages);
             }
         }
 
-        if(!allNewPages.isEmpty()){
-            site.getAllPages().addAll(allNewPages);
+        if (!allNewPages.isEmpty()) {
+            log.debug("Add {} meta tag pages.", allNewPages.size());
 
-            if(log.isDebugEnabled()){
-                log.debug("Add {} meta tag pages.", allNewPages.size());
-                for(Page p: allNewPages){
-                    log.debug(p.getUrl());
-                }
+            for (Page p: allNewPages) {
+                site.addPage(p);
+                log.debug(p.getUrl());
             }
+
+            //site.getAllPages().addAll(allNewPages);
         }
     }
 
@@ -86,16 +86,16 @@ public class CollectionMetaTagPageGenerator implements Generator{
         ListHolder<Tag> tagsHolder = collection.getTagsHolder();
         String[] tagMetaNames = tagsHolder.getKeys();
 
-        for(String tagMeta: tagMetaNames) {
+        for (String tagMeta : tagMetaNames) {
             String templateIdentity = "tag_template_" + collection.getName() + "_" + tagMeta;
 
             Page templatePage = lookupTemplatePage(templateIdentity, site.getAllPages(), templatePages);
 
-            if(templatePage == null){
+            if (templatePage == null) {
                 log.warn("Template page for collection '{}', tag '{}' not found.", collection.getName(), tagMeta);
                 continue;
-            }else{
-                log.debug("Template found: {}", templatePage);
+            } else {
+                log.debug("Template found: {}", templatePage.getSource().getOrigin());
             }
 
             templatePages.add(templatePage);
@@ -107,10 +107,10 @@ public class CollectionMetaTagPageGenerator implements Generator{
     }
 
     private void generateCollectionMetaTagPages(Site site, Collection collection, Page templatePage, List<? extends MetaTag> tags,
-                                            List<Page> allNewPages) {
-        for(MetaTag tag: tags){
+                                                List<Page> allNewPages) {
+        for (MetaTag tag : tags) {
             List<Page> pages = tag.getPages();
-            if(pages.isEmpty()){
+            if (pages.isEmpty()) {
                 continue;
             }
 
@@ -118,22 +118,31 @@ public class CollectionMetaTagPageGenerator implements Generator{
 
             String title = tag.getName();
             String titlePrefix = getProperty(templatePage, tag.getConfig(), "title_prefix");
-            if(titlePrefix != null){
+            if (titlePrefix != null) {
                 title = titlePrefix + title;
             }
             tagPage.setTitle(title);
 
+            //url encode and decode
+            Boolean tagUrlEncode = getProperty(templatePage, tag.getConfig(), "url_encode");
+            Boolean tagUrlDecode = getProperty(templatePage, tag.getConfig(), "url_decode");
+            if (tagUrlEncode != null && tagUrlEncode.booleanValue()) {
+                tagPage.setUrlEncode(true);
+            }
+            if (tagUrlDecode != null && tagUrlDecode.booleanValue()) {
+                tagPage.setUrlDecode(true);
+            }
 
             String permalink = getProperty(templatePage, tag.getConfig(), "permalink");
             String url = "/" + tag.getSlug() + "/";
-            if(permalink != null){
+            if (permalink != null) {
                 url = AbstractFreeMarkerRenderer.process(permalink, tag);
-            }else {
-                if(tag instanceof Category){
+            } else {
+                if (tag instanceof Category) {
                     url = "/" + ((Category) tag).getPath() + "/";
                 }
                 String tagDir = getProperty(templatePage, tag.getConfig(), "output_dir");
-                if(tagDir != null){
+                if (tagDir != null) {
                     url = tagDir + url;
                 }
             }
@@ -150,25 +159,25 @@ public class CollectionMetaTagPageGenerator implements Generator{
             //Collections.sort(pages, PageComparator.INSTANCE);
 
             Number paginate = getProperty(templatePage, tag.getConfig(), "paginate");
-            if(paginate != null && paginate.intValue() > 0){
+            if (paginate != null && paginate.intValue() > 0) {
                 List<Page> pagedList = PaginationUtils.paginate(site, tagPage, pages, paginate.intValue());
-                if(pagedList != null){
+                if (pagedList != null) {
                     allNewPages.addAll(pagedList);
                 }
             }
         }
     }
 
-    private <T> T getProperty(Page templatePage, Config metaTagConfig, String propertyName){
+    private <T> T getProperty(Page templatePage, Config metaTagConfig, String propertyName) {
         T value = templatePage.get(propertyName);
-        if(value == null && metaTagConfig != null){
+        if (value == null && metaTagConfig != null) {
             value = metaTagConfig.get(propertyName);
         }
         return value;
     }
 
 
-    private Page lookupTemplatePage(final String identity, List<Page> allPages, Set<Page> templatePages){
+    private Page lookupTemplatePage(final String identity, List<Page> allPages, Set<Page> templatePages) {
         Predicate<Page> predicate = new Predicate<Page>() {
             @Override
             public boolean apply(Page input) {
@@ -177,7 +186,7 @@ public class CollectionMetaTagPageGenerator implements Generator{
         };
 
         Page page = Iterables.tryFind(templatePages, predicate).orNull();
-        if(page == null) {
+        if (page == null) {
             page = Iterables.tryFind(allPages, predicate).orNull();
         }
 
@@ -193,12 +202,12 @@ public class CollectionMetaTagPageGenerator implements Generator{
         ListHolder<Category> categoriesHolder = collection.getCategoriesHolder();
         String[] categoryMetaNames = categoriesHolder.getKeys();
 
-        for(String categoryMeta: categoryMetaNames) {
+        for (String categoryMeta : categoryMetaNames) {
             String templateIdentity = "category_template_" + collection.getName() + "_" + categoryMeta;
 
             Page templatePage = lookupTemplatePage(templateIdentity, site.getAllPages(), templatePages);
 
-            if(templatePage == null){
+            if (templatePage == null) {
                 log.warn("Template page for collection '{}', category '{}' not found.", collection.getName(), categoryMeta);
                 continue;
             }
@@ -210,7 +219,6 @@ public class CollectionMetaTagPageGenerator implements Generator{
             generateCollectionMetaTagPages(site, collection, templatePage, categories, allNewPages);
         }
     }
-
 
 
     @Override

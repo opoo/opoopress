@@ -22,6 +22,8 @@ import java.util.Map;
  *
  */
 public abstract class MapUtils {
+	public static final String PRIVATE_KEY_PREFIX = "___";
+
 	
 	public static <K,V> void put(Map<K, V> map, K key, V value){
 		if(value == null){
@@ -48,8 +50,7 @@ public abstract class MapUtils {
 		}
 		return map.get(key);
 	}
-	
-	
+
 	public static <K,V> K getKeyByValue(Map<K,V> map, V value){
 		if(map == null || map.isEmpty()){
 			return null;
@@ -60,5 +61,15 @@ public abstract class MapUtils {
 			}
 		}
 		return null;
+	}
+
+	public static <V> void copy(Map<String,V> dest, Map<String,V> src){
+		for(Map.Entry<String,V> entry: src.entrySet()){
+			String key = entry.getKey();
+			//don't copy special (private) properties
+			if(!key.startsWith(PRIVATE_KEY_PREFIX)){
+				dest.put(key, entry.getValue());
+			}
+		}
 	}
 }

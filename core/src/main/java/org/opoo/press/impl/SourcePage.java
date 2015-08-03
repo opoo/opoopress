@@ -22,26 +22,26 @@ import org.opoo.press.Source;
 
 /**
  * @author Alex Lin
- *
  */
-public class SourcePage extends AbstractSourcePage implements Page{
+public class SourcePage extends AbstractSourcePage implements Page {
 
-	/**
-	 * Construct a page instance.
-	 * @param site
-	 * @param source
-	 */
-	public SourcePage(Site site, Source source) {
-		super(site, source, null);
-	}
+    /**
+     * Construct a page instance.
+     *
+     * @param site
+     * @param source
+     */
+    public SourcePage(Site site, Source source) {
+        super(site, source, null);
+    }
 
-	/**
-	 * @param site
-	 * @param source
-	 * @param pager
-	 */
-	public SourcePage(Site site, Source source, Pager pager) {
-		super(site, source, pager);
-	}
+    /**
+     * @param site
+     * @param source
+     * @param pager
+     */
+    public SourcePage(Site site, Source source, Pager pager) {
+        super(site, source, pager);
+    }
 
 }

@@ -20,31 +20,33 @@ import org.eclipse.mylyn.wikitext.tracwiki.core.TracWikiLanguage;
 
 /**
  * WikiText MediaWiki converter. <code>*.tracwiki</code>
+ *
  * @author Alex Lin
  */
 public class WikiTextTracWikiConverter extends AbstractWikiTextConverter {
-	private MarkupParser parser = new MarkupParser(new TracWikiLanguage());
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 160;
-	}
+    private MarkupParser parser = new MarkupParser(new TracWikiLanguage());
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
-	 */
-	@Override
-	protected MarkupParser getMarkupParser() {
-		return parser;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 160;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
-	 */
-	@Override
-	protected String[] getInputFileExtensions() {
-		return new String[]{"tracwiki"};
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
+     */
+    @Override
+    protected MarkupParser getMarkupParser() {
+        return parser;
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
+     */
+    @Override
+    protected String[] getInputFileExtensions() {
+        return new String[]{"tracwiki"};
+    }
 }

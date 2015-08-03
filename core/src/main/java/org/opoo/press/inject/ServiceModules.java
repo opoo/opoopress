@@ -44,7 +44,7 @@ public class ServiceModules {
 
             if (module.getClass().isAnnotationPresent(OverrideModule.class)) {
                 overrides.add(module);
-            }else {
+            } else {
                 runtime.add(module);
             }
         }

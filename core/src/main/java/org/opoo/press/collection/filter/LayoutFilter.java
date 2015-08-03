@@ -21,16 +21,16 @@ import org.opoo.press.collection.Filter;
 /**
  * @author Alex Lin
  */
-public class LayoutFilter implements Filter{
+public class LayoutFilter implements Filter {
     private final String layout;
     private final boolean equals;
 
-    public LayoutFilter(String layout, boolean equals){
+    public LayoutFilter(String layout, boolean equals) {
         this.layout = layout;
         this.equals = equals;
     }
 
-    public LayoutFilter(String layout){
+    public LayoutFilter(String layout) {
         this(layout, true);
     }
 

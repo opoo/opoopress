@@ -26,16 +26,15 @@ import org.opoo.press.PageComparator;
 import org.opoo.press.ProcessorAdapter;
 import org.opoo.press.Site;
 import org.opoo.press.Tag;
-import org.opoo.press.collection.configuration.CollectionConfiguration;
-import org.opoo.press.collection.configuration.CollectionConfigurationResolver;
-import org.opoo.press.collection.configuration.FilterConfiguration;
-import org.opoo.press.collection.configuration.impl.CollectionConfigurationResolverImpl;
+import org.opoo.press.collection.config.CollectionConfig;
+import org.opoo.press.collection.config.CollectionConfigResolver;
+import org.opoo.press.collection.config.FilterConfig;
+import org.opoo.press.collection.config.impl.CollectionConfigResolverImpl;
 import org.opoo.press.util.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,8 +45,7 @@ import java.util.Set;
 public class CollectionProcessor extends ProcessorAdapter {
     private static final Logger log = LoggerFactory.getLogger(CollectionProcessor.class);
 
-    private CollectionConfigurationResolver collectionConfigurationResolver
-            = new CollectionConfigurationResolverImpl();
+    private CollectionConfigResolver collectionConfigResolver = new CollectionConfigResolverImpl();
 
     @Override
     public int getOrder() {
@@ -74,35 +72,36 @@ public class CollectionProcessor extends ProcessorAdapter {
     }
 
     private void createCollection(Site site, String collectionName, Map<String, ?> collectionConfigurationMap) {
-        CollectionConfiguration configuration = collectionConfigurationResolver.resolve(collectionName,
+        CollectionConfig configuration = collectionConfigResolver.resolve(collectionName,
                 collectionConfigurationMap);
 
-        CollectionImpl collection = new CollectionImpl(configuration);
+        CollectionImpl collection = new CollectionImpl(site, configuration);
 
         log.debug("Initializing default tags and categories for collection: {}", collectionName);
         Factory factory = site.getFactory();
-        CollectionMetaTagUtils.initializeDefaultTags(collection, configuration, factory);
-        CollectionMetaTagUtils.initializeDefaultCategories(collection, configuration, factory);
+        CollectionMetaTagsUtils.initializeDefaultTags(collection, configuration, factory);
+        CollectionMetaTagsUtils.initializeDefaultCategories(collection, configuration, factory);
 
-        FilterConfiguration filterConfiguration = configuration.getFilter();
-        Predicate<Page> filter = createFilter(site, factory, filterConfiguration);
+        FilterConfig filterConfig = configuration.getFilter();
+        Predicate<Page> filter = createFilter(site, factory, filterConfig);
 
         log.debug("Filter pages by: " + filter);
 
-        Iterator<Page> iterator = site.getAllPages().iterator();
-        while (iterator.hasNext()) {
-            Page page = iterator.next();
+        for (Page page : site.getAllPages()) {
             if (filter.apply(page)) {
-                collection.addPage(page);
-                page.set("collection", collection);
+                //collection.addPage(page);
+                collection.getPages().add(page);
+
+                //collection not serializable
+                //page.set("collection", collection);
                 log.debug("Add page '{}' to collection '{}'", page.getUrl(), collectionName);
 
                 log.debug("Processing tags and categories for page: {}", page.getUrl());
-                CollectionMetaTagUtils.processPageMetaTags(collection, configuration, factory, page);
+                CollectionMetaTagsUtils.processPageMetaTags(collection, configuration, factory, page);
             }
         }
 
-        //if collection name is 'post' or configuration has property 'sort'
+        //if collection name is 'post' or config has property 'sort'
         Boolean sortable = configuration.get("sortable");
         if (collectionName.equals("post")
                 || sortable != null && sortable) {
@@ -131,13 +130,13 @@ public class CollectionProcessor extends ProcessorAdapter {
         }
     }
 
-    private void sort(List<? extends Page> pages) {
+    private void sort(List<Page> pages) {
         Collections.sort(pages, PageComparator.INSTANCE);
 
         //set next and previous
         Page previous = null;
-        for(Page page: pages){
-            if(previous != null){
+        for (Page page: pages) {
+            if (previous != null) {
                 previous.setNext(page);
                 page.setPrevious(previous);
             }
@@ -163,14 +162,13 @@ public class CollectionProcessor extends ProcessorAdapter {
         }
     }
 
-
-    private Filter createFilter(Site site, Factory factory, FilterConfiguration filterConfiguration) {
-        Object[] args = filterConfiguration.getArgs();
+    private Filter createFilter(Site site, Factory factory, FilterConfig filterConfig) {
+        Object[] args = filterConfig.getArgs();
         Filter filter = null;
         if (args == null || args.length == 0) {
-            filter = factory.createInstance(Filter.class, filterConfiguration.getType());
+            filter = factory.createInstance(Filter.class, filterConfig.getType());
         } else {
-            filter = factory.constructInstance(Filter.class, filterConfiguration.getType(), args);
+            filter = factory.constructInstance(Filter.class, filterConfig.getType(), args);
         }
 
         if (filter != null) {
@@ -178,7 +176,7 @@ public class CollectionProcessor extends ProcessorAdapter {
         }
 
         //type is classname
-        String classname = filterConfiguration.getType();
+        String classname = filterConfig.getType();
         if (args == null || args.length == 0) {
             return ClassUtils.newInstance(classname, site.getClassLoader(), site, site.getConfig());
         } else {
@@ -186,10 +184,9 @@ public class CollectionProcessor extends ProcessorAdapter {
         }
     }
 
-
     @Override
     public void postGenerate(Site site) {
-        Set<Page> siteTemplatePages = (Set<Page>) site.get("template_pages");
+        Set<Page> siteTemplatePages = site.get("template_pages");
         if (siteTemplatePages != null) {
             log.info("Removing template pages: {}", siteTemplatePages.size());
             site.getAllPages().removeAll(siteTemplatePages);

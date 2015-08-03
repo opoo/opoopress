@@ -58,7 +58,7 @@ public class VelocityRenderer extends AbstractVelocityRenderer implements Render
     }
 
     private void initializeVelocityEngine(Site site, VelocityEngine velocityEngine) {
-        //configuration file: velocity.properties
+        //config file: velocity.properties
         File themeDir = site.getTheme().getPath();
         File configurationFile = new File(themeDir, "velocity.properties");
         if (configurationFile.exists() && configurationFile.isFile() && configurationFile.canRead()) {
@@ -67,7 +67,7 @@ public class VelocityRenderer extends AbstractVelocityRenderer implements Render
             try {
                 in = new FileInputStream(configurationFile);
                 props.load(in);
-                log.info("Load template engine configuration from " + configurationFile);
+                log.info("Load template engine config from " + configurationFile);
             } catch (IOException e) {
                 throw new IllegalArgumentException("Initializing velocity engine failed: " + e.getMessage(), e);
             } finally {
@@ -75,7 +75,7 @@ public class VelocityRenderer extends AbstractVelocityRenderer implements Render
             }
         }
 
-        //configuration in theme.yaml
+        //config in theme.yaml
         Map<String, Object> configuration = site.get("velocity.properties");
         if (configuration != null) {
             for (Map.Entry<String, Object> entry : configuration.entrySet()) {

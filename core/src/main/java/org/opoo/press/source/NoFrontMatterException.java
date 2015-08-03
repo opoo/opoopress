@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Alex Lin.
+ * Copyright 2013 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration;
+package org.opoo.press.source;
 
-import java.util.Map;
+import org.opoo.press.Origin;
 
 /**
+ * If the source entry has not front-matter header, throw this exception.
+ *
  * @author Alex Lin
  */
-public interface CollectionConfigurationResolver {
+public class NoFrontMatterException extends Exception {
+    private static final long serialVersionUID = -5507870296641103275L;
+    private Origin origin;
 
-    CollectionConfiguration resolve(String name, Map<String, ?> configurationMap);
+    public NoFrontMatterException(Origin origin) {
+        super();
+        this.origin = origin;
+    }
+
+    /**
+     * @return the sourceEntry
+     */
+    public Origin getOrigin() {
+        return origin;
+    }
 }

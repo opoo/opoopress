@@ -21,9 +21,9 @@ import org.opoo.press.Site;
 import org.opoo.press.SiteAware;
 import org.opoo.press.SlugHelper;
 import org.opoo.press.Source;
-import org.opoo.press.SourceEntryLoader;
+import org.opoo.press.SourceDirectoryWalker;
 import org.opoo.press.SourceManager;
-import org.opoo.press.SourceParser;
+import org.opoo.press.SourceWalker;
 import org.opoo.press.Tag;
 import org.opoo.press.impl.CategoryImpl;
 import org.opoo.press.impl.SourcePage;
@@ -40,7 +40,7 @@ import java.util.ServiceLoader;
 
 /**
  */
-public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
+public class GuiceFactory implements Factory, ObjectFactory, SiteAware {
     private static final Logger log = LoggerFactory.getLogger(GuiceFactory.class);
 
     private Injector injector;
@@ -48,7 +48,7 @@ public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
     private PluginManager pluginManager;
 
     @Override
-    public void setSite(Site site){
+    public void setSite(Site site) {
         this.site = site;
 
         Module module = ServiceModules.loadFromClasspath(site);
@@ -58,13 +58,13 @@ public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
     }
 
     @Override
-    public SourceEntryLoader getSourceEntryLoader() {
-        return getInstance(SourceEntryLoader.class);
+    public SourceDirectoryWalker getSourceDirectoryWalker() {
+        return getInstance(SourceDirectoryWalker.class);
     }
 
     @Override
-    public SourceParser getSourceParser() {
-        return getInstance(SourceParser.class);
+    public List<SourceWalker> getSourceWalkers() {
+        return pluginManager.getObjectList(SourceWalker.class);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
 
     @Override
     public SlugHelper getSlugHelper() {
-        if(site.getLocale() != null){
+        if (site.getLocale() != null) {
             String name = site.getLocale().toString();
             try {
                 return getInstance(SlugHelper.class, name);
@@ -97,9 +97,9 @@ public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
 
     @Override
     public Page createPage(Site site, Source source, String layout) {
-        try{
+        try {
             return constructInstance(Page.class, "Page:" + layout, site, source);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new SourcePage(site, source);
         }
     }
@@ -124,13 +124,13 @@ public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
     @Override
     public Renderer getRenderer() {
         String className = (String) site.getTheme().get("renderer");
-        if(className == null){
+        if (className == null) {
             className = "freemarker";
         }
-//        return injector.getInstance(Key.get(Renderer.class, Names.named(className)));
-        try{
+//        return injector.getInstance(Key.getPage(Renderer.class, Names.named(className)));
+        try {
             return constructInstance(Renderer.class, "Render:" + className, site);
-        }catch (Exception e){
+        } catch (Exception e) {
             return getInstance(Renderer.class, className);
         }
     }
@@ -154,7 +154,6 @@ public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
             return new CategoryImpl(slug, categoryName, parent);
         }
     }
-
 
 
     @Override
@@ -213,11 +212,11 @@ public class GuiceFactory implements Factory,ObjectFactory, SiteAware{
         return newInstance(constructor, args);
     }
 
-    private <T> T apply(T t){
+    private <T> T apply(T t) {
         return ClassUtils.apply(t, site);
     }
 
-    private <T> T newInstance(Constructor<T> constructor, Object... args){
+    private <T> T newInstance(Constructor<T> constructor, Object... args) {
         try {
             return apply(constructor.newInstance(args));
         } catch (InstantiationException e) {

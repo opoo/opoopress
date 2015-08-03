@@ -19,11 +19,10 @@ import org.opoo.press.Tag;
 
 /**
  * @author Alex Lin
- *
  */
 public class TagImpl extends AbstractMetaTag implements Tag {
 
-	public TagImpl(String slug, String name){
-		super(slug, name);
-	}
+    public TagImpl(String slug, String name) {
+        super(slug, name);
+    }
 }

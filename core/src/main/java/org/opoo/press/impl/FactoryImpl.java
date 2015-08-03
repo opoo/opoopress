@@ -32,25 +32,22 @@ import org.opoo.press.ResourceBuilder;
 import org.opoo.press.Site;
 import org.opoo.press.SlugHelper;
 import org.opoo.press.Source;
-import org.opoo.press.SourceEntryLoader;
+import org.opoo.press.SourceDirectoryWalker;
 import org.opoo.press.SourceManager;
-import org.opoo.press.SourceParser;
+import org.opoo.press.SourceWalker;
 import org.opoo.press.Tag;
 import org.opoo.press.highlighter.SyntaxHighlighter;
 import org.opoo.press.pagination.ConfigurablePaginationUpdater;
 import org.opoo.press.plugin.PluginManagerImpl;
 import org.opoo.press.renderer.FreeMarkerRenderer;
 import org.opoo.press.slug.DefaultSlugHelper;
-import org.opoo.press.source.SourceEntryLoaderImpl;
+import org.opoo.press.source.SourceDirectoryWalkerImpl;
 import org.opoo.press.source.SourceManagerImpl;
-import org.opoo.press.source.SourceParserImpl;
 import org.opoo.press.util.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -71,10 +68,10 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     private static final Logger log = LoggerFactory.getLogger(FactoryImpl.class);
 
     private Site site;
-    private Map<String,Object> configuration = new LinkedHashMap<String, Object>();
+    private Map<String, Object> configuration = new LinkedHashMap<String, Object>();
 
-    private SourceEntryLoader sourceEntryLoader;
-    private SourceParser sourceParser;
+    private SourceDirectoryWalker sourceDirectoryWalker;
+    private List<SourceWalker> sourceWalkers;
     private SourceManager sourceManager;
     private Highlighter highlighter;
     private SlugHelper slugHelper;
@@ -82,33 +79,42 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     private PaginationUpdater paginationUpdater;
     private List<Plugin> plugins;
 
-    private Map<String,Object> instances = new HashMap<String,Object>();
+    private Map<String, Object> instances = new HashMap<String, Object>();
 
-    public FactoryImpl(Site site){
+    public FactoryImpl(Site site) {
         super(site);
         this.site = site;
 
-        //default factory configuration
+        //default factory config
         InputStream is = Site.class.getResourceAsStream("/factory.yml");
         addConfiguration(is);
 
-        //theme factory configuration
+        //theme factory config
         File themeDir = site.getTheme().getPath();
         File factoryFile = new File(themeDir, "factory.yml");
         addConfiguration(factoryFile);
 
-        //site factory configuration
+        //site factory config
         File basedir = site.getBasedir();
         factoryFile = new File(basedir, "factory.yml");
         addConfiguration(factoryFile);
 
         initializePlugins();
-
-        initializeCaches();
     }
 
-    void addConfiguration(InputStream is){
-        if(is != null) {
+    public static Factory createInstance(Site site) {
+        String factoryClassName = site.getConfig().get("factory");
+        if (StringUtils.isNotBlank(factoryClassName)) {
+            log.debug("Create factory: {}", factoryClassName);
+            return ClassUtils.newInstance(factoryClassName, site.getClassLoader(), site, site.getConfig());
+        }
+
+        //default factory
+        return new FactoryImpl(site);
+    }
+
+    void addConfiguration(InputStream is) {
+        if (is != null) {
             Map map = new Yaml().loadAs(is, Map.class);
             configuration.putAll(map);
             IOUtils.closeQuietly(is);
@@ -116,7 +122,7 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     }
 
     void addConfiguration(File factoryFile) {
-        if(factoryFile != null && factoryFile.exists()){
+        if (factoryFile != null && factoryFile.exists()) {
             try {
                 addConfiguration(new FileInputStream(factoryFile));
             } catch (FileNotFoundException e) {
@@ -125,37 +131,30 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
         }
     }
 
-    void initializeCaches(){
-
+    @Override
+    public SourceDirectoryWalker getSourceDirectoryWalker() {
+        if (sourceDirectoryWalker == null) {
+            sourceDirectoryWalker = getInstance(SourceDirectoryWalker.class);
+            if (sourceDirectoryWalker == null) {
+                sourceDirectoryWalker = new SourceDirectoryWalkerImpl();
+            }
+        }
+        return sourceDirectoryWalker;
     }
 
     @Override
-    public SourceEntryLoader getSourceEntryLoader() {
-        if(sourceEntryLoader == null){
-            sourceEntryLoader = getInstance(SourceEntryLoader.class);
-            if(sourceEntryLoader == null){
-                sourceEntryLoader = new SourceEntryLoaderImpl();
-            }
+    public List<SourceWalker> getSourceWalkers() {
+        if (sourceWalkers == null) {
+            sourceWalkers = instantiateList(SourceWalker.class);
         }
-        return sourceEntryLoader;
-    }
-
-    @Override
-    public SourceParser getSourceParser() {
-        if(sourceParser == null){
-            sourceParser = getInstance(SourceParser.class);
-            if(sourceParser == null){
-                sourceParser = new SourceParserImpl();
-            }
-        }
-        return sourceParser;
+        return sourceWalkers;
     }
 
     @Override
     public SourceManager getSourceManager() {
-        if(sourceManager == null){
+        if (sourceManager == null) {
             sourceManager = getInstance(SourceManager.class);
-            if(sourceManager == null){
+            if (sourceManager == null) {
                 sourceManager = new SourceManagerImpl();
             }
         }
@@ -164,9 +163,9 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
 
     @Override
     public Highlighter getHighlighter() {
-        if(highlighter == null){
+        if (highlighter == null) {
             highlighter = getInstance(Highlighter.class);
-            if(highlighter == null){
+            if (highlighter == null) {
                 highlighter = new SyntaxHighlighter();
             }
         }
@@ -175,21 +174,21 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
 
     @Override
     public SlugHelper getSlugHelper() {
-        if(slugHelper == null){
-            if(site.getLocale() != null){
+        if (slugHelper == null) {
+            if (site.getLocale() != null) {
                 String hint = site.getLocale().toString();
                 String str = SlugHelper.class.getName() + "-" + hint;
                 String className = (String) configuration.get(str);
-                if(className != null){
+                if (className != null) {
                     slugHelper = newInstance(className);
                 }
             }
 
-            if(slugHelper == null){
+            if (slugHelper == null) {
                 slugHelper = createInstance(SlugHelper.class);
             }
 
-            if(slugHelper == null){
+            if (slugHelper == null) {
                 slugHelper = new DefaultSlugHelper();
             }
         }
@@ -198,9 +197,9 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
 
     @Override
     public RelatedPostsFinder getRelatedPostsFinder() {
-        if(relatedPostsFinder == null){
+        if (relatedPostsFinder == null) {
             relatedPostsFinder = getInstance(RelatedPostsFinder.class);
-            if(relatedPostsFinder == null){
+            if (relatedPostsFinder == null) {
                 relatedPostsFinder = new NoOpRelatedPostsFinder();
             }
         }
@@ -218,29 +217,28 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
                 new Class[]{Site.class, Source.class},
                 new Object[]{site, source});
 
-        if(page != null){
+        if (page != null) {
             return page;
         }
 
-        if("post".equalsIgnoreCase(layout)){
-            if(log.isDebugEnabled()){
-                log.debug("Create post using SourcePost as default: {}", source.getSourceEntry().getFile());
+        if ("post".equalsIgnoreCase(layout)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Create post using SourcePost as default: {}", source.getOrigin());
             }
             return new SourcePost(site, source);
         }
 
-        if(log.isDebugEnabled()){
-            log.debug("Create page using SourcePage as default: {}", source.getSourceEntry().getFile());
+        if (log.isDebugEnabled()) {
+            log.debug("Create page using SourcePage as default: {}", source.getOrigin());
         }
         return new SourcePage(site, source);
     }
 
-
-    private void initializePlugins(){
-        if(plugins == null){
+    private void initializePlugins() {
+        if (plugins == null) {
             log.debug("Initializing plugins");
             plugins = instantiateList(Plugin.class);
-            for(Plugin plugin: plugins){
+            for (Plugin plugin : plugins) {
                 log.debug("Initializing plugin: {}", plugin.getClass().getName());
                 plugin.initialize(this);
             }
@@ -261,12 +259,12 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     public Renderer getRenderer() {
         ServiceLoader<Renderer> loader = ServiceLoader.load(Renderer.class, site.getClassLoader());
         Iterator<Renderer> iterator = loader.iterator();
-        if(iterator.hasNext()){
+        if (iterator.hasNext()) {
             return iterator.next();
         }
 
         String className = (String) site.getTheme().get("renderer");
-        if(className != null){
+        if (className != null) {
             Class<Renderer> clazz;
             try {
                 clazz = ClassUtils.getClass(site.getClassLoader(), className);
@@ -305,9 +303,9 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
 
     @Override
     public PaginationUpdater getPaginationUpdater() {
-        if(paginationUpdater == null){
+        if (paginationUpdater == null) {
             paginationUpdater = getInstance(PaginationUpdater.class);
-            if(paginationUpdater == null){
+            if (paginationUpdater == null) {
                 paginationUpdater = new ConfigurablePaginationUpdater();
             }
         }
@@ -317,11 +315,11 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     @Override
     public ResourceBuilder createResourceBuilder(String type) {
         ResourceBuilder builder = createInstance(ResourceBuilder.class, type);
-        if(builder == null){
+        if (builder == null) {
             builder = ClassUtils.newInstance(type, site.getClassLoader(), site, site.getConfig());
         }
         return builder;
-   }
+    }
 
     @Override
     public Category createCategory(String categoryMeta, String slug, String categoryName, Category parent) {
@@ -329,7 +327,7 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
                 new Class[]{String.class, String.class, Category.class},
                 new Object[]{slug, categoryName, parent});
 
-        if(category != null){
+        if (category != null) {
             return category;
         }
 
@@ -342,14 +340,12 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
                 new Class[]{String.class, String.class},
                 new Object[]{slug, categoryName});
 
-        if(category != null){
+        if (category != null) {
             return category;
         }
 
         return new CategoryImpl(slug, categoryName);
     }
-
-
 
     @Override
     public Category createCategory(String categoryMeta, String slugOrName) {
@@ -363,7 +359,7 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
                 new Class[]{String.class, String.class},
                 new Object[]{slug, name});
 
-        if(tag != null){
+        if (tag != null) {
             return tag;
         }
 
@@ -378,17 +374,16 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
         return createTag(tagMeta, slug, slugOrName);
     }
 
-
     @Override
     public <T> T getInstance(Class<T> clazz, String name) {
         String cacheKey = clazz.getName();
-        if(name != null){
+        if (name != null) {
             cacheKey += "-" + name;
         }
 
-        if(instances.containsKey(cacheKey)){
+        if (instances.containsKey(cacheKey)) {
             return (T) instances.get(cacheKey);
-        }else{
+        } else {
             T o = createInstance(clazz, name);
             instances.put(cacheKey, o);
             return o;
@@ -396,40 +391,40 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     }
 
     @Override
-    public <T> T getInstance(Class<T> clazz){
+    public <T> T getInstance(Class<T> clazz) {
         return getInstance(clazz, null);
     }
 
     @Override
     public <T> T createInstance(Class<T> clazz, final String hint) {
         ServiceLoader<T> loader = ServiceLoader.load(clazz, site.getClassLoader());
-        if(hint == null){
+        if (hint == null) {
             Iterator<T> iterator = loader.iterator();
-            if(iterator.hasNext()){
+            if (iterator.hasNext()) {
                 return apply(iterator.next());
             }
-        }else{
+        } else {
             T t = null;
-            for(T tt: loader){
-                if(t instanceof Named && hint.equals(((Named) t).getName())){
+            for (T tt : loader) {
+                if (t instanceof Named && hint.equals(((Named) t).getName())) {
                     t = tt;
                     break;
                 }
             }
 
-            if(t != null){
+            if (t != null) {
                 log.debug("Find instance in ServiceLoader: {}", clazz.getName());
                 return apply(t);
             }
         }
 
         String classKey = clazz.getName();
-        if(hint != null){
+        if (hint != null) {
             classKey += "-" + hint;
         }
 
         String className = (String) configuration.get(classKey);
-        if(StringUtils.isBlank(className) || "none".equalsIgnoreCase(className)){
+        if (StringUtils.isBlank(className) || "none".equalsIgnoreCase(className)) {
             return null;
         }
         return newInstance(className);
@@ -447,42 +442,41 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
 
     public <T> T constructInstance(Class<T> clazz, String hint, Class<?>[] parameterTypes, Object[] args) {
         String classKey = clazz.getName();
-        if(hint != null){
+        if (hint != null) {
             classKey += "-" + hint;
         }
 
         String className = (String) configuration.get(classKey);
-        if(StringUtils.isBlank(className) || "none".equalsIgnoreCase(className)){
+        if (StringUtils.isBlank(className) || "none".equalsIgnoreCase(className)) {
             return null;
         }
 
         return ClassUtils.constructInstance(className, site.getClassLoader(), parameterTypes, args);
     }
 
-
-    public <T> T newInstance(String className){
+    public <T> T newInstance(String className) {
         T t = ClassUtils.newInstance(className, site.getClassLoader(), site, site.getConfig());
         //log.debug("Create instance for '{}': {}", className, t.getClass().getName());
         return t;
     }
 
     @Override
-    public <T> List<T> instantiateList(Class<T> clazz){
+    public <T> List<T> instantiateList(Class<T> clazz) {
         List<T> list = super.instantiateList(clazz);
 
         Object o = configuration.get(clazz.getName());
-        if(o instanceof List){
+        if (o instanceof List) {
             List<String> classNames = (List<String>) o;
-            if(!classNames.isEmpty()){
-                for(String className: classNames){
+            if (!classNames.isEmpty()) {
+                for (String className : classNames) {
                     T t = newInstance(className);
                     log.debug("Create instance: {} => {}", clazz.getName(), className);
                     list.add(t);
                 }
             }
-        }else if (o instanceof Map) {
+        } else if (o instanceof Map) {
             Map<String, String> classNames = (Map<String, String>) o;
-            if(!classNames.isEmpty()) {
+            if (!classNames.isEmpty()) {
                 for (Map.Entry<String, String> entry : classNames.entrySet()) {
                     String name = entry.getKey();
                     String className = entry.getValue();
@@ -491,7 +485,7 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
                     list.add(t);
                 }
             }
-        }else if(o != null){
+        } else if (o != null) {
             log.warn("Configuration error: {} => {}", clazz.getName(), o);
         }
 
@@ -499,25 +493,25 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
     }
 
     @Override
-    public <T> Map<String,T> instantiateMap(Class<T> clazz){
-        Map<String,T> map = super.instantiateMap(clazz);
+    public <T> Map<String, T> instantiateMap(Class<T> clazz) {
+        Map<String, T> map = super.instantiateMap(clazz);
 
         Object o = configuration.get(clazz.getName());
-        if(o instanceof List){
+        if (o instanceof List) {
             List<String> classNames = (List<String>) o;
-            if(!classNames.isEmpty()){
-                for(String className: classNames){
+            if (!classNames.isEmpty()) {
+                for (String className : classNames) {
                     T t = newInstance(className);
-                    if(t instanceof Named) {
+                    if (t instanceof Named) {
                         log.debug("Create instance for '{}': {} => {}", ((Named) t).getName(), clazz.getName(), className);
                         map.put(((Named) t).getName(), t);
                     }
                 }
             }
 
-        }else if (o instanceof Map) {
+        } else if (o instanceof Map) {
             Map<String, String> classNames = (Map<String, String>) o;
-            if(!classNames.isEmpty()) {
+            if (!classNames.isEmpty()) {
                 for (Map.Entry<String, String> entry : classNames.entrySet()) {
                     String name = entry.getKey();
                     String className = entry.getValue();
@@ -526,22 +520,10 @@ public class FactoryImpl extends PluginManagerImpl implements Factory, PluginMan
                     map.put(name, t);
                 }
             }
-        }else if(o != null){
+        } else if (o != null) {
             log.warn("Configuration error: {} => {}", clazz.getName(), o);
         }
 
         return map;
-    }
-
-
-    public static Factory createInstance(Site site){
-        String factoryClassName = site.getConfig().get("factory");
-        if(StringUtils.isNotBlank(factoryClassName)){
-            log.debug("Create factory: {}", factoryClassName);
-            return ClassUtils.newInstance(factoryClassName, site.getClassLoader(), site, site.getConfig());
-        }
-
-        //default factory
-        return new FactoryImpl(site);
     }
 }

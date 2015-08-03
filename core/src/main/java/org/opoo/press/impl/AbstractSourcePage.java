@@ -19,11 +19,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.opoo.press.Base;
 import org.opoo.press.Convertible;
+import org.opoo.press.Origin;
 import org.opoo.press.Pager;
 import org.opoo.press.Post;
 import org.opoo.press.Site;
 import org.opoo.press.Source;
-import org.opoo.press.SourceEntry;
 import org.opoo.press.renderer.AbstractFreeMarkerRenderer;
 import org.opoo.press.util.LinkUtils;
 import org.slf4j.Logger;
@@ -47,9 +47,11 @@ public abstract class AbstractSourcePage extends SimplePage implements Base, Con
 
     AbstractSourcePage(Site site, Source source, Pager pager) {
         super(site);
-
         if (source == null) {
             throw new NullPointerException("page source null.");
+        }
+        if (site == null) {
+            throw new NullPointerException("site null");
         }
 
         setSource(source);
@@ -61,12 +63,6 @@ public abstract class AbstractSourcePage extends SimplePage implements Base, Con
         String permalink = (String) source.getMeta().get("permalink");
         String url = (String) source.getMeta().get("url");
 
-        String path = (String) source.getMeta().get("path");
-        if (path == null) {
-            SourceEntry sourceEntry = source.getSourceEntry();
-            path = sourceEntry.getPath() + "/" + sourceEntry.getName();
-        }
-
         //date, updated
         Date date = lookup(source.getMeta(), "date");
         Date updated = lookup(source.getMeta(), "updated");
@@ -74,22 +70,32 @@ public abstract class AbstractSourcePage extends SimplePage implements Base, Con
         Boolean bool = (Boolean) source.getMeta().get("published");
         boolean published = (bool == null || bool.booleanValue());
 
+        boolean urlEncode = site.getConfig().get("url_encode", false);
+        boolean urlDecode = site.getConfig().get("url_decode", false);
+
         setTitle(published ? title : "[Draft]" + title);
         setContent(content);
         setLayout(layout);
         setPermalink(permalink);
-        setPath(path);
         setDate(date);
         setUpdated(updated);
-//        setUrl(url);
         setPublished(published);
+        setUrlDecode(urlDecode);
+        setUrlEncode(urlEncode);
 
-//        if (title != null) {
-//            log = LoggerFactory.getLogger(getClass().getName() + "[" + title + "]");
-//        }
+        if (date != null) {
+            String dateFormatted = site.formatDate(date);
+            set("dateFormatted", dateFormatted);
+            set("date_formatted", dateFormatted);
+        }
+        if (updated != null) {
+            String updatedFormatted = site.formatDate(updated);
+            set("updatedFormatted", updatedFormatted);
+            set("updated_formatted", updatedFormatted);
+        }
 
-        if(url == null){
-            url = buildUrl();
+        if (url == null) {
+            url = buildUrl(site, layout);
         }
         setUrl(url);
     }
@@ -115,64 +121,46 @@ public abstract class AbstractSourcePage extends SimplePage implements Base, Con
         return (Date) date;
     }
 
-    /**
-     * For freemarker template.
-     *
-     * @return the date formatted string
-     */
-    public String getDate_formatted() {
-        return getDateFormatted();
-    }
-
-    /**
-     * For freemarker template.
-     *
-     * @return the update date formatted string
-     */
-    public String getUpdated_formatted() {
-        return getUpdatedFormatted();
-    }
-
-    private String buildUrl() {
-        SourceEntry sourceEntry = getSource().getSourceEntry();
-        String fileName = sourceEntry.getName();
+    private String buildUrl(Site site, String layout) {
+        Origin origin = getSource().getOrigin();
+        String fileName = origin.getName();
         String baseName = FilenameUtils.getBaseName(fileName);
-        String path = sourceEntry.getPath();
+        String path = origin.getPath();
         String ext = getOutputFileExtension();
         String name = baseName;
 
-        if(Post.FILENAME_PATTERN.matcher(baseName).matches()){
+        if (Post.FILENAME_PATTERN.matcher(baseName).matches()) {
             name = baseName.substring(11);
         }
 
-        String permalink = getPossiblePermalink();
+        String permalink = getPossiblePermalink(site, layout);
 
-        if(StringUtils.isBlank(permalink)){
+        if (StringUtils.isBlank(permalink)) {
             if ("index".equals(baseName) && (".html".equals(ext) || ".html".equals(ext))) {
                 return path + "/";
-            }else{
+            } else {
                 return path + "/" + name + ext;
             }
         }
 
-        Map<String,Object> params = new HashMap<String, Object>(getSource().getMeta());
+        Map<String, Object> params = new HashMap<String, Object>(getSource().getMeta());
         params.put("pathToFile", path);
         params.put("fileName", fileName);
         params.put("name", name);
 
         Date date = getDate();
-        if(date != null){
+        if (date != null) {
             LinkUtils.addDateParams(params, date);
         }
 
         return AbstractFreeMarkerRenderer.process(permalink, params);
     }
 
-    private String getPossiblePermalink(){
+    private String getPossiblePermalink(Site site, String layout) {
         String link = getPermalink();
-        if(StringUtils.isNotBlank(link)){
+        if (StringUtils.isNotBlank(link)) {
             return link;
         }
-        return getSite().getPermalink(getLayout());
+        return site.getPermalink(layout);
     }
 }

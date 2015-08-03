@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration;;
+package org.opoo.press.collection.config;
+
+import java.util.Map;
 
 /**
  * @author Alex Lin
  */
-public interface TagConfiguration extends MetaTagConfiguration{
+public interface CollectionConfigResolver {
+
+    CollectionConfig resolve(String name, Map<String, ?> configurationMap);
 }

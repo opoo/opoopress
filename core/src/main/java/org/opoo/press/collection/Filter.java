@@ -21,5 +21,5 @@ import org.opoo.press.Page;
 /**
  * @author Alex Lin
  */
-public interface Filter extends Predicate<Page>{
+public interface Filter extends Predicate<Page> {
 }

@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration;
+package org.opoo.press.collection.config.impl;
+
+import org.opoo.press.collection.config.CategoryConfig;
+
+import java.util.Map;
 
 /**
  * @author Alex Lin
  */
-public interface CategoryConfiguration extends MetaTagConfiguration{
+public class CategoryConfigImpl extends MetaTagConfigImpl implements CategoryConfig {
+    CategoryConfigImpl(Map.Entry<String, ?> entry) {
+        super(entry);
+    }
 }

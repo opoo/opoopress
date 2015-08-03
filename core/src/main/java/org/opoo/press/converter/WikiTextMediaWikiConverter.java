@@ -20,31 +20,33 @@ import org.eclipse.mylyn.wikitext.mediawiki.core.MediaWikiLanguage;
 
 /**
  * WikiText MediaWiki converter. <code>*.mediawiki</code>
+ *
  * @author Alex Lin
  */
 public class WikiTextMediaWikiConverter extends AbstractWikiTextConverter {
-	private MarkupParser parser = new MarkupParser(new MediaWikiLanguage());
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 140;
-	}
+    private MarkupParser parser = new MarkupParser(new MediaWikiLanguage());
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
-	 */
-	@Override
-	protected MarkupParser getMarkupParser() {
-		return parser;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 140;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
-	 */
-	@Override
-	protected String[] getInputFileExtensions() {
-		return new String[]{"mediawiki"};
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
+     */
+    @Override
+    protected MarkupParser getMarkupParser() {
+        return parser;
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
+     */
+    @Override
+    protected String[] getInputFileExtensions() {
+        return new String[]{"mediawiki"};
+    }
 }

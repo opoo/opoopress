@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration.impl;
+package org.opoo.press.collection.config.impl;
 
-import org.opoo.press.collection.configuration.FilterConfiguration;
+import org.opoo.press.collection.config.FilterConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -23,15 +23,15 @@ import java.util.Map;
 /**
  * @author Alex Lin
  */
-public class FilterConfigurationImpl extends MapConfiguration implements FilterConfiguration{
+public class FilterConfigImpl extends MapConfig implements FilterConfig {
     private String type;
     private Object[] args;
 
-    FilterConfigurationImpl(Map<String, ?> map) {
+    FilterConfigImpl(Map<String, ?> map) {
         super(map);
         this.type = get("type");
         List<?> list = get("args");
-        if(list != null){
+        if (list != null) {
             args = list.toArray(new Object[list.size()]);
         }
     }

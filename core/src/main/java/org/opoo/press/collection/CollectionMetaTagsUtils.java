@@ -23,9 +23,9 @@ import org.opoo.press.Config;
 import org.opoo.press.Factory;
 import org.opoo.press.Page;
 import org.opoo.press.Tag;
-import org.opoo.press.collection.configuration.CategoryConfiguration;
-import org.opoo.press.collection.configuration.CollectionConfiguration;
-import org.opoo.press.collection.configuration.TagConfiguration;
+import org.opoo.press.collection.config.CategoryConfig;
+import org.opoo.press.collection.config.CollectionConfig;
+import org.opoo.press.collection.config.TagConfig;
 import org.opoo.press.impl.AbstractMetaTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,17 +38,17 @@ import java.util.TreeMap;
 /**
  * @author Alex Lin
  */
-public class CollectionMetaTagUtils {
-    private static final Logger log = LoggerFactory.getLogger(CollectionMetaTagUtils.class);
+public class CollectionMetaTagsUtils {
+    private static final Logger log = LoggerFactory.getLogger(CollectionMetaTagsUtils.class);
 
 
-    public static void initializeDefaultTags(Collection collection, CollectionConfiguration configuration, Factory factory){
-        TagConfiguration[] tags = configuration.getTags();
+    public static void initializeDefaultTags(Collection collection, CollectionConfig configuration, Factory factory) {
+        TagConfig[] tags = configuration.getTags();
 
-        if(tags != null && tags.length > 0){
+        if (tags != null && tags.length > 0) {
             String collectionName = configuration.getName();
 
-            for(TagConfiguration tagConfiguration: tags){
+            for (TagConfig tagConfiguration : tags) {
 
                 String tagMeta = tagConfiguration.getMeta();
                 String tagMetaForCollection = tagConfiguration.getMetaForCollection();
@@ -59,22 +59,22 @@ public class CollectionMetaTagUtils {
         }
     }
 
-    public static void createTags(String collectionName, String tagMeta, Map<String,String> names,
-                                       Factory factory, Config config, List<Tag> tagList) {
-        if(names == null || names.isEmpty()){
+    public static void createTags(String collectionName, String tagMeta, Map<String, String> names,
+                                  Factory factory, Config config, List<Tag> tagList) {
+        if (names == null || names.isEmpty()) {
             return;
         }
 
         log.debug("Processing tags for: {}-{}", collectionName, tagMeta);
 
-        for(Map.Entry<String,String> entry : names.entrySet()){
+        for (Map.Entry<String, String> entry : names.entrySet()) {
             Tag tag = factory.createTag(collectionName + "-" + tagMeta, entry.getKey(), entry.getValue());
 
-            if(tag instanceof AbstractMetaTag){
+            if (tag instanceof AbstractMetaTag) {
                 ((AbstractMetaTag) tag).setConfig(config);
             }
 
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Add tag: {} => {}", tagMeta, tag);
             }
 
@@ -82,13 +82,13 @@ public class CollectionMetaTagUtils {
         }
     }
 
-    public static void initializeDefaultCategories(Collection collection, CollectionConfiguration configuration, Factory factory){
-        CategoryConfiguration[] categories = configuration.getCategories();
+    public static void initializeDefaultCategories(Collection collection, CollectionConfig configuration, Factory factory) {
+        CategoryConfig[] categories = configuration.getCategories();
 
-        if(categories != null && categories.length > 0){
+        if (categories != null && categories.length > 0) {
             String collectionName = configuration.getName();
 
-            for(CategoryConfiguration categoryConfiguration: categories){
+            for (CategoryConfig categoryConfiguration : categories) {
 
                 String categoryMeta = categoryConfiguration.getMeta();
                 String tagMetaForCollection = categoryConfiguration.getMetaForCollection();
@@ -104,44 +104,44 @@ public class CollectionMetaTagUtils {
     private static void createCategories(String collectionName, String categoryMeta,
                                          Map<String, String> names, Factory factory, Config config,
                                          List<Category> categoryList) {
-        if(names == null || names.isEmpty()){
+        if (names == null || names.isEmpty()) {
             return;
         }
 
         log.debug("Processing categories for: {}-{}", collectionName, categoryMeta);
 
-        Map<String,Category> map = new HashMap<String, Category>();
+        Map<String, Category> map = new HashMap<String, Category>();
 
         //sort by key
         TreeMap<String, String> treeMap = new TreeMap<String, String>(names);
-        for(Map.Entry<String,String> entry: treeMap.entrySet()){
+        for (Map.Entry<String, String> entry : treeMap.entrySet()) {
             String path = entry.getKey();
             String categoryName = entry.getValue();
             String slug = path;
             String parentPath = null;
 
             int index = path.lastIndexOf('/');//changed since 2.0
-            if(index != -1){
+            if (index != -1) {
                 slug = path.substring(index + 1);
                 parentPath = path.substring(0, index);
             }
 
             Category cat;
-            if(parentPath != null){
+            if (parentPath != null) {
                 Category parent = map.get(parentPath);
-                if(parent == null){
+                if (parent == null) {
                     throw new IllegalArgumentException("Parent category not found: " + parentPath);
                 }
                 cat = factory.createCategory(collectionName + "-" + categoryMeta, slug, categoryName, parent);
-            }else{
+            } else {
                 cat = factory.createCategory(collectionName + "-" + categoryMeta, slug, categoryName);
             }
 
-            if(cat instanceof AbstractMetaTag){
+            if (cat instanceof AbstractMetaTag) {
                 ((AbstractMetaTag) cat).setConfig(config);
             }
 
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Add category: {} => {}", categoryMeta, cat);
             }
 
@@ -151,13 +151,13 @@ public class CollectionMetaTagUtils {
     }
 
 
-    public static void processPageMetaTags(Collection collection, CollectionConfiguration configuration,
-                                           Factory factory, Page page){
-        if(page.getSource() == null || page.getSource().getMeta() == null){
+    public static void processPageMetaTags(Collection collection, CollectionConfig configuration,
+                                           Factory factory, Page page) {
+        if (page.getSource() == null || page.getSource().getMeta() == null) {
             return;
         }
 
-        Map<String,Object> sourceMeta = page.getSource().getMeta();
+        Map<String, Object> sourceMeta = page.getSource().getMeta();
         String collectionName = configuration.getName();
 
         processPageTags(collection, configuration, factory, page, collectionName, sourceMeta);
@@ -165,31 +165,31 @@ public class CollectionMetaTagUtils {
     }
 
 
-    private static void processPageTags(Collection collection, CollectionConfiguration configuration,
+    private static void processPageTags(Collection collection, CollectionConfig configuration,
                                         Factory factory, Page page,
-                                        String collectionName, Map<String, Object> sourceMeta){
-        TagConfiguration[] tags = configuration.getTags();
-        if(tags == null || tags.length == 0){
+                                        String collectionName, Map<String, Object> sourceMeta) {
+        TagConfig[] tags = configuration.getTags();
+        if (tags == null || tags.length == 0) {
             return;
         }
 
-        for(TagConfiguration tagConfiguration: tags){
+        for (TagConfig tagConfiguration : tags) {
             processPageTag(collection, configuration, factory, page, tagConfiguration, collectionName, sourceMeta);
         }
     }
 
-    private static void processPageTag(Collection collection, CollectionConfiguration configuration,
-                                       Factory factory, Page page, TagConfiguration tagConfiguration,
+    private static void processPageTag(Collection collection, CollectionConfig configuration,
+                                       Factory factory, Page page, TagConfig tagConfiguration,
                                        String collectionName, Map<String, Object> sourceMeta) {
         List<String> stringTags = MetaTagsUtils.getStringTags(sourceMeta, tagConfiguration);
-        if(stringTags == null || stringTags.isEmpty()){
+        if (stringTags == null || stringTags.isEmpty()) {
             return;
         }
 
         String tagMeta = tagConfiguration.getMeta();
         List<Tag> tags = collection.getTagsHolder().get(tagConfiguration.getMetaForCollection());
 
-        for(final String stringTag: stringTags){
+        for (final String stringTag : stringTags) {
             Tag tag = Iterables.tryFind(tags, new Predicate<Tag>() {
                 @Override
                 public boolean apply(Tag tag) {
@@ -197,59 +197,59 @@ public class CollectionMetaTagUtils {
                 }
             }).orNull();
 
-            if(tag == null){
+            if (tag == null) {
                 tag = factory.createTag(collectionName + "-" + tagMeta, stringTag);
-                if(tag instanceof AbstractMetaTag){
+                if (tag instanceof AbstractMetaTag) {
                     ((AbstractMetaTag) tag).setConfig(tagConfiguration);
                 }
                 tags.add(tag);
             }
 
-			//tag.getPages().add(page);
+            //tag.getPages().add(page);
             List<Page> pages = tag.getPages();
-			if(!pages.contains(page)){
-				pages.add(page);
-			}
+            if (!pages.contains(page)) {
+                pages.add(page);
+            }
             page.getTagsHolder().add(tagMeta, tag);
         }
     }
 
 
-    private static void processPageCategories(Collection collection, CollectionConfiguration configuration,
+    private static void processPageCategories(Collection collection, CollectionConfig configuration,
                                               Factory factory, Page page,
                                               String collectionName, Map<String, Object> sourceMeta) {
-        CategoryConfiguration[] categories = configuration.getCategories();
-        if(categories == null || categories.length == 0){
+        CategoryConfig[] categories = configuration.getCategories();
+        if (categories == null || categories.length == 0) {
             return;
         }
 
-        for(CategoryConfiguration categoryConfiguration: categories){
+        for (CategoryConfig categoryConfiguration : categories) {
             processPageCategory(collection, configuration, factory, page, categoryConfiguration,
                     collectionName, sourceMeta);
         }
     }
 
-    private static void processPageCategory(Collection collection, CollectionConfiguration configuration,
-                                            Factory factory, Page page, CategoryConfiguration categoryConfiguration,
+    private static void processPageCategory(Collection collection, CollectionConfig configuration,
+                                            Factory factory, Page page, CategoryConfig categoryConfiguration,
                                             String collectionName, Map<String, Object> sourceMeta) {
         List<String> stringCategories = MetaTagsUtils.getStringTags(sourceMeta, categoryConfiguration);
-        if(stringCategories == null || stringCategories.isEmpty()){
+        if (stringCategories == null || stringCategories.isEmpty()) {
             return;
         }
 
         String categoryMeta = categoryConfiguration.getMeta();
         List<Category> categories = collection.getCategoriesHolder().get(categoryConfiguration.getMetaForCollection());
 
-        for(final String stringCategory: stringCategories){
+        for (final String stringCategory : stringCategories) {
             Category category = Iterables.tryFind(categories, new Predicate<Category>() {
                 @Override
                 public boolean apply(Category input) {
                     return input.isNameOrSlug(stringCategory);
                 }
             }).orNull();
-            if(category == null){
+            if (category == null) {
                 category = factory.createCategory(collectionName + "-" + categoryMeta, stringCategory);
-                if(category instanceof AbstractMetaTag){
+                if (category instanceof AbstractMetaTag) {
                     ((AbstractMetaTag) category).setConfig(categoryConfiguration);
                 }
                 categories.add(category);
@@ -257,10 +257,10 @@ public class CollectionMetaTagUtils {
 
             //category.getPages().add(page);
             List<Page> pages = category.getPages();
-			if(!pages.contains(page)){
-				pages.add(page);
-			}
-			page.getCategoriesHolder().add(categoryMeta, category);
+            if (!pages.contains(page)) {
+                pages.add(page);
+            }
+            page.getCategoriesHolder().add(categoryMeta, category);
         }
     }
 }

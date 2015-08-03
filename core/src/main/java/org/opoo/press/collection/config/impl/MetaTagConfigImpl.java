@@ -13,42 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration.impl;
+package org.opoo.press.collection.config.impl;
 
 import com.google.common.base.Strings;
-import org.opoo.press.collection.configuration.MetaTagConfiguration;
+import org.opoo.press.collection.config.MetaTagConfig;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Alex Lin
  */
-public class MetaTagConfigurationImpl implements MetaTagConfiguration {
+public class MetaTagConfigImpl implements MetaTagConfig, Serializable {
     private String meta;
     private String metaForCollection;
     private String[] alias;
     private String separator;
-    private Map<String,String> names;
-    private Map<String,?> map;
+    private Map<String, String> names;
+    private Map<String, ?> map;
 
-    MetaTagConfigurationImpl(Map.Entry<String, ?> entry) {
+    MetaTagConfigImpl(Map.Entry<String, ?> entry) {
         meta = entry.getKey();
-        if(Strings.isNullOrEmpty(meta)){
+        if (Strings.isNullOrEmpty(meta)) {
             throw new IllegalArgumentException("No meta defined in collection's tag.");
         }
 
         Object value = entry.getValue();
-        if(value != null && value instanceof Map) {
+        if (value != null && value instanceof Map) {
             this.map = (Map<String, ?>) value;
 
             this.metaForCollection = (String) map.get("metaForCollection");
-            if(this.metaForCollection == null){
+            if (this.metaForCollection == null) {
                 this.metaForCollection = meta;
             }
 
             List<String> list = (List<String>) map.get("alias");
-            if(list != null){
+            if (list != null) {
                 this.alias = list.toArray(new String[list.size()]);
             }
 
@@ -88,7 +89,7 @@ public class MetaTagConfigurationImpl implements MetaTagConfiguration {
     }
 
     @Override
-    public <T> T get(String key, T defaultValue){
+    public <T> T get(String key, T defaultValue) {
         T t = get(key);
         return (t == null) ? defaultValue : t;
     }

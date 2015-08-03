@@ -13,30 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration;
+package org.opoo.press.collection.config.impl;
 
-import org.opoo.press.Config;
+import org.opoo.press.collection.config.TagConfig;
 
 import java.util.Map;
 
 /**
  * @author Alex Lin
  */
-public interface MetaTagConfiguration extends Config{
-
-    String getMeta();
-
-    String getMetaForCollection();
-
-    String[] getAlias();
-
-    String getSeparator();
-
-    /**
-     * Default mapping names.
-     * @return
-     */
-    Map<String,String> getNames();
-
-    <T> T get(String key);
+public class TagConfigImpl extends MetaTagConfigImpl implements TagConfig {
+    TagConfigImpl(Map.Entry<String, ?> entry) {
+        super(entry);
+    }
 }

@@ -23,14 +23,13 @@ import java.io.FileFilter;
 
 /**
  * @author Alex Lin
- *
  */
 public class WatchableDirectory extends FileAlterationListenerAdaptor implements Watchable {
-	private final File directory;
-	private final FileFilter fileFilter;
-	private Result result;
-	private FileAlterationObserver fileAlterationObserver;
-	
+    private final File directory;
+    private final FileFilter fileFilter;
+    private Result result;
+    private FileAlterationObserver fileAlterationObserver;
+
     /**
      * Construct an observer for the specified directory.
      *
@@ -44,7 +43,7 @@ public class WatchableDirectory extends FileAlterationListenerAdaptor implements
      * Construct an observer for the specified directory and file filter.
      *
      * @param directoryName the name of the directory to observe
-     * @param fileFilter The file filter or null if none
+     * @param fileFilter    The file filter or null if none
      */
     public WatchableDirectory(String directoryName, FileFilter fileFilter) {
         this(new File(directoryName), fileFilter);
@@ -56,13 +55,13 @@ public class WatchableDirectory extends FileAlterationListenerAdaptor implements
      * @param directory the directory to observe
      */
     public WatchableDirectory(File directory) {
-        this(directory, (FileFilter)null);
+        this(directory, (FileFilter) null);
     }
 
     /**
      * Construct an observer for the specified directory and file filter.
      *
-     * @param directory the directory to observe
+     * @param directory  the directory to observe
      * @param fileFilter The file filter or null if none
      */
     public WatchableDirectory(File directory, FileFilter fileFilter) {
@@ -70,53 +69,53 @@ public class WatchableDirectory extends FileAlterationListenerAdaptor implements
         this.fileFilter = fileFilter;
     }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.monitor.Observer#initialize()
-	 */
-	@Override
-	public void initialize() {
-		this.fileAlterationObserver = new FileAlterationObserver(directory, fileFilter);
-		this.fileAlterationObserver.addListener(this);
-		try {
-			this.fileAlterationObserver.initialize();
-		} catch (Exception e) {
-		}
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.monitor.Observer#initialize()
+     */
+    @Override
+    public void initialize() {
+        this.fileAlterationObserver = new FileAlterationObserver(directory, fileFilter);
+        this.fileAlterationObserver.addListener(this);
+        try {
+            this.fileAlterationObserver.initialize();
+        } catch (Exception e) {
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.monitor.Observer#check()
-	 */
-	@Override
-	public Result check() {
-		result = Result.newResult();
-		fileAlterationObserver.checkAndNotify();
-		return result;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.monitor.Observer#check()
+     */
+    @Override
+    public Result check() {
+        result = Result.newResult();
+        fileAlterationObserver.checkAndNotify();
+        return result;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.monitor.Observer#destroy()
-	 */
-	@Override
-	public void destroy() {
-		result = null;
-		try {
-			fileAlterationObserver.destroy();
-		} catch (Exception e) {
-		}
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.monitor.Observer#destroy()
+     */
+    @Override
+    public void destroy() {
+        result = null;
+        try {
+            fileAlterationObserver.destroy();
+        } catch (Exception e) {
+        }
+    }
 
-	@Override
-	public void onFileCreate(File file) {
-		result.addCreatedFile(file);
-	}
+    @Override
+    public void onFileCreate(File file) {
+        result.addCreatedFile(file);
+    }
 
-	@Override
-	public void onFileChange(File file) {
-		result.addUpdatedFile(file);
-	}
+    @Override
+    public void onFileChange(File file) {
+        result.addUpdatedFile(file);
+    }
 
-	@Override
-	public void onFileDelete(File file) {
-		result.addDeletedFile(file);
-	}
+    @Override
+    public void onFileDelete(File file) {
+        result.addDeletedFile(file);
+    }
 }

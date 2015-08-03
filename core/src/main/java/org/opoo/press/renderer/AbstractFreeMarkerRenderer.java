@@ -104,7 +104,7 @@ public abstract class AbstractFreeMarkerRenderer extends AbstractRenderer {
 
     @Override
     public String render(Page base, Object rootMap) {
-        if(StringUtils.isBlank(base.getContent())){
+        if (StringUtils.isBlank(base.getContent())) {
             log.warn("Empty converted content, skip render: {}", base.getUrl());
             return "";
         }
@@ -113,7 +113,7 @@ public abstract class AbstractFreeMarkerRenderer extends AbstractRenderer {
 
     public abstract String render(Page base, Map<String, Object> rootMap);
 
-    public static String process(String templateContent, Object rootMap){
+    public static String process(String templateContent, Object rootMap) {
         try {
             Configuration configuration = new Configuration();
             Template template = new Template("tmp", new StringReader(templateContent), configuration, "UTF-8");
@@ -121,7 +121,7 @@ public abstract class AbstractFreeMarkerRenderer extends AbstractRenderer {
             template.process(rootMap, writer);
             writer.flush();
             return writer.toString();
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Process template failed: " + templateContent, e);
         }
     }

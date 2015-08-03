@@ -26,31 +26,32 @@ import java.util.List;
  * @author Alex Lin
  */
 public class GeneratorsGenerator implements Generator {
-	private final List<Generator> generators;
-	public GeneratorsGenerator(List<Generator> generators){
-		this.generators = generators;
-		if(this.generators != null){
-			Collections.sort(generators, Ordered.COMPARATOR);
-		}
-	}
- 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 0;
-	}
+    private final List<Generator> generators;
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Generator#generate(org.opoo.press.Site)
-	 */
-	@Override
-	public void generate(Site site) {
-		if(generators != null){
-			for(Generator g: generators){
-				g.generate(site);
-			}
-		}
-	}
+    public GeneratorsGenerator(List<Generator> generators) {
+        this.generators = generators;
+        if (this.generators != null) {
+            Collections.sort(generators, Ordered.COMPARATOR);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.Generator#generate(org.opoo.press.Site)
+     */
+    @Override
+    public void generate(Site site) {
+        if (generators != null) {
+            for (Generator g : generators) {
+                g.generate(site);
+            }
+        }
+    }
 }

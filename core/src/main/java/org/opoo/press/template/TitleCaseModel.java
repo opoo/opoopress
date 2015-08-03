@@ -27,60 +27,59 @@ import java.util.StringTokenizer;
 
 /**
  * Usage: ${titlecase(post.title)}
- * 
- * @author Alex Lin
  *
+ * @author Alex Lin
  */
 public class TitleCaseModel implements TemplateMethodModel, Named, ConfigAware {
-	private static String[] smallWords = {"a", "an", "am", "and", "as", "at", "but", "by", "en", "for", 
-			"if", "in", "of", "on", "or", "the", "to", "v", "v.", "via", "vs", "vs.", "be"};
-	private static List<String> smallWordList = Arrays.asList(smallWords);
+    private static String[] smallWords = {"a", "an", "am", "and", "as", "at", "but", "by", "en", "for",
+            "if", "in", "of", "on", "or", "the", "to", "v", "v.", "via", "vs", "vs.", "be"};
+    private static List<String> smallWordList = Arrays.asList(smallWords);
 
-	private boolean titlecase;
+    private boolean titlecase;
 
-	/* (non-Javadoc)
-	 * @see freemarker.template.TemplateMethodModel#exec(java.util.List)
-	 */
-	@Override
-	public Object exec(@SuppressWarnings("rawtypes") List arguments) throws TemplateModelException {
-		if(arguments == null || arguments.isEmpty()){
-			return "";
-		}
-		String str = (String)arguments.get(0);
+    /* (non-Javadoc)
+     * @see freemarker.template.TemplateMethodModel#exec(java.util.List)
+     */
+    @Override
+    public Object exec(@SuppressWarnings("rawtypes") List arguments) throws TemplateModelException {
+        if (arguments == null || arguments.isEmpty()) {
+            return "";
+        }
+        String str = (String) arguments.get(0);
 //		return WordUtils.capitalizeFully(str);
-		return titlecase ? toTitleCase(str) : str;
-	}
+        return titlecase ? toTitleCase(str) : str;
+    }
 
-	@Override
-	public String getName() {
-		return "titlecase";
-	}
+    @Override
+    public String getName() {
+        return "titlecase";
+    }
 
-	@Override
-	public void setConfig(Config config) {
-		if(config != null) {
-			titlecase = config.get("titlecase", false);
-		}
-	}
+    @Override
+    public void setConfig(Config config) {
+        if (config != null) {
+            titlecase = config.get("titlecase", false);
+        }
+    }
 
-	public static String toTitleCase(String string){
-		StringTokenizer st = new StringTokenizer(string);
-		StringBuffer sb = new StringBuffer();
-		while(st.hasMoreTokens()){
-			if(sb.length() > 0){
-				sb.append(" ");
-			}
-			String str = st.nextToken();
-			String lower = str.toLowerCase();
-			if(sb.length() > 0 && smallWordList.contains(lower)){
-				sb.append(lower);
-			}else{
-				sb.append((str.charAt(0) + "").toUpperCase());
-				if(str.length() > 1){
-					sb.append(str.substring(1));
-				}
-			}
-		}
-		return sb.toString();
-	}
+    public static String toTitleCase(String string) {
+        StringTokenizer st = new StringTokenizer(string);
+        StringBuffer sb = new StringBuffer();
+        while (st.hasMoreTokens()) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            String str = st.nextToken();
+            String lower = str.toLowerCase();
+            if (sb.length() > 0 && smallWordList.contains(lower)) {
+                sb.append(lower);
+            } else {
+                sb.append((str.charAt(0) + "").toUpperCase());
+                if (str.length() > 1) {
+                    sb.append(str.substring(1));
+                }
+            }
+        }
+        return sb.toString();
+    }
 }

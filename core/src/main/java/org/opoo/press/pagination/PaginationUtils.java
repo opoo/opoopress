@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class PaginationUtils {
 
-    public static int calculateTotalPages(int totalItems, int pageSize){
+    public static int calculateTotalPages(int totalItems, int pageSize) {
         return (int) Math.ceil((double) totalItems / (double) pageSize);
     }
 
@@ -27,17 +27,17 @@ public class PaginationUtils {
 
         Page[] pages = new Page[totalPages];
         Pager[] pagers = new Pager[totalPages];
-        for(int i = 0 ; i < totalPages ; i++){
+        for (int i = 0; i < totalPages; i++) {
             int pageNumber = i + 1;
             int fromIndex = i * pageSize;
             int toIndex = fromIndex + pageSize;
-            if(toIndex > totalItems){
+            if (toIndex > totalItems) {
                 toIndex = totalItems;
             }
             List<?> pageItems = items.subList(fromIndex, toIndex);
 
             Pager pager = new Pager(pageNumber, totalPages, totalItems, pageSize, pageItems);
-            if(pageNumber > 1){
+            if (pageNumber > 1) {
                 SimplePage newPage = /*(page.getSource() != null)
                         ? new PageImpl(site, page.getSource(), pager)
                         : */new SimplePage(site, page, pager);
@@ -46,7 +46,7 @@ public class PaginationUtils {
                 newPages.add(newPage);
 
                 site.getFactory().getPaginationUpdater().apply(newPage);
-            }else{
+            } else {
                 page.setPager(pager);
                 pages[i] = page;
             }
@@ -55,11 +55,11 @@ public class PaginationUtils {
 
         //set next and previous
         int maxIndex = totalPages - 1;
-        for(int i = 0 ; i < totalPages ; i++){
-            if(i > 0){
+        for (int i = 0; i < totalPages; i++) {
+            if (i > 0) {
                 pagers[i].setPrevious(pages[i - 1]);
             }
-            if(i < maxIndex){
+            if (i < maxIndex) {
                 pagers[i].setNext(pages[i + 1]);
             }
         }
@@ -67,12 +67,12 @@ public class PaginationUtils {
         return newPages;
     }
 
-    public static Map<String,?> getPagination(Page page){
-        Map<String,?> pagination = page.get("pagination");
-        if(pagination == null){
+    public static Map<String, ?> getPagination(Page page) {
+        Map<String, ?> pagination = page.get("pagination");
+        if (pagination == null) {
             Collection collection = page.get("collection");
-            if(collection != null){
-                pagination = collection.getConfiguration().get("pagination");
+            if (collection != null) {
+                pagination = collection.getConfig().get("pagination");
             }
         }
         return pagination;

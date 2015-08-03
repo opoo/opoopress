@@ -16,8 +16,9 @@
 package org.opoo.press.impl;
 
 import org.apache.commons.io.FileUtils;
+import org.opoo.press.FileOrigin;
+import org.opoo.press.Origin;
 import org.opoo.press.Site;
-import org.opoo.press.SourceEntry;
 import org.opoo.press.StaticFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,80 +28,83 @@ import java.io.IOException;
 
 /**
  * @author Alex Lin
- *
  */
 public class StaticFileImpl implements StaticFile {
-	private static final Logger log = LoggerFactory.getLogger(StaticFileImpl.class);
-	
-	private Site site;
-	private SourceEntry sourceEntry;
+    private static final Logger log = LoggerFactory.getLogger(StaticFileImpl.class);
 
-	public StaticFileImpl(Site site, SourceEntry sourceEntry){
-		this.site = site;
-		this.sourceEntry = sourceEntry;
-	}
+    private Site site;
+    private Origin origin;
 
-	/**
-	 * @return the site
-	 */
-	public Site getSite() {
-		return site;
-	}
+    public StaticFileImpl(Site site, Origin origin) {
+        this.site = site;
+        this.origin = origin;
+    }
 
-	/**
-	 * @param site the site to set
-	 */
-	public void setSite(Site site) {
-		this.site = site;
-	}
+    /**
+     * @return the site
+     */
+    public Site getSite() {
+        return site;
+    }
 
-	/**
-	 * @return the sourceEntry
-	 */
-	public SourceEntry getSourceEntry() {
-		return sourceEntry;
-	}
+    /**
+     * @param site the site to set
+     */
+    public void setSite(Site site) {
+        this.site = site;
+    }
 
-	/**
-	 * @param sourceEntry the sourceEntry to set
-	 */
-	public void setSourceEntry(SourceEntry sourceEntry) {
-		this.sourceEntry = sourceEntry;
-	}
+    /**
+     * @return the sourceEntry
+     */
+    public Origin getOrigin() {
+        return origin;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.StaticFile#getOutputFile(java.io.File)
-	 */
-	@Override
-	public File getOutputFile(File dest) {
-		String file = sourceEntry.getPath() + "/" + sourceEntry.getName(); 
-		return new File(dest, file);
-	}
+    /**
+     * @param origin the sourceEntry to set
+     */
+    public void setOrigin(Origin origin) {
+        this.origin = origin;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.StaticFile#write(java.io.File)
-	 */
-	@Override
-	public void write(File dest) {
-		File target = getOutputFile(dest);
+    /* (non-Javadoc)
+     * @see org.opoo.press.StaticFile#getOutputFile(java.io.File)
+     */
+    @Override
+    public File getOutputFile(File dest) {
+        String file = origin.getPath() + "/" + origin.getName();
+        return new File(dest, file);
+    }
 
-		if(target.exists() && target.length() == sourceEntry.getLength() 
-				&& target.lastModified() >= sourceEntry.getLastModified()){
-			//log.debug("Target file is newer than source file, skip copying.");
-			return;
-		}
-		
-		try {
-			File parentFile = target.getParentFile();
-			if(!parentFile.exists()){
-				parentFile.mkdirs();
-			}
-			
-			log.debug("Copying static file to " + target);
-			FileUtils.copyFile(sourceEntry.getFile(), target);
-		} catch (IOException e) {
-			log.error("Copying static file error: " + target, e);
-			throw new RuntimeException(e);
-		}
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.StaticFile#write(java.io.File)
+     */
+    @Override
+    public void write(File dest) {
+        if (origin instanceof FileOrigin) {
+            File target = getOutputFile(dest);
+
+            FileOrigin fo = (FileOrigin) origin;
+            if (target.exists() && target.length() == fo.getLength()
+                    && target.lastModified() >= fo.getLastModified()) {
+                //log.debug("Target file is newer than source file, skip copying.");
+                return;
+            }
+            try {
+                File parentFile = target.getParentFile();
+                if (!parentFile.exists()) {
+                    parentFile.mkdirs();
+                }
+
+                log.debug("Copying static file to " + target);
+                FileUtils.copyFile(fo.getFile(), target);
+            } catch (IOException e) {
+                log.error("Copying static file error: " + target, e);
+                throw new RuntimeException(e);
+            }
+        } else {
+            log.warn("Origin not support yet: " + origin);
+        }
+    }
 }

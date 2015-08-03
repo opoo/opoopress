@@ -27,23 +27,23 @@ import java.io.StringWriter;
 /**
  * @author Alex Lin
  */
-public abstract class AbstractRenderer implements Renderer{
+public abstract class AbstractRenderer implements Renderer {
 
-    public boolean isValidLayout(String layout){
+    public boolean isValidLayout(String layout) {
         return LayoutUtils.isValidLayout(layout);
     }
 
     public boolean isRenderRequired(Site site, Page base, String content) {
-        if(StringUtils.isBlank(content)){
+        if (StringUtils.isBlank(content)) {
             return false;
         }
 
         Boolean requireRender = base.get("render");
-        if(requireRender == null){
+        if (requireRender == null) {
             requireRender = site.get("require_render_content");
         }
 
-        if(requireRender != null){
+        if (requireRender != null) {
             return requireRender;
         }
 
@@ -51,7 +51,7 @@ public abstract class AbstractRenderer implements Renderer{
     }
 
     @Override
-    public void prepare(){
+    public void prepare() {
 
     }
 

@@ -22,60 +22,57 @@ import java.util.List;
 
 /**
  * @author Alex Lin
- *
  */
 public class SyntaxHighlighter implements Highlighter {
-	public static final String NAME = "SyntaxHighlighter";
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.Highlighter#containsHighlightCodeBlock(java.lang.String)
-	 */
-	@Override
-	public boolean containsHighlightCodeBlock(String content) {
-		return StringUtils.contains(content, "<pre class='brush:")
-				|| StringUtils.contains(content, "<pre class=\"brush:");
-	}
+    public static final String NAME = "SyntaxHighlighter";
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.Highlighter#getHighlighterName()
-	 */
-	@Override
-	public String getHighlighterName() {
-		return NAME;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.Highlighter#containsHighlightCodeBlock(java.lang.String)
+     */
+    @Override
+    public boolean containsHighlightCodeBlock(String content) {
+        return StringUtils.contains(content, "<pre class='brush:")
+                || StringUtils.contains(content, "<pre class=\"brush:");
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.Highlighter#highlight(java.lang.StringBuilder, java.util.List, java.lang.String)
-	 */
-	@Override
-	public void highlight(StringBuilder out, List<String> lines, String meta) {
-		out.append("<pre");
-		if(StringUtils.isNotBlank(meta)){
-			out.append(" class='brush:" + meta + "'");
-		}
-		out.append(">");
-		for(String line: lines)
-        {
-            for(int i = 0; i < line.length(); i++)
-            {
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.Highlighter#getHighlighterName()
+     */
+    @Override
+    public String getHighlighterName() {
+        return NAME;
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.Highlighter#highlight(java.lang.StringBuilder, java.util.List, java.lang.String)
+     */
+    @Override
+    public void highlight(StringBuilder out, List<String> lines, String meta) {
+        out.append("<pre");
+        if (StringUtils.isNotBlank(meta)) {
+            out.append(" class='brush:" + meta + "'");
+        }
+        out.append(">");
+        for (String line : lines) {
+            for (int i = 0; i < line.length(); i++) {
                 final char c;
-                switch(c = line.charAt(i))
-                {
-                case '&':
-                    out.append("&amp;");
-                    break;
-                case '<':
-                    out.append("&lt;");
-                    break;
-                case '>':
-                    out.append("&gt;");
-                    break;
-                default:
-                    out.append(c);
-                    break;
+                switch (c = line.charAt(i)) {
+                    case '&':
+                        out.append("&amp;");
+                        break;
+                    case '<':
+                        out.append("&lt;");
+                        break;
+                    case '>':
+                        out.append("&gt;");
+                        break;
+                    default:
+                        out.append(c);
+                        break;
                 }
             }
             out.append('\n');
         }
-		out.append("</pre>");
-	}
+        out.append("</pre>");
+    }
 }

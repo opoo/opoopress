@@ -17,6 +17,8 @@ package org.opoo.press.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.opoo.press.Category;
+import org.opoo.press.Converter;
+import org.opoo.press.Highlighter;
 import org.opoo.press.Post;
 import org.opoo.press.Renderer;
 import org.opoo.press.Site;
@@ -39,25 +41,26 @@ public class SourcePost extends AbstractSourcePage implements Post, Comparable<P
     public SourcePost(Site site, Source source) {
         super(site, source, null);
 
-        if (getDate() == null || getDateFormatted() == null) {
-            throw new IllegalArgumentException("Date is required in post yaml front-matter header: "
-                    + getSource().getSourceEntry().getFile());
+        if (getDate() == null || get("dateFormatted") == null) {
+            throw new IllegalArgumentException("Date is required in post YAML front-matter header: "
+                    + getSource().getOrigin());
         }
 
         Map<String, Object> frontMatter = getSource().getMeta();
-        String id = (String) frontMatter.get("id");
+
+        id = (String) frontMatter.get("id");
 
         excerptable = isExcerptable(site);
-        initExcerpt(frontMatter);
+        initExcerpt(site, frontMatter);
     }
 
-    private static boolean isExcerptable(Site site){
+    private static boolean isExcerptable(Site site) {
         Boolean bool = site.get("excerptable");
         return (bool == null || bool);
     }
 
-    private void initExcerpt(Map<String, Object> frontMatter) {
-        if(!excerptable){
+    private void initExcerpt(Site site, Map<String, Object> frontMatter) {
+        if (!excerptable) {
             log.debug("Skip process excerpt.");
             return;
         }
@@ -78,7 +81,7 @@ public class SourcePost extends AbstractSourcePage implements Post, Comparable<P
         }
 
         //default "<!--more-->";
-        String excerptSeparator = getSite().getConfig().get("excerpt_separator", DEFAULT_EXCERPT_SEPARATOR);
+        String excerptSeparator = site.getConfig().get("excerpt_separator", DEFAULT_EXCERPT_SEPARATOR);
         int index = content.indexOf(excerptSeparator);
         if (index > 0) {
             excerpt = content.substring(0, index);
@@ -95,27 +98,23 @@ public class SourcePost extends AbstractSourcePage implements Post, Comparable<P
         setExcerpt(excerpt);
     }
 
-    /* (non-Javadoc)
-     * @see org.opoo.press.impl.Convertible#convert()
-     */
     @Override
-    public void convert() {
-        super.convert();
-        if (excerptable) {
-            setExcerpt(getConverter().convert(getExcerpt()));
+    public void convert(Converter converter) {
+        super.convert(converter);
+        if (excerptable && converter != null) {
+            setExcerpt(converter.convert(getExcerpt()));
         }
     }
 
     @Override
-    public void render(Map<String, Object> rootMap) {
-        super.render(rootMap);
-
-        if (isRenderSkip()) {
+    public void render(Renderer renderer, Highlighter highlighter, Map<String, Object> rootMap) {
+        if (isSkipRender()) {
             return;
         }
 
-        if(excerptable) {
-            Renderer renderer = getSite().getRenderer();
+        super.render(renderer, highlighter, rootMap);
+
+        if (excerptable) {
             String excerpt = getExcerpt();
             if (renderer.isRenderRequired(this, excerpt)) {
                 log.debug("Rendering excerpt.");
@@ -144,11 +143,11 @@ public class SourcePost extends AbstractSourcePage implements Post, Comparable<P
      */
     @Override
     public String getExcerpt() {
-        return getContentHolder().getExcerpt();
+        return contentHolder.getExcerpt();
     }
 
-    public void setExcerpt(String excerpt){
-        getContentHolder().setExcerpt(excerpt);
+    public void setExcerpt(String excerpt) {
+        contentHolder.setExcerpt(excerpt);
     }
 
     public boolean isExcerptExtracted() {
@@ -164,9 +163,6 @@ public class SourcePost extends AbstractSourcePage implements Post, Comparable<P
         return excerptable;
     }
 
-    /* (non-Javadoc)
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
     @Override
     public int compareTo(Post o) {
         return o.getDate().compareTo(getDate());

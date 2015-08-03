@@ -21,39 +21,38 @@ import org.opoo.press.Source;
 
 /**
  * @author Alex Lin
- *
  */
 public class IdentityConverter implements Converter {
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return Integer.MAX_VALUE;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return Integer.MAX_VALUE;
+    }
 
-	/* (non-Javadoc)
-	 */
-	@Override
-	public boolean matches(Source src) {
-		return true;
-	}
+    /* (non-Javadoc)
+     */
+    @Override
+    public boolean matches(Source src) {
+        return true;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#convert(java.lang.String)
-	 */
-	@Override
-	public String convert(String content) {
-		return content;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Converter#convert(java.lang.String)
+     */
+    @Override
+    public String convert(String content) {
+        return content;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
-	 */
-	@Override
-	public String getOutputFileExtension(Source src) {
-		String name = src.getSourceEntry().getName();
-		return "." + FilenameUtils.getExtension(name);
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
+     */
+    @Override
+    public String getOutputFileExtension(Source src) {
+        String name = src.getOrigin().getName();
+        return "." + FilenameUtils.getExtension(name);
+    }
 }

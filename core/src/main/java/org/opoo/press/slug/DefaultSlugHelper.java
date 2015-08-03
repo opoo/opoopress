@@ -18,49 +18,48 @@ package org.opoo.press.slug;
 import org.opoo.press.SlugHelper;
 
 /**
- *
  * @author Alex Lin
  */
 public class DefaultSlugHelper implements SlugHelper {
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.SlugHelper#transform(java.lang.String)
-	 */
-	@Override
-	public String toSlug(String text) {
-		if(text == null || text.length() == 0){
-			return null;
-		}
-		text = text.toLowerCase();
-		text = text.replace(' ', '-');
-		char[] chars = text.toCharArray();
-		StringBuffer sb = new StringBuffer();
-		for(char c: chars){
-			toSlug(sb, c);
-		}
-		if(sb.length() > 0){
+    /* (non-Javadoc)
+     * @see org.opoo.press.SlugHelper#transform(java.lang.String)
+     */
+    @Override
+    public String toSlug(String text) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
+        text = text.toLowerCase();
+        text = text.replace(' ', '-');
+        char[] chars = text.toCharArray();
+        StringBuffer sb = new StringBuffer();
+        for (char c : chars) {
+            toSlug(sb, c);
+        }
+        if (sb.length() > 0) {
             trimDot(sb);
         }
-        if(sb.length() == 0){
-			throw new UnsupportedOperationException("Cannot process text '"
-					+ text + "' to slug, try configure another SlugHelper instead.");
-		}
-		return sb.toString();
-	}
+        if (sb.length() == 0) {
+            throw new UnsupportedOperationException("Cannot process text '"
+                    + text + "' to slug, try configure another SlugHelper instead.");
+        }
+        return sb.toString();
+    }
 
-	protected void toSlug(StringBuffer result, char c) {
-		//alpha numeric characters.
-        if((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '/' || c == '.'){
-			result.append(c);
-		}
-	}
-	
-	public static void trimDot(StringBuffer sb){
-		while(sb.length() > 0 && (sb.charAt(0) == '.' || sb.charAt(0) == ' ')){
-			sb.deleteCharAt(0);
-		}
-		while(sb.length() > 0 && (sb.charAt(sb.length() - 1) == '.' || sb.charAt(sb.length() - 1) == ' ')){
-			sb.deleteCharAt(sb.length() - 1);
-		}
-	}
+    protected void toSlug(StringBuffer result, char c) {
+        //alpha numeric characters.
+        if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '/' || c == '.') {
+            result.append(c);
+        }
+    }
+
+    public static void trimDot(StringBuffer sb) {
+        while (sb.length() > 0 && (sb.charAt(0) == '.' || sb.charAt(0) == ' ')) {
+            sb.deleteCharAt(0);
+        }
+        while (sb.length() > 0 && (sb.charAt(sb.length() - 1) == '.' || sb.charAt(sb.length() - 1) == ' ')) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+    }
 }

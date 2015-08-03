@@ -17,8 +17,7 @@ package org.opoo.press.task;
 
 /**
  * @author Alex Lin
- *
  */
-public interface CallableTask<T,V> {
-	V call(T input);
+public interface CallableTask<T, V> {
+    V call(T input);
 }

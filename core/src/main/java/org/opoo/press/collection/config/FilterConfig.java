@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opoo.press.collection.configuration;
+package org.opoo.press.collection.config;
 
 /**
  * @author Alex Lin
  */
-public interface FilterConfiguration {
+public interface FilterConfig {
 
     String getType();
 

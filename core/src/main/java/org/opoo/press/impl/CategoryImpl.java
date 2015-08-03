@@ -23,54 +23,53 @@ import java.util.List;
 
 /**
  * @author Alex Lin
- *
  */
-public class CategoryImpl extends AbstractMetaTag implements Category{
-	private Category parent;
-	private List<Category> children = Lists.newArrayList();
+public class CategoryImpl extends AbstractMetaTag implements Category {
+    private Category parent;
+    private List<Category> children = Lists.newArrayList();
 
-	public CategoryImpl(String slug, String name){
-		this(slug, name, null);
-	}
+    public CategoryImpl(String slug, String name) {
+        this(slug, name, null);
+    }
 
-	public CategoryImpl(String slug, String name, Category parent){
-		super(slug, name);
-		this.parent = parent;
+    public CategoryImpl(String slug, String name, Category parent) {
+        super(slug, name);
+        this.parent = parent;
 
-		if(parent != null){
-			parent.getChildren().add(this);
-		}
-	}
-	
-	/**
-	 * @return the parent
-	 */
-	@Override
-	public Category getParent() {
-		return parent;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Category#getChildren()
-	 */
-	@Override
-	public List<Category> getChildren() {
-		return children;
-	}
+        if (parent != null) {
+            parent.getChildren().add(this);
+        }
+    }
 
-	@Override
-	public String getPath() {
-		return parent != null ? parent.getPath() + "/" + getSlug() : getSlug();
-	}
+    /**
+     * @return the parent
+     */
+    @Override
+    public Category getParent() {
+        return parent;
+    }
 
-	public String toString(){
-		MoreObjects.ToStringHelper toStringHelper = MoreObjects.toStringHelper(this)
-				.add("slug", getSlug())
-				.add("name", getName())
-				.add("size", getPagesSize());
-		if(parent != null){
-			toStringHelper.add("parent", parent.getSlug());
-		}
-		return toStringHelper.toString();
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Category#getChildren()
+     */
+    @Override
+    public List<Category> getChildren() {
+        return children;
+    }
+
+    @Override
+    public String getPath() {
+        return parent != null ? parent.getPath() + "/" + getSlug() : getSlug();
+    }
+
+    public String toString() {
+        MoreObjects.ToStringHelper toStringHelper = MoreObjects.toStringHelper(this)
+                .add("slug", getSlug())
+                .add("name", getName())
+                .add("size", getPagesSize());
+        if (parent != null) {
+            toStringHelper.add("parent", parent.getSlug());
+        }
+        return toStringHelper.toString();
+    }
 }

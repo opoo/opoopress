@@ -35,7 +35,7 @@ public class ConfigurablePaginationUpdater extends DefaultPaginationUpdater {
         //pagination->permalink: ${urlWithoutExtension}-page-${pageNumber}.html         //url ends with '.html'
         //pagination->permalink: ${urlWithoutExtension}-page-${pageNumber}.${urlExtension} //url ends with other ext
         String urlFormat = (pagination != null) ? (String) pagination.get("permalink") : null;
-        if(urlFormat != null){
+        if (urlFormat != null) {
             String url = page.getUrl();
             String urlWithoutExtension = FilenameUtils.removeExtension(url);
             String urlExtension = FilenameUtils.getExtension(url);
@@ -50,16 +50,16 @@ public class ConfigurablePaginationUpdater extends DefaultPaginationUpdater {
             map.put("totalItems", pager.getTotalItems());
 
             page.setUrl(AbstractFreeMarkerRenderer.process(urlFormat, map));
-        }else{
+        } else {
             super.updateUrl(page, pager);
         }
 
         //pagination->title_suffix_format: ' - Page ${pageNumber} of ${totalPages}'
         //pagination->title_suffix_format: ' - Part ${pageNumber}'
         String titleSuffixFormat = (pagination != null) ? (String) pagination.get("title_suffix_format") : null;
-        if(titleSuffixFormat != null){
+        if (titleSuffixFormat != null) {
             page.set("title_suffix", AbstractFreeMarkerRenderer.process(titleSuffixFormat, pager));
-        }else{
+        } else {
             super.updateTitle(page, pager);
         }
     }

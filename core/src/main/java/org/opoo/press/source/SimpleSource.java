@@ -15,55 +15,54 @@
  */
 package org.opoo.press.source;
 
+import org.opoo.press.Origin;
 import org.opoo.press.Source;
-import org.opoo.press.SourceEntry;
 
 import java.io.Serializable;
 import java.util.Map;
 
 /**
  * @author Alex Lin
- *
  */
 public class SimpleSource implements Source, Serializable {
-	private final Map<String, Object> frontMatter;
-	private final String content;
-	private final SourceEntry sourceEntry;
-	
-	/**
-	 * @param sourceEntry
-	 * @param frontMatter
-	 * @param content
-	 */
-	public SimpleSource(SourceEntry sourceEntry,
-			Map<String, Object> frontMatter, String content) {
-		super();
-		this.sourceEntry = sourceEntry;
-		this.frontMatter = frontMatter;
-		this.content = content;
-	}
+    private final Map<String, Object> frontMatter;
+    private final String content;
+    private final Origin origin;
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Source#getSourceEntry()
-	 */
-	@Override
-	public SourceEntry getSourceEntry() {
-		return sourceEntry;
-	}
+    /**
+     * @param origin
+     * @param frontMatter
+     * @param content
+     */
+    public SimpleSource(Origin origin,
+                        Map<String, Object> frontMatter, String content) {
+        super();
+        this.origin = origin;
+        this.frontMatter = frontMatter;
+        this.content = content;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Source#getMeta()
-	 */
-	@Override
-	public Map<String, Object> getMeta() {
-		return frontMatter;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Source#getOrigin()
+     */
+    @Override
+    public Origin getOrigin() {
+        return origin;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Source#getContent()
-	 */
-	@Override
-	public String getContent() {
-		return content;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Source#getMeta()
+     */
+    @Override
+    public Map<String, Object> getMeta() {
+        return frontMatter;
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.Source#getContent()
+     */
+    @Override
+    public String getContent() {
+        return content;
+    }
 }

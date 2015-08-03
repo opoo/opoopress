@@ -20,31 +20,33 @@ import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
 
 /**
  * WikiText confluence converter. <code>*.confluence</code>
+ *
  * @author Alex Lin
  */
 public class WikiTextConfluenceConverter extends AbstractWikiTextConverter {
-	private MarkupParser parser = new MarkupParser(new ConfluenceLanguage());
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 130;
-	}
+    private MarkupParser parser = new MarkupParser(new ConfluenceLanguage());
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
-	 */
-	@Override
-	protected MarkupParser getMarkupParser() {
-		return parser;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 130;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
-	 */
-	@Override
-	protected String[] getInputFileExtensions() {
-		return new String[]{"confluence"};
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
+     */
+    @Override
+    protected MarkupParser getMarkupParser() {
+        return parser;
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
+     */
+    @Override
+    protected String[] getInputFileExtensions() {
+        return new String[]{"confluence"};
+    }
 }

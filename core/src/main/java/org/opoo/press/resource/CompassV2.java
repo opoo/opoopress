@@ -29,106 +29,105 @@ import java.util.Map;
 
 /**
  * @author Alex Lin
- *
  */
 class CompassV2 {
-	private static final Logger log = LoggerFactory.getLogger(Compass.class);
-	private String path;
-	private String config;
-	
-	private String compileScript;
-	private String watchScript;
-	
-	
-	static List<String> toCompassConfigFileLines(Map<String, Object> options){
-		List<String> lines = new ArrayList<String>();
-		for(Map.Entry<String, Object> en: options.entrySet()){
-			Object value = en.getValue();
-			if(value instanceof String && !((String)value).startsWith(":")){
-				value = "\"" + value + "\"";
-			}
-			String string = String.format("%s = %s", en.getKey(), value);
-			lines.add(string);
-		}
-		return lines;
-	}
-	
-	static String toCompassConfigRubyScript(Map<String, Object> options) {
-		StringBuffer sb = new StringBuffer("{");
-		for(Map.Entry<String, Object> en: options.entrySet()){
-			Object value = en.getValue();
-			if(value instanceof String && !((String)value).startsWith(":")){
-				value = "'" + value + "'";
-			}
-			if(sb.length() > 1){
-				sb.append(", ");
-			}
-			sb.append(":").append(en.getKey()).append(" => ").append(value); 
-		}
-		sb.append("}");
-		return sb.toString();
-	}
+    private static final Logger log = LoggerFactory.getLogger(Compass.class);
+    private String path;
+    private String config;
 
-	CompassV2(File path, Map<String,Object> options) {
-		this.path = FilenameUtils.separatorsToUnix(path.getAbsolutePath());
-		this.config = toCompassConfigRubyScript(options);
-	}
+    private String compileScript;
+    private String watchScript;
 
-	public void compile() {
-		if(compileScript == null){
-			compileScript = buildCompileScript();
-		}
-		runScriptlet(compileScript);
-	}
 
-	public void watch() {
-		if(watchScript == null){
-			watchScript = buildWatchScript();
-		}
-		runScriptlet(watchScript);
-	}
+    static List<String> toCompassConfigFileLines(Map<String, Object> options) {
+        List<String> lines = new ArrayList<String>();
+        for (Map.Entry<String, Object> en : options.entrySet()) {
+            Object value = en.getValue();
+            if (value instanceof String && !((String) value).startsWith(":")) {
+                value = "\"" + value + "\"";
+            }
+            String string = String.format("%s = %s", en.getKey(), value);
+            lines.add(string);
+        }
+        return lines;
+    }
 
-	private void runScriptlet(String script) {
-		log.debug(script);
-		new ScriptingContainer().runScriptlet(script);
-	}
+    static String toCompassConfigRubyScript(Map<String, Object> options) {
+        StringBuffer sb = new StringBuffer("{");
+        for (Map.Entry<String, Object> en : options.entrySet()) {
+            Object value = en.getValue();
+            if (value instanceof String && !((String) value).startsWith(":")) {
+                value = "'" + value + "'";
+            }
+            if (sb.length() > 1) {
+                sb.append(", ");
+            }
+            sb.append(":").append(en.getKey()).append(" => ").append(value);
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 
-	private void buildBasicScript(PrintWriter script) {
-		//script.println("require 'rubygems'");
-		script.println("require 'compass'");
-		script.println("frameworks = Dir.new(Compass::Frameworks::DEFAULT_FRAMEWORKS_PATH).path");
-		script.println("Compass::Frameworks.register_directory(File.join(frameworks, 'compass'))");
-		script.println("Compass::Frameworks.register_directory(File.join(frameworks, 'blueprint'))");
+    CompassV2(File path, Map<String, Object> options) {
+        this.path = FilenameUtils.separatorsToUnix(path.getAbsolutePath());
+        this.config = toCompassConfigRubyScript(options);
+    }
+
+    public void compile() {
+        if (compileScript == null) {
+            compileScript = buildCompileScript();
+        }
+        runScriptlet(compileScript);
+    }
+
+    public void watch() {
+        if (watchScript == null) {
+            watchScript = buildWatchScript();
+        }
+        runScriptlet(watchScript);
+    }
+
+    private void runScriptlet(String script) {
+        log.debug(script);
+        new ScriptingContainer().runScriptlet(script);
+    }
+
+    private void buildBasicScript(PrintWriter script) {
+        //script.println("require 'rubygems'");
+        script.println("require 'compass'");
+        script.println("frameworks = Dir.new(Compass::Frameworks::DEFAULT_FRAMEWORKS_PATH).path");
+        script.println("Compass::Frameworks.register_directory(File.join(frameworks, 'compass'))");
+        script.println("Compass::Frameworks.register_directory(File.join(frameworks, 'blueprint'))");
 //		script.println("Compass.add_project_configuration '" + config + "'");
-		script.println("Compass.add_configuration(" + config + ", 'custom')");
-		script.println("Compass.configure_sass_plugin!");
-	}
+        script.println("Compass.add_configuration(" + config + ", 'custom')");
+        script.println("Compass.configure_sass_plugin!");
+    }
 
-	private String buildCompileScript() {
-		StringWriter raw = new StringWriter();
-		PrintWriter script = new PrintWriter(raw);
+    private String buildCompileScript() {
+        StringWriter raw = new StringWriter();
+        PrintWriter script = new PrintWriter(raw);
 
-		buildBasicScript(script);
+        buildBasicScript(script);
 
-		script.println("Dir.chdir('" + path + "') do ");
-		// script.println("Dir.chdir(File.dirname('" + config + "')) do ");
-		script.println("  Compass.compiler.run");
-		script.println("end");
-		script.flush();
+        script.println("Dir.chdir('" + path + "') do ");
+        // script.println("Dir.chdir(File.dirname('" + config + "')) do ");
+        script.println("  Compass.compiler.run");
+        script.println("end");
+        script.flush();
 
-		return raw.toString();
-	}
+        return raw.toString();
+    }
 
-	private String buildWatchScript() {
-		StringWriter raw = new StringWriter();
-		PrintWriter script = new PrintWriter(raw);
+    private String buildWatchScript() {
+        StringWriter raw = new StringWriter();
+        PrintWriter script = new PrintWriter(raw);
 
-		buildBasicScript(script);
-		script.println("require 'compass/commands'");
-		script.println("command = Compass::Commands::WatchProject.new('" + path	+ "', {})");
-		script.println("command.perform");
-		script.flush();
+        buildBasicScript(script);
+        script.println("require 'compass/commands'");
+        script.println("command = Compass::Commands::WatchProject.new('" + path + "', {})");
+        script.println("command.perform");
+        script.flush();
 
-		return raw.toString();
-	}
+        return raw.toString();
+    }
 }

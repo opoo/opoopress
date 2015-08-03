@@ -15,15 +15,15 @@
  */
 package org.opoo.util;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 
 /**
  * @author Alex Lin
@@ -43,7 +43,7 @@ public abstract class PathUtils {
 			}
 		}else{
 			if(!dir.isDirectory()){
-				throw new IllegalArgumentException("Path exits but not a directory: " + dir);
+				throw new IllegalArgumentException("Path exists but not a directory: " + dir);
 			}
 		}
 		//Create new directory whatever
@@ -64,7 +64,7 @@ public abstract class PathUtils {
 			}
 		}else{
 			if(!file.isFile()){
-				throw new IllegalArgumentException("Path exits but not a file: " + file);
+				throw new IllegalArgumentException("Path exists but not a file: " + file);
 			}
 		}
 		
@@ -181,7 +181,7 @@ public abstract class PathUtils {
 		if(filePath.startsWith(dirPath)){
 			return filePath.substring(dirPath.length());
 		}else {
-			throw new IllegalArgumentException("File not in base directory.");
+			throw new IllegalArgumentException("File '" + file + "' not in base directory '" + baseDir + "'");
 		}
 	}
 
@@ -195,7 +195,7 @@ public abstract class PathUtils {
 		if(filePath.startsWith(baseDir)){
 			return filePath.substring(baseDir.length());
 		}else {
-			throw new IllegalArgumentException("File not in base directory.");
+			throw new IllegalArgumentException("File '" + file + "' not in base directory '" + baseDir + "'");
 		}
 	}
 }

@@ -18,7 +18,7 @@ package org.opoo.press.collection;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.opoo.press.collection.configuration.MetaTagConfiguration;
+import org.opoo.press.collection.config.MetaTagConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -28,14 +28,14 @@ import java.util.Map;
  */
 public class MetaTagsUtils {
 
-    public static List<String> getStringTags(Map<String,?> meta, MetaTagConfiguration def){
+    public static List<String> getStringTags(Map<String, ?> meta, MetaTagConfig def) {
         List<String> stringMetaValues = Lists.newArrayList();
 
         processSingleMeta(meta, def, def.getMeta(), stringMetaValues);
 
         String[] alias = def.getAlias();
-        if(alias != null){
-            for(String metaName: alias){
+        if (alias != null) {
+            for (String metaName : alias) {
                 processSingleMeta(meta, def, metaName, stringMetaValues);
             }
         }
@@ -43,26 +43,26 @@ public class MetaTagsUtils {
     }
 
 
-    private static void processSingleMeta(Map<String,?> meta, MetaTagConfiguration def, String metaName, List<String> stringMetaValues){
+    private static void processSingleMeta(Map<String, ?> meta, MetaTagConfig def, String metaName, List<String> stringMetaValues) {
         Object o = meta.get(metaName);
-        if(o == null){
+        if (o == null) {
             return;
         }
 
-        if(o instanceof List){
+        if (o instanceof List) {
             stringMetaValues.addAll((List<String>) o);
             return;
         }
 
         String stringValue = o.toString();
-        if(StringUtils.isBlank(stringValue)){
+        if (StringUtils.isBlank(stringValue)) {
             return;
         }
 
-        if(def.getSeparator() != null){
+        if (def.getSeparator() != null) {
             List<String> strings = Splitter.on(def.getSeparator()).omitEmptyStrings().trimResults().splitToList(stringValue);
             stringMetaValues.addAll(strings);
-        }else{
+        } else {
             stringMetaValues.add(stringValue.trim());
         }
     }

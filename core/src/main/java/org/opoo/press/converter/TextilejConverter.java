@@ -26,51 +26,50 @@ import java.io.StringWriter;
 
 /**
  * @author Alex Lin
- *
  */
 public class TextilejConverter implements Converter {
-	private MarkupParser parser = new MarkupParser(new TextileDialect());
-	
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 120;
-	}
+    private MarkupParser parser = new MarkupParser(new TextileDialect());
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#convert(java.lang.String)
-	 */
-	@Override
-	public String convert(String content) {
-		StringWriter writer = new StringWriter();
-		HtmlDocumentBuilder builder = new HtmlDocumentBuilder(writer);
-		builder.setEmitAsDocument(false);
-		parser.setBuilder(builder);
-		
-		parser.parse(content);
-		parser.setBuilder(null);
-		return writer.toString();
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 120;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
-	 */
-	@Override
-	public String getOutputFileExtension(Source src) {
-		return ".html";
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Converter#convert(java.lang.String)
+     */
+    @Override
+    public String convert(String content) {
+        StringWriter writer = new StringWriter();
+        HtmlDocumentBuilder builder = new HtmlDocumentBuilder(writer);
+        builder.setEmitAsDocument(false);
+        parser.setBuilder(builder);
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Converter#matches(org.opoo.press.Source)
-	 */
-	@Override
-	public boolean matches(Source src) {
-		String name = src.getSourceEntry().getName().toLowerCase();
-		if(FilenameUtils.isExtension(name, "textile")){
-			return true;
-		}
-		return false;
-	}
+        parser.parse(content);
+        parser.setBuilder(null);
+        return writer.toString();
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.Converter#getOutputFileExtension(org.opoo.press.Source)
+     */
+    @Override
+    public String getOutputFileExtension(Source src) {
+        return ".html";
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.Converter#matches(org.opoo.press.Source)
+     */
+    @Override
+    public boolean matches(Source src) {
+        String name = src.getOrigin().getName().toLowerCase();
+        if (FilenameUtils.isExtension(name, "textile")) {
+            return true;
+        }
+        return false;
+    }
 }

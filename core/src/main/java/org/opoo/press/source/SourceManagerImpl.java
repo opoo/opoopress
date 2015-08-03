@@ -16,8 +16,9 @@
 package org.opoo.press.source;
 
 import org.apache.commons.io.FileUtils;
+import org.opoo.press.FileOrigin;
+import org.opoo.press.Origin;
 import org.opoo.press.Source;
-import org.opoo.press.SourceEntry;
 import org.opoo.press.SourceManager;
 import org.yaml.snakeyaml.Yaml;
 
@@ -38,7 +39,12 @@ public class SourceManagerImpl implements SourceManager {
      */
     @Override
     public void saveSourceToFile(Source source) {
-        File file = source.getSourceEntry().getFile();
+        Origin origin = source.getOrigin();
+        if (!(origin instanceof FileOrigin)) {
+            throw new IllegalArgumentException("No a file origin: " + origin);
+        }
+
+        File file = ((FileOrigin) origin).getFile();
         File dir = file.getParentFile();
         if (!dir.exists()) {
             dir.mkdirs();
@@ -65,30 +71,12 @@ public class SourceManagerImpl implements SourceManager {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.opoo.press.SourceManager#buildEntry(java.io.File, java.lang.String)
-     */
-    @Override
-    public SourceEntry buildEntry(File sourceDir, String path) {
-//		path = FilenameUtils.separatorsToUnix(path);
-//		String[] arr = StringUtils.split(path, "/");
-//
-//		SourceEntry entry = null;
-//		for(String s: arr){
-//			sourceDir = new File(sourceDir, s);
-//			entry = new SourceEntry(entry, sourceDir);
-//		}
-//
-//		return entry;
-        throw new UnsupportedOperationException();
-    }
 
     /* (non-Javadoc)
      * @see org.opoo.press.SourceManager#buildSource(java.io.File, java.lang.String, java.util.Map, java.lang.String)
      */
     @Override
     public Source buildSource(File sourceDir, String path, Map<String, Object> meta, String content) {
-        SourceEntry entry = buildEntry(sourceDir, path);
-        return new SimpleSource(entry, meta, content);
+        return null;
     }
 }

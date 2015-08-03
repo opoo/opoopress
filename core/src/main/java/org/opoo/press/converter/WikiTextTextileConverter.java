@@ -20,31 +20,33 @@ import org.eclipse.mylyn.wikitext.textile.core.TextileLanguage;
 
 /**
  * WikiText Textile converter. <code>*.textile</code>
+ *
  * @author Alex Lin
  */
 public class WikiTextTextileConverter extends AbstractWikiTextConverter {
-	private MarkupParser parser = new MarkupParser(new TextileLanguage());
-	/* (non-Javadoc)
-	 * @see org.opoo.press.Ordered#getOrder()
-	 */
-	@Override
-	public int getOrder() {
-		return 150;
-	}
+    private MarkupParser parser = new MarkupParser(new TextileLanguage());
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
-	 */
-	@Override
-	protected MarkupParser getMarkupParser() {
-		return parser;
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.Ordered#getOrder()
+     */
+    @Override
+    public int getOrder() {
+        return 150;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
-	 */
-	@Override
-	protected String[] getInputFileExtensions() {
-		return new String[]{"textile"};
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getMarkupParser()
+     */
+    @Override
+    protected MarkupParser getMarkupParser() {
+        return parser;
+    }
+
+    /* (non-Javadoc)
+     * @see org.opoo.press.converter.AbstractWikiTextConverter#getInputFileExtensions()
+     */
+    @Override
+    protected String[] getInputFileExtensions() {
+        return new String[]{"textile"};
+    }
 }

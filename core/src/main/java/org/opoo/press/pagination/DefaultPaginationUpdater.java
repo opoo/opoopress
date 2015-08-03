@@ -26,7 +26,7 @@ import org.opoo.press.PaginationUpdater;
 public class DefaultPaginationUpdater implements PaginationUpdater {
     @Override
     public void apply(Page page) {
-        if(page.getPager() != null && page.getPager().getPageNumber() > 1){
+        if (page.getPager() != null && page.getPager().getPageNumber() > 1) {
             update(page, page.getPager());
         }
     }
@@ -40,10 +40,10 @@ public class DefaultPaginationUpdater implements PaginationUpdater {
         String url = page.getDecodedUrl();
         int pageNumber = pager.getPageNumber();
 
-        if(url.endsWith("/")){
+        if (url.endsWith("/")) {
             // /a/b/c/name/ --> /a/b/c/name/page/2/
             url += "page/" + pageNumber + "/";
-        }else{
+        } else {
             //  /a/b/c/name.html --> /a/b/c/name-p2.html
             url = FilenameUtils.removeExtension(url) + "-p" + pageNumber
                     + "." + FilenameUtils.getExtension(url);
@@ -52,9 +52,9 @@ public class DefaultPaginationUpdater implements PaginationUpdater {
     }
 
     protected void updateTitle(Page page, Pager pager) {
-        if(page.getTitle() != null){
+        if (page.getTitle() != null) {
             page.set("title_suffix", " - Part " + pager.getPageNumber());
-        }else{
+        } else {
             page.set("title_suffix", " - Page " + pager.getPageNumber());
         }
     }

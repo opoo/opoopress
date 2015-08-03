@@ -16,10 +16,12 @@
 package org.opoo.press.impl;
 
 import org.opoo.press.Collection;
+import org.opoo.press.Page;
 import org.opoo.press.Post;
 import org.opoo.press.RelatedPostsFinder;
 import org.opoo.press.Site;
 import org.opoo.press.SiteAware;
+import org.opoo.press.util.PageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,25 +45,32 @@ public class RandomPostsFinder implements RelatedPostsFinder, SiteAware {
     @Override
     public List<Post> findRelatedPosts(Post post, int size) {
         Collection collection = site.getCollections().get("post");
-        if(collection == null){
+        if (collection == null) {
             return null;
         }
 
-        List<Post> posts = (List<Post>) collection.getPages();
+        List<Page> posts = collection.getPages();
         int postSize = posts.size();
-        if(postSize <= size){
-            List<Post> randomPosts = new ArrayList<Post>(posts);
-            randomPosts.remove(post);
+        if (postSize <= size) {
+            List<Post> randomPosts = new ArrayList<Post>();
+            for (Page page : posts) {
+                Post temp = PageUtils.unwrap(page, Post.class);
+                if (!post.equals(temp)) {
+                    randomPosts.add(temp);
+                }
+            }
+            //randomPosts.remove(post);
             return randomPosts;
         }
 
         SecureRandom random = new SecureRandom();
         List<Post> randomPosts = new ArrayList<Post>();
         int count = 0;
-        while(count < size){
+        while (count < size) {
             int x = random.nextInt(postSize);
-            Post temp = posts.get(x);
-            if(!randomPosts.contains(temp) && !temp.equals(post)){
+            Page page = posts.get(x);
+            Post temp = PageUtils.unwrap(page, Post.class);
+            if (!temp.equals(post) && !randomPosts.contains(temp)) {
                 randomPosts.add(temp);
                 count++;
             }
@@ -74,7 +83,7 @@ public class RandomPostsFinder implements RelatedPostsFinder, SiteAware {
         this.site = site;
 
         Number num = site.getConfig().get("random_posts");
-        if(num != null){
+        if (num != null) {
             this.size = num.intValue();
             log.debug("Set random posts size: {}", size);
         }

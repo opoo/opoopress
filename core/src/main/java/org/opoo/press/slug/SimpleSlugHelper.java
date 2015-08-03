@@ -27,19 +27,19 @@ public class SimpleSlugHelper implements SlugHelper {
 
     @Override
     public String toSlug(String text) {
-        if(text == null || text.length() == 0){
+        if (text == null || text.length() == 0) {
             return null;
         }
 
         char[] chars = text.toCharArray();
         StringBuffer sb = new StringBuffer();
-        for(char c: chars){
+        for (char c : chars) {
             toSlug(text, sb, c);
         }
-        if(sb.length() > 0){
+        if (sb.length() > 0) {
             DefaultSlugHelper.trimDot(sb);
         }
-        if(sb.length() == 0){
+        if (sb.length() == 0) {
             throw new UnsupportedOperationException("Cannot process text '"
                     + text + "' to slug, try configure another SlugHelper instead.");
         }
@@ -48,9 +48,9 @@ public class SimpleSlugHelper implements SlugHelper {
 
     protected void toSlug(String text, StringBuffer result, char c) {
         // \/:*?"<>| not allowed for file name.
-        if(c != '\\' && c != ':' && c != '*' && c != '?' && c != '"' && c != '<' && c != '>' && c != '|'){
+        if (c != '\\' && c != ':' && c != '*' && c != '?' && c != '"' && c != '<' && c != '>' && c != '|') {
             result.append(c);
-        }else{
+        } else {
             log.debug("Slug contains illegal char, remote it: {} -> '{}'", text, c);
         }
     }

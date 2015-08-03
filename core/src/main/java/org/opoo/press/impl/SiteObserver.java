@@ -19,24 +19,25 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.opoo.press.Observer;
 import org.opoo.press.SiteConfig;
-import org.opoo.press.SourceEntry;
-import org.opoo.press.SourceEntryLoader;
 import org.opoo.press.file.Result;
 import org.opoo.press.file.Watchable;
 import org.opoo.press.file.WatchableDirectory;
 import org.opoo.press.file.WatchableFiles;
+import org.opoo.press.source.FileOriginImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * @author Alex Lin
  */
-public class SiteObserver implements Observer{
+public class SiteObserver implements Observer {
     private static final Logger log = LoggerFactory.getLogger(SiteObserver.class);
 
     private final SiteImpl site;
@@ -46,7 +47,7 @@ public class SiteObserver implements Observer{
     private List<Watchable> otherWatchers = new ArrayList<Watchable>();
 
 
-    SiteObserver(SiteImpl site){
+    SiteObserver(SiteImpl site) {
         this.site = site;
 
         themeObserver = site.getTheme().getObserver();
@@ -59,35 +60,36 @@ public class SiteObserver implements Observer{
         configWatchers.add(themeConfigWatcher);
 
         List<File> sources = site.getSources();
-        for(File source: sources){
+        for (File source : sources) {
             otherWatchers.add(new WatchableDirectory(source));
         }
 
         otherWatchers.add(new WatchableDirectory(site.getTemplates()));
 
         List<File> assets = site.getAssets();
-        for(File asset: assets){
+        for (File asset : assets) {
             otherWatchers.add(new StaticFilesWatcher(asset));
         }
     }
 
     /**
-     * Create configuration files FileFilter.
+     * Create config files FileFilter.
+     *
      * @return file filter
      */
-    private FileFilter createConfigFilesFilter(){
+    private FileFilter createConfigFilesFilter() {
         SiteConfig config = site.getConfig();
         boolean useDefaultConfigFiles = config.useDefaultConfigFiles();
-        if(useDefaultConfigFiles){
+        if (useDefaultConfigFiles) {
             log.debug("Using default config files.");
             return SiteConfigImpl.DEFAULT_CONFIG_FILES_FILTER;
-        }else{//custom config files
+        } else {//custom config files
             final File[] configFiles = config.getConfigFiles();
-            return new FileFilter(){
+            return new FileFilter() {
                 @Override
                 public boolean accept(File file) {
-                    for(File configFile: configFiles){
-                        if(configFile.equals(file)){
+                    for (File configFile : configFiles) {
+                        if (configFile.equals(file)) {
                             return true;
                         }
                     }
@@ -99,80 +101,80 @@ public class SiteObserver implements Observer{
 
     @Override
     public void initialize() throws Exception {
-        if(themeObserver != null){
+        if (themeObserver != null) {
             themeObserver.initialize();
         }
 
-        for(Watchable watcher: configWatchers){
+        for (Watchable watcher : configWatchers) {
             watcher.initialize();
         }
 
-        for(Watchable watcher: otherWatchers){
+        for (Watchable watcher : otherWatchers) {
             watcher.initialize();
         }
     }
 
     @Override
     public void check() throws Exception {
-        if(themeObserver != null){
+        if (themeObserver != null) {
             themeObserver.check();
         }
 
-        for(Watchable watcher: configWatchers){
+        for (Watchable watcher : configWatchers) {
             Result result = watcher.check();
-            if(!result.isEmpty()) {
+            if (!result.isEmpty()) {
                 log.info("Configuration file changed: \n{}", result.toString());
                 throw new ConfigChangedException(result);
             }
         }
 
         Result result = Result.newResult();
-        for(Watchable watcher: otherWatchers){
+        for (Watchable watcher : otherWatchers) {
             Result check = watcher.check();
-            if(!check.isEmpty()){
+            if (!check.isEmpty()) {
                 result.addResult(check);
             }
         }
-        if(!result.isEmpty()){
+        if (!result.isEmpty()) {
             log.info("Source file(s) changed: \n{}", result.toString());
             long start = System.currentTimeMillis();
             //force build
             site.build(true);
             log.info("Build time: {}ms", System.currentTimeMillis() - start);
-        }else{
+        } else {
             log.debug("Nothing to build - all site output files are up to date.");
         }
     }
 
     @Override
     public void destroy() throws Exception {
-        if(themeObserver != null){
+        if (themeObserver != null) {
             themeObserver.destroy();
         }
 
-        for(Watchable watcher: configWatchers){
+        for (Watchable watcher : configWatchers) {
             watcher.destroy();
         }
 
-        for(Watchable watcher: otherWatchers){
+        for (Watchable watcher : otherWatchers) {
             watcher.destroy();
         }
     }
 
 
-    public static class ConfigChangedException extends Exception{
+    public static class ConfigChangedException extends Exception {
         private Result result;
 
         public ConfigChangedException(Result result) {
             this.result = result;
         }
 
-        public Result getResult(){
+        public Result getResult() {
             return result;
         }
     }
 
-    private class StaticFilesWatcher extends WatchableDirectory{
+    private class StaticFilesWatcher extends WatchableDirectory {
         private File dir;
 
         public StaticFilesWatcher(File directory) {
@@ -191,11 +193,36 @@ public class SiteObserver implements Observer{
 
         @Override
         public void onFileChange(File file) {
-            SourceEntryLoader loader = site.getFactory().getSourceEntryLoader();
-            SourceEntry sourceEntry = loader.buildSourceEntry(dir, file);
-            StaticFileImpl staticFile = new StaticFileImpl(site, sourceEntry);
+            FileOriginImpl origin = buildOrigin(dir, file);
+            StaticFileImpl staticFile = new StaticFileImpl(site, origin);
             staticFile.write(site.getDestination());
             log.info("Copy static file: {} => {}", file, site.getDestination());
+        }
+
+        private FileOriginImpl buildOrigin(File root, File file) {
+            List<File> files = new ArrayList<File>();
+
+            File parent = file.getParentFile();
+            if (parent == null) {
+                throw new IllegalArgumentException("Directory must contains file");
+            }
+
+            while (!parent.equals(root)) {
+                files.add(parent);
+                parent = parent.getParentFile();
+            }
+
+            FileOriginImpl parentOrigin = null;
+            if (!files.isEmpty()) {
+                Collections.reverse(files);
+                Iterator<File> iterator = files.iterator();
+                parentOrigin = new FileOriginImpl(iterator.next(), root);
+                while (iterator.hasNext()) {
+                    parentOrigin = new FileOriginImpl(iterator.next(), root, parentOrigin);
+                }
+            }
+
+            return new FileOriginImpl(file, root, parentOrigin);
         }
 
         @Override
@@ -204,11 +231,11 @@ public class SiteObserver implements Observer{
             String filePath = file.getAbsolutePath();
             String dirPath = dir.getAbsolutePath();
             String string = filePath.replace(dirPath, "");
-            while(string.startsWith("/") || string.startsWith("\\")){
+            while (string.startsWith("/") || string.startsWith("\\")) {
                 string = string.substring(1);
             }
             File destFile = new File(site.getDestination(), string);
-            if(destFile.exists()){
+            if (destFile.exists()) {
                 FileUtils.deleteQuietly(destFile);
                 log.info("Delete static file: {}", destFile);
             }

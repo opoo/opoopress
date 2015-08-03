@@ -27,20 +27,20 @@ import java.util.List;
  */
 public class NoOpRelatedPostsFinder implements RelatedPostsFinder {
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.RelatedPostsFinder#findRelatedPosts(org.opoo.press.Post)
-	 */
-	@Override
-	public List<Post> findRelatedPosts(Post post) {
-		return Collections.emptyList();
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.RelatedPostsFinder#findRelatedPosts(org.opoo.press.Post)
+     */
+    @Override
+    public List<Post> findRelatedPosts(Post post) {
+        return Collections.emptyList();
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opoo.press.RelatedPostsFinder#findRelatedPosts(org.opoo.press.Post, int)
-	 */
-	@Override
-	public List<Post> findRelatedPosts(Post post, int size) {
-		return Collections.emptyList();
-	}
+    /* (non-Javadoc)
+     * @see org.opoo.press.RelatedPostsFinder#findRelatedPosts(org.opoo.press.Post, int)
+     */
+    @Override
+    public List<Post> findRelatedPosts(Post post, int size) {
+        return Collections.emptyList();
+    }
 
 }

@@ -33,27 +33,27 @@ import java.util.Map;
 /**
  * @author Alex Lin
  */
-public class PreRenderProcessor extends ProcessorAdapter{
+public class PreRenderProcessor extends ProcessorAdapter {
     private static final Logger log = LoggerFactory.getLogger(PreRenderProcessor.class);
 
     @Override
     public void preRender(Site site) {
-        List<Map<String,String>> preRenderConfiguration = site.get("pre_render");
-        if(preRenderConfiguration == null || preRenderConfiguration.isEmpty()){
-            log.debug("No 'pre_render' defined in site configuration, skip process.");
+        List<Map<String, String>> preRenderConfiguration = site.get("pre_render");
+        if (preRenderConfiguration == null || preRenderConfiguration.isEmpty()) {
+            log.debug("No 'pre_render' defined in site config, skip process.");
             return;
         }
 
         Renderer renderer = site.getRenderer();
-        File workingTemplateDir = new File( site.getWorking(), "templates");
+        File workingTemplateDir = new File(site.getWorking(), "templates");
         workingTemplateDir.mkdirs();
 
         log.debug("Pre render content in directory: {}", workingTemplateDir);
 
-        for(Map<String,String> preRenderItem: preRenderConfiguration){
+        for (Map<String, String> preRenderItem : preRenderConfiguration) {
             String template = preRenderItem.get("template");
             String output = preRenderItem.get("output");
-            if(template == null || output == null){
+            if (template == null || output == null) {
                 log.warn("pre_render item defined error, skip process {}", preRenderItem);
                 continue;
             }
@@ -64,7 +64,7 @@ public class PreRenderProcessor extends ProcessorAdapter{
     private void render(Site site, Renderer renderer, File workingTemplateDir,
                         String template, String output) {
         try {
-            Map<String, Object> map = new HashMap<String,Object>();
+            Map<String, Object> map = new HashMap<String, Object>();
             map.put("site", site);
             map.put("root_url", site.getRoot());
             map.put("basedir", site.getRoot());
