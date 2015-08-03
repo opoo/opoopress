@@ -86,9 +86,9 @@
                         </goals>
                         <configuration>
                             <!--  These artifacts and their children should not be added to the jar's lib directory -->
-                            <excludeArtifactIds>opoopress-core,junit</excludeArtifactIds>
+                            <excludeArtifactIds>opoopress-core,junit,opoopress-api</excludeArtifactIds>
                             <!--  because of this setting, transitive resources for added libs may needed to be added manually
-                             or this configuration block will need to be modified -->
+                             or this config block will need to be modified -->
                             <excludeTransitive>true</excludeTransitive>
                             <outputDirectory>${project.build.directory}/plugins</outputDirectory>
                         </configuration>
@@ -103,6 +103,16 @@
                 <version>2.2</version>
                 <configuration>
                     <classifier>classes</classifier>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
                 </configuration>
             </plugin>
 
