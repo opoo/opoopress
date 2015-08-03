@@ -22,13 +22,14 @@ import java.util.Map;
  *
  * @author Alex Lin
  */
-public interface Source {
+public interface Source{
     String TRIPLE_DASHED_LINE = "---";
 
     /**
-     * @return source entry
+     * Source origin.
+     * @return
      */
-    SourceEntry getSourceEntry();
+    Origin getOrigin();
 
     /**
      * YAML front-matter header.

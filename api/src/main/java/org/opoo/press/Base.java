@@ -23,7 +23,7 @@ import java.util.Date;
  *
  * @author Alex Lin
  */
-public interface Base extends Convertible{
+public interface Base extends Writable, Convertible{
     String DATE_FORMAT_PATTERN_1 = "yyyy-MM-dd HH:mm";
     String DATE_FORMAT_PATTERN_2 = "yyyy-MM-dd HH:mm:ss";
 
@@ -49,6 +49,10 @@ public interface Base extends Convertible{
      */
     String getTitle();
 
+    void setUrlEncode(boolean urlEncode);
+
+    void setUrlDecode(boolean urlDecode);
+
     /**
      * Return the URL.
      * It's part of output URL, start with a '/', relative to
@@ -62,9 +66,14 @@ public interface Base extends Convertible{
      *
      * @return the page or post main URL
      * @see Site#getRoot()
+     * @see #getEncodedUrl()
      */
     String getUrl();
 
+    /**
+     * Set new url.
+     * @param original url
+     */
     void setUrl(String url);
 
     /**
@@ -73,13 +82,13 @@ public interface Base extends Convertible{
      */
     String getDecodedUrl();
 
+    String getOriginalUrl();
+
     /**
-     * The origin file path of the source file, not source directory prefix.
-     * Such as '/about/index.markdown'.
-     *
-     * @return the origin file path
+     * @see #getUrl()
+     * @return encoded url
      */
-    String getPath();
+    String getEncodedUrl();
 
     /**
      * The layout of source file.
@@ -100,8 +109,6 @@ public interface Base extends Convertible{
      */
     String getPermalink();
 
-//	boolean isPublished();
-
     /**
      * The date format in the source file is 'yyyy-MM-dd HH:mm' or
      * 'yyyy-MM-dd HH:mm:ss'.
@@ -119,40 +126,28 @@ public interface Base extends Convertible{
     Date getUpdated();
 
     /**
-     * The output date format of the date.
      *
-     * @return date format string
-     * @see #getDate()
-     */
-    String getDateFormatted();
-
-    /**
-     * The output date format of the updated date.
-     *
-     * @return updated date format string
-     * @see #getUpdated()
-     */
-    String getUpdatedFormatted();
-
-    /**
-     *
-     * @return
+     * @return true or false, default true.
      */
     boolean isPublished();
+
+    void setOutputFileExtension(String outputFileExtension);
+
+    String getOutputFileExtension();
 
     /**
      * Get meta data.
      *
-     * @param name
-     * @return value
+     * @param name of meta
+     * @return value of meta
      */
     <T> T get(String name);
 
     /**
      * Set meta data.
      *
-     * @param name
-     * @param value
+     * @param name of meta
+     * @param value of meta
      * @see #get(String)
      */
     <T> void set(String name, T value);

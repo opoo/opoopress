@@ -38,7 +38,5 @@ public interface MetaTag {
 
     Config getConfig();
 
-    //<C extends Config> C getConfig(Class<C> clz);
-
     void setPage(Page page);
 }

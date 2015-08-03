@@ -22,11 +22,11 @@ import java.util.List;
  */
 public interface Collection {
 
-    Config getConfiguration();
+    Config getConfig();
 
     String getName();
 
-    List<? extends Page> getPages();
+    List<Page> getPages();
 
     ListHolder<Tag> getTagsHolder();
 

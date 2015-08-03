@@ -32,5 +32,4 @@ public interface StaticFile extends Writable {
      * @param dest
      */
     void write(File dest);
-
 }

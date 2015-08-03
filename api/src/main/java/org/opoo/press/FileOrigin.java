@@ -16,12 +16,11 @@
 package org.opoo.press;
 
 import java.io.File;
-import java.io.Serializable;
 
 /**
  * @author Alex Lin
  */
-public interface SourceEntry extends Serializable{
+public interface FileOrigin extends Origin{
     /**
      * The file.
      * @return
@@ -32,6 +31,7 @@ public interface SourceEntry extends Serializable{
      * The name of file.
      * @return
      */
+    @Override
     String getName();
 
     /**
@@ -56,5 +56,6 @@ public interface SourceEntry extends Serializable{
      * Path from source directory to this file.
      * @return "" or string starts with "/".
      */
+    @Override
     String getPath();
 }

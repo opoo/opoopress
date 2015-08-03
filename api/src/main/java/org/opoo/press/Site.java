@@ -49,13 +49,13 @@ public interface Site extends SiteBuilder, SiteHelper {
 
     /**
      * @return all posts
-     * @deprecated using getCollections().get("post").getPages();
+     * @deprecated using {@link #getCollections()}.get("post").getPages();
      */
     @Deprecated
     List<Post> getPosts();
 
     /**
-     * @deprecated using getCollections().get("page").getPages();
+     * @deprecated using {@link #getCollections()}.get("page").getPages();
      * @return all pages(except posts)
      */
     @Deprecated
@@ -63,7 +63,20 @@ public interface Site extends SiteBuilder, SiteHelper {
 
     List<StaticFile> getStaticFiles();
 
+    /**
+     * All pages of this site.
+     * This is an immutable list, call {@link Site#addPage(Page)} to add page, don't call {@link List#add(Object)} method.
+     * @return all pages.
+     * @see #addPage(Page)
+     */
     List<Page> getAllPages();
+
+    /**
+     * Add page to site
+     * @param page the page to add
+     * @return added page, maybe a PageWrapper object.
+     */
+    Page addPage(Page page);
 
     Date getTime();
 
@@ -84,7 +97,7 @@ public interface Site extends SiteBuilder, SiteHelper {
     boolean showDrafts();
 
     /**
-     * Get value from configuration file or site variables.
+     * Get value from config file or site variables.
      *
      * @param name
      * @return value

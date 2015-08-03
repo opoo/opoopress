@@ -18,13 +18,6 @@ package org.opoo.press;
 /**
  * @author Alex Lin
  */
-public interface SourceParser {
-    /**
-     * Parse SourceEntry to Source.
-     *
-     * @param sourceEntry
-     * @return source
-     * @throws NoFrontMatterException
-     */
-    Source parse(SourceEntry sourceEntry) throws NoFrontMatterException;
+public interface SourceVisitor extends OriginVisitor{
+    void visit(Source source);
 }

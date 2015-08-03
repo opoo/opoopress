@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Alex Lin.
+ * Copyright 2013 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,16 @@ package org.opoo.press;
 /**
  * @author Alex Lin
  */
-public interface SourceEntryVisitor {
-    void visit(SourceEntry sourceEntry);
+public interface Origin{
+    /**
+     * Source origin name. such as filename.
+     * @return name
+     */
+    String getName();
+
+    /**
+     * Source path, such as path to a file.
+     * @return "" or string starts with "/".
+     */
+    String getPath();
 }

@@ -15,9 +15,7 @@
  */
 package org.opoo.press;
 
-import java.io.File;
 import java.util.Map;
-
 
 /**
  * Interface to describe convertible object.
@@ -26,21 +24,16 @@ import java.util.Map;
  */
 public interface Convertible extends Writable {
 
-    void convert();
+    /**
+     * @param converter
+     */
+    void convert(Converter converter);
 
     /**
+     * @param renderer content renderer
+     * @param highlighter highlighter handler
      * @param rootMap root object for FreeMarker template
      */
-    void render(Map<String, Object> rootMap);
+    void render(Renderer renderer,Highlighter highlighter, Map<String, Object> rootMap);
 
-//    /**
-//     * @param dest
-//     * @return output file
-//     */
-//    File getOutputFile(File dest);
-
-    /**
-     * @param dest
-     */
-    void write(File dest);
 }

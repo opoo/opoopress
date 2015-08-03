@@ -18,21 +18,6 @@ package org.opoo.press;
 /**
  * @author Alex Lin
  */
-public interface Page extends Base {
-
-    Pager getPager();
-
-    void setPager(Pager pager);
-
-    Page getNext();
-
-    void setNext(Page next);
-
-    Page getPrevious();
-
-    void setPrevious(Page previous);
-
-    ListHolder<Tag> getTagsHolder();
-
-    ListHolder<Category> getCategoriesHolder();
+public interface SourceWalker {
+    void walk(SourceVisitor visitor);
 }

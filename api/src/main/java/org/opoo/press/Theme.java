@@ -26,7 +26,7 @@ import java.io.File;
 public interface Theme {
 
     /**
-     * Theme configuration file.
+     * Theme config file.
      *
      * @return theme configutation file
      */

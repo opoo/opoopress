@@ -27,4 +27,6 @@ public interface ListHolder<T> {
     ListHolder<T> add(String key, T e);
 
     String[] getKeys();
+
+    void clear();
 }

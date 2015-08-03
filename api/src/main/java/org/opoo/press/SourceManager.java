@@ -25,7 +25,5 @@ public interface SourceManager {
 
     void saveSourceToFile(Source source);
 
-    SourceEntry buildEntry(File sourceDir, String path);
-
     Source buildSource(File sourceDir, String path, Map<String, Object> meta, String content);
 }

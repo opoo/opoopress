@@ -15,24 +15,12 @@
  */
 package org.opoo.press;
 
+import java.io.File;
+import java.io.FileFilter;
+
 /**
  * @author Alex Lin
  */
-public interface Page extends Base {
-
-    Pager getPager();
-
-    void setPager(Pager pager);
-
-    Page getNext();
-
-    void setNext(Page next);
-
-    Page getPrevious();
-
-    void setPrevious(Page previous);
-
-    ListHolder<Tag> getTagsHolder();
-
-    ListHolder<Category> getCategoriesHolder();
+public interface SourceDirectoryWalker {
+    void walk(File sourceDirectory, FileFilter fileFilter, OriginVisitor visitor);
 }

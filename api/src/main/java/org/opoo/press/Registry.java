@@ -26,10 +26,6 @@ public interface Registry {
 
     Registry registerProcessor(Processor processor);
 
-//	void registerTemplateModel(String name, TemplateModel model);
-
-//	void registerTemplateLoader(TemplateLoader loader);
-
     <T> Registry register(Class<T> clazz, T instance);
 
     <T> Registry register(Class<T> clazz, String name, T instance);

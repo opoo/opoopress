@@ -22,9 +22,9 @@ import java.util.List;
  */
 public interface Factory extends ObjectFactory{
 
-    SourceEntryLoader getSourceEntryLoader();
+    SourceDirectoryWalker getSourceDirectoryWalker();
 
-    SourceParser getSourceParser();
+    List<SourceWalker> getSourceWalkers();
 
     SourceManager getSourceManager();
 

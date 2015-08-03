@@ -22,5 +22,15 @@ import java.io.File;
  * @since 1.1.1
  */
 public interface Writable {
+    /**
+     * @param dest destination folder
+     * @return output file
+     */
+    File getOutputFile(File dest);
+
+    /**
+     * Write to destination folder.
+     * @param dest destination folder.
+     */
     void write(File dest);
 }

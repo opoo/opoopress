@@ -20,6 +20,5 @@ package org.opoo.press;
  * @since 1.2
  */
 public interface ConfigAware {
-
     void setConfig(Config config);
 }

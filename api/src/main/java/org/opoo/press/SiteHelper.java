@@ -15,7 +15,6 @@
  */
 package org.opoo.press;
 
-
 import java.util.Date;
 
 /**

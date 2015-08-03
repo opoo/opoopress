@@ -26,9 +26,6 @@ public class ProcessorsProcessor implements Processor{
 	
 	public ProcessorsProcessor(List<Processor> processors){
 		this.processors = processors;
-//		if(this.processors != null){
-//			Collections.sort(processors, Ordered.COMPARATOR);
-//		}
 	}
 	
 	/* (non-Javadoc)

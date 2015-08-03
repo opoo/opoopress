@@ -25,17 +25,11 @@ import java.util.Map;
  */
 public interface PluginManager extends Registry {
 
-    //List<Converter> getConverters();
-
     Converter getConverter(Source source);
 
     List<Generator> getGenerators();
 
     List<Processor> getProcessors();
-
-//	List<TemplateLoader> getTemplateLoaders();
-
-//	Map<String, TemplateModel> getTemplateModels();
 
     <T> List<T> getObjectList(Class<T> clazz);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Alex Lin.
+ * Copyright 2013-2015 Alex Lin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,9 @@
 package org.opoo.press;
 
 /**
- * If the source entry has not front-matter header, throw this exception.
- *
  * @author Alex Lin
  */
-public class NoFrontMatterException extends Exception {
-    private static final long serialVersionUID = -5507870296641103275L;
+public interface PageWrapper {
 
-    private SourceEntry sourceEntry;
-
-    /**
-     *
-     */
-    public NoFrontMatterException(SourceEntry sourceEntry) {
-        super();
-        this.sourceEntry = sourceEntry;
-    }
-
-    /**
-     * @return the sourceEntry
-     */
-    public SourceEntry getSourceEntry() {
-        return sourceEntry;
-    }
+    <T extends Page> T unwrap(Class<T> clazz);
 }
