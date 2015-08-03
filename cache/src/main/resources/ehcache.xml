@@ -7,7 +7,7 @@
     <diskStore path="target/cache"/>
 
     <!--
-    Mandatory Default Cache configuration. These settings will be applied to caches
+    Mandatory Default Cache config. These settings will be applied to caches
     created programmatically using CacheManager.add(String cacheName)
     -->
     <defaultCache
@@ -20,8 +20,8 @@
             diskExpiryThreadIntervalSeconds="12000"
             />
 
-    <cache name="sources"
-           maxElementsInMemory="1000"
+    <cache name="pages"
+           maxElementsInMemory="2000"
            eternal="false"
            timeToIdleSeconds="31536000000"
            timeToLiveSeconds="31536000000"
@@ -30,24 +30,5 @@
            diskExpiryThreadIntervalSeconds="12000"
             />
 
-    <cache name="static-file-source-entries"
-           maxElementsInMemory="1000"
-           eternal="false"
-           timeToIdleSeconds="31536000000"
-           timeToLiveSeconds="31536000000"
-           overflowToDisk="true"
-           diskPersistent="true"
-           diskExpiryThreadIntervalSeconds="12000"
-            />
-
-    <cache name="contents"
-           maxElementsInMemory="1000"
-           eternal="false"
-           timeToIdleSeconds="31536000000"
-           timeToLiveSeconds="31536000000"
-           overflowToDisk="true"
-           diskPersistent="false"
-           diskExpiryThreadIntervalSeconds="12000"
-            />
 </ehcache>
 
