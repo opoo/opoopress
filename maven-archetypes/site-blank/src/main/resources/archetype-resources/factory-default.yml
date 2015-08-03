@@ -1,11 +1,9 @@
 #####################################################################################
-# rename this file to 'factory.yml' to configuration your custom plugin or
-# configuration your custom plugin in 'META-INF/services/org.opoo.press.Plugin' file.
+# rename this file to 'factory.yml' to config your custom plugin or
+# config your custom plugin in 'META-INF/services/org.opoo.press.Plugin' file.
 #####################################################################################
 
-#org.opoo.press.SourceEntryLoader: org.opoo.press.source.SourceEntryLoaderImpl
-
-#org.opoo.press.SourceParser: org.opoo.press.source.SourceParserImpl
+#org.opoo.press.SourceDirectoryWalker: org.opoo.press.source.SourceDirectoryWalkerImpl
 
 #org.opoo.press.SourceManager: org.opoo.press.source.SourceManagerImpl
 
@@ -41,6 +39,7 @@
 # processors, list
 #org.opoo.press.Processor:
 #  - org.opoo.press.collection.CollectionProcessor
+#  - org.opoo.press.impl.RelatedPostsProcessor
 
 # plugins, list
 # org.opoo.press.Plugin:
