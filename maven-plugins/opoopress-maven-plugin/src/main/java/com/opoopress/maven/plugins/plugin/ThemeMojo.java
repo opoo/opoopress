@@ -15,6 +15,8 @@
  */
 package com.opoopress.maven.plugins.plugin;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.opoopress.maven.plugins.plugin.downloader.ArtifactDownloader;
 import com.opoopress.maven.plugins.plugin.downloader.DefaultArtifactDownloader;
 import com.opoopress.maven.plugins.plugin.downloader.ProgressURLDownloader;
@@ -225,19 +227,20 @@ public class ThemeMojo extends AbstractOpooPressMojo {
             throws MojoFailureException {
 
         if(currentThemeName != null){
-            File file = new File(config.getBasedir(), "config.yml");
-            if(file.exists()) {
+            File[] configFiles = config.getConfigFiles();
+            for(File file: configFiles) {
                 try {
                     List<String> lines = FileUtils.readLines(file, "UTF-8");
-                    int lineNumber = -1;
-                    for(int i = 0 ; i < lines.size() ; i++){
-                        if(lines.get(i).startsWith("theme: ")){
-                            lineNumber = i;
-                            break;
+
+                    int lineNumber = Iterables.indexOf(lines, new Predicate<String>() {
+                        @Override
+                        public boolean apply(String input) {
+                            return input.startsWith("theme: ");
                         }
-                    }
-                    if(lineNumber != -1){
-                        getLog().debug("Change theme to '" + newThemeName + "' in file:" + file);
+                    });
+
+                    if (lineNumber != -1) {
+                        getLog().info("Change theme to '" + newThemeName + "' in file:" + file);
                         lines.set(lineNumber, "theme: '" + newThemeName + "'");
                         FileUtils.writeLines(file, "UTF-8", lines);
                         return;
@@ -248,12 +251,23 @@ public class ThemeMojo extends AbstractOpooPressMojo {
             }
         }
 
-        getLog().debug("Changing config file 'config-theme.yml'.");
         File themeConfigFile = new File(config.getBasedir(), "config-theme.yml");
-        try {
-            FileUtils.writeStringToFile(themeConfigFile, "theme: '" + name + "'");
-        } catch (IOException e) {
-            throw new MojoFailureException("Change theme config file failed.", e);
+        if(themeConfigFile.exists()){
+            getLog().info("Set theme to '" + newThemeName + "' in file:" + themeConfigFile);
+            try{
+                List<String> lines = FileUtils.readLines(themeConfigFile, "UTF-8");
+                lines.add("theme: '" + newThemeName + "'");
+                FileUtils.writeLines(themeConfigFile, "UTF-8", lines);
+            } catch (IOException e) {
+                throw new MojoFailureException("Change theme config file failed.", e);
+            }
+        }else{
+            getLog().info("Add config file 'config-theme.yml'.");
+            try {
+                FileUtils.writeStringToFile(themeConfigFile, "theme: '" + name + "'");
+            } catch (IOException e) {
+                throw new MojoFailureException("Create 'config-theme.yml' file failed.", e);
+            }
         }
     }
 
