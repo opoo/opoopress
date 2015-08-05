@@ -17,9 +17,14 @@ package org.opoo.press.util;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import org.opoo.press.ListHolder;
+import org.opoo.press.MetaTag;
+import org.opoo.press.MetaTagComparator;
 import org.opoo.press.Page;
+import org.opoo.press.PageComparator;
 import org.opoo.press.PageWrapper;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,5 +46,37 @@ public abstract class PageUtils {
                 return PageUtils.unwrap(input, clazz);
             }
         });
+    }
+
+    public static void sort(List<Page> pages) {
+        Collections.sort(pages, PageComparator.INSTANCE);
+
+        //set next and previous
+        Page previous = null;
+        for (Page page: pages) {
+            if (previous != null) {
+                previous.setNext(page);
+                page.setPrevious(previous);
+            }
+            previous = page;
+        }
+    }
+
+    public static void sort(ListHolder<? extends MetaTag> listHolder, boolean sortPagesOfMetaTag) {
+        String[] keys = listHolder.getKeys();
+        for (String key : keys) {
+            List<? extends MetaTag> list = listHolder.get(key);
+            //sort tag
+            Collections.sort(list, MetaTagComparator.INSTANCE);
+
+            if (sortPagesOfMetaTag) {
+                for (MetaTag metaTag : list) {
+                    List<Page> pages = metaTag.getPages();
+                    if (pages != null && !pages.isEmpty()) {
+                        Collections.sort(pages, PageComparator.INSTANCE);
+                    }
+                }
+            }
+        }
     }
 }

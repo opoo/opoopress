@@ -31,6 +31,7 @@ import org.opoo.press.collection.config.CollectionConfigResolver;
 import org.opoo.press.collection.config.FilterConfig;
 import org.opoo.press.collection.config.impl.CollectionConfigResolverImpl;
 import org.opoo.press.util.ClassUtils;
+import org.opoo.press.util.PageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,12 +108,12 @@ public class CollectionProcessor extends ProcessorAdapter {
                 || sortable != null && sortable) {
 
 //            Collections.sort(collection.getPages(), PageComparator.INSTANCE);
-            sort(collection.getPages());
-            sort(collection.getCategoriesHolder(), true);
-            sort(collection.getTagsHolder(), true);
+            PageUtils.sort(collection.getPages());
+            PageUtils.sort(collection.getCategoriesHolder(), true);
+            PageUtils.sort(collection.getTagsHolder(), true);
         } else {
-            sort(collection.getCategoriesHolder(), false);
-            sort(collection.getTagsHolder(), false);
+            PageUtils.sort(collection.getCategoriesHolder(), false);
+            PageUtils.sort(collection.getTagsHolder(), false);
         }
 
         site.getCollections().put(collectionName, collection);
@@ -127,38 +128,6 @@ public class CollectionProcessor extends ProcessorAdapter {
 
             site.set("tags", tags);
             site.set("categories", categories);
-        }
-    }
-
-    private void sort(List<Page> pages) {
-        Collections.sort(pages, PageComparator.INSTANCE);
-
-        //set next and previous
-        Page previous = null;
-        for (Page page: pages) {
-            if (previous != null) {
-                previous.setNext(page);
-                page.setPrevious(previous);
-            }
-            previous = page;
-        }
-    }
-
-    private void sort(ListHolder<? extends MetaTag> listHolder, boolean sortPagesOfMetaTag) {
-        String[] keys = listHolder.getKeys();
-        for (String key : keys) {
-            List<? extends MetaTag> list = listHolder.get(key);
-            //sort tag
-            Collections.sort(list, MetaTagComparator.INSTANCE);
-
-            if (sortPagesOfMetaTag) {
-                for (MetaTag metaTag : list) {
-                    List<Page> pages = metaTag.getPages();
-                    if (pages != null && !pages.isEmpty()) {
-                        Collections.sort(pages, PageComparator.INSTANCE);
-                    }
-                }
-            }
         }
     }
 
