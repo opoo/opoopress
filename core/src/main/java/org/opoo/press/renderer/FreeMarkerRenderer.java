@@ -92,16 +92,16 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer {
         initializeTemplateModels();
 
 
-        renderMethod = (String) site.get(PROPERTY_PREFIX + "render_method");
+        renderMethod = site.get(PROPERTY_PREFIX + "render_method");
 
-        Boolean useMacroLayout = (Boolean) site.get(PROPERTY_PREFIX + "macro_layout");
+        Boolean useMacroLayout = site.get(PROPERTY_PREFIX + "macro_layout");
         workingTemplateHolder = (useMacroLayout == null || useMacroLayout.booleanValue()) ?
                 new MacroWorkingTemplateHolder() : new NonMacroWorkingTemplateHolder();
     }
 
     private void initializeTemplateModels() {
         templateModels = site.getFactory().getPluginManager().getObjectMap(TemplateModel.class);
-        Map<String, String> map = (Map<String, String>) site.get(TemplateModel.class.getName());
+        Map<String, String> map = site.get(TemplateModel.class.getName());
         if (map != null) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 String name = entry.getKey();
@@ -114,7 +114,7 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer {
     }
 
     private void initializeAutoImportTemplates(Site site, Configuration configuration) {
-        Map<String, String> autoImportTemplates = (Map<String, String>) site.get(PROPERTY_PREFIX + "auto_import_templates");
+        Map<String, String> autoImportTemplates = site.get(PROPERTY_PREFIX + "auto_import_templates");
         if (autoImportTemplates != null && !autoImportTemplates.isEmpty()) {
             for (Map.Entry<String, String> en : autoImportTemplates.entrySet()) {
                 configuration.addAutoImport(en.getKey(), en.getValue());
@@ -124,7 +124,7 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer {
     }
 
     private void initializeAutoIncludeTemplates(Site site, Configuration configuration) {
-        List<String> autoIncludeTemplates = (List<String>) site.get(PROPERTY_PREFIX + "auto_include_templates");
+        List<String> autoIncludeTemplates = site.get(PROPERTY_PREFIX + "auto_include_templates");
         if (autoIncludeTemplates != null && !autoIncludeTemplates.isEmpty()) {
             for (String template : autoIncludeTemplates) {
                 configuration.addAutoInclude(template);
@@ -172,6 +172,11 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer {
 
     @Override
     public String render(Page base, Map<String, Object> rootMap) {
+        if(!(base.getSource().getOrigin() instanceof FileOrigin)){
+            log.debug("Origin is not FileOrigin, using recursive render method.");
+            return renderRecursive(base, rootMap);
+        }
+        else
         //render methods: merge|recursive, default is merge
         if (renderMethod == null || "merge".equalsIgnoreCase(renderMethod)) {
             return renderMergedTemplate(base, rootMap);
@@ -242,7 +247,7 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer {
         return isRenderRequired(site, base, content);
     }
 
-    static interface WorkingTemplateHolder {
+    interface WorkingTemplateHolder {
         String getMergedWorkingTemplate(String layout, String content, Source source);
 
         String getLayoutWorkingTemplate(String layout);
@@ -251,9 +256,10 @@ public class FreeMarkerRenderer extends AbstractFreeMarkerRenderer {
     abstract class AbstractWorkingTemplateHolder implements WorkingTemplateHolder {
         @Override
         public String getMergedWorkingTemplate(String layout, String content, Source source) {
-            Origin origin = source.getOrigin();
+            //must be FileOrigin
+            FileOrigin origin = (FileOrigin) source.getOrigin();
             String workingTemplateName = origin.getPath() + "/" + origin.getName() + "." + layout + ".ftl";
-            File sourceFile = origin instanceof FileOrigin ? ((FileOrigin) origin).getFile() : null;
+            File sourceFile = origin.getFile();
             prepareWorkingTemplate(workingTemplateName, sourceFile, layout, content);
             return workingTemplateName;
         }

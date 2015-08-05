@@ -104,10 +104,6 @@ public abstract class AbstractFreeMarkerRenderer extends AbstractRenderer {
 
     @Override
     public String render(Page base, Object rootMap) {
-        if (StringUtils.isBlank(base.getContent())) {
-            log.warn("Empty converted content, skip render: {}", base.getUrl());
-            return "";
-        }
         return render(base, (Map<String, Object>) rootMap);
     }
 
