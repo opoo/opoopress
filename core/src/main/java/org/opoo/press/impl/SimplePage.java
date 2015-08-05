@@ -309,10 +309,10 @@ public class SimplePage implements Page {
             return;
         }
 
-        if (StringUtils.isBlank(getContent())) {
-            log.debug("Empty content, skip render: {}", getUrl());
-            return;
-        }
+//        if (StringUtils.isBlank(getContent())) {
+//            log.debug("Empty content, skip render: {}", getUrl());
+//            return;
+//        }
 
         rootMap = new HashMap<String, Object>(rootMap);
         mergeRootMap(highlighter, rootMap);
@@ -320,8 +320,6 @@ public class SimplePage implements Page {
     }
 
     protected void mergeRootMap(Highlighter highlighter, Map<String, Object> rootMap) {
-//        String canonical = getSite().buildCanonical(getUrl());
-//        rootMap.put("canonical", canonical);
         mergeHighlighterParam(highlighter, rootMap);
 
         rootMap.put("page", this);
