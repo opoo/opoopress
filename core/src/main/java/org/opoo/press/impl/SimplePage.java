@@ -292,7 +292,14 @@ public class SimplePage implements Page {
     public void convert(Converter converter) {
         if (converter != null) {
             this.setOutputFileExtension(converter.getOutputFileExtension(getSource()));
-            setContent(converter.convert(getContent()));
+
+            String content = getContent();
+            if (StringUtils.isBlank(content)) {
+                log.debug("Empty content, skip convert: {}", getUrl());
+                return;
+            }
+
+            setContent(converter.convert(content));
         }
     }
 
@@ -303,7 +310,7 @@ public class SimplePage implements Page {
         }
 
         if (StringUtils.isBlank(getContent())) {
-            log.warn("Empty content, skip render: {}", getUrl());
+            log.debug("Empty content, skip render: {}", getUrl());
             return;
         }
 
