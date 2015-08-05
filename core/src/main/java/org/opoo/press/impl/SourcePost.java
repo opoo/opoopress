@@ -48,7 +48,8 @@ public class SourcePost extends AbstractSourcePage implements Post, Comparable<P
 
         Map<String, Object> frontMatter = getSource().getMeta();
 
-        id = (String) frontMatter.get("id");
+        Object id = frontMatter.get("id");
+        this.id = id != null ? id.toString() : null;
 
         excerptable = isExcerptable(site);
         initExcerpt(site, frontMatter);
