@@ -160,7 +160,7 @@
         <repository>
             <id>sonatype-nexus-snapshots</id>
             <name>Sonatype Nexus Snapshots</name>
-            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -174,7 +174,7 @@
         <pluginRepository>
             <id>sonatype-nexus-snapshots</id>
             <name>Sonatype Nexus Snapshots</name>
-            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -189,7 +189,7 @@
         <repository>
             <id>opoopress-repos-snapshots</id>
             <name>OpooPress Repos Snapshots</name>
-            <url>http://repo.opoopress.com/snapshots</url>
+            <url>https://repo.opoopress.com/snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -203,7 +203,7 @@
         <pluginRepository>
             <id>opoopress-repos-snapshots</id>
             <name>OpooPress Repos Snapshots</name>
-            <url>http://repo.opoopress.com/snapshots</url>
+            <url>https://repo.opoopress.com/snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
